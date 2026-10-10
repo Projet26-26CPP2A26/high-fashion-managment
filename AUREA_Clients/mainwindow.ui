@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>1280</width><height>820</height></rect>
+  </property>
+  <property name="minimumSize">
+   <size><width>1100</width><height>700</height></size>
+  </property>
+  <property name="windowTitle">
+   <string>AUREA — Gestion des clients</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="rootLayout">
+    <property name="spacing"><number>0</number></property>
+    <property name="leftMargin"><number>0</number></property>
+    <property name="topMargin"><number>0</number></property>
+    <property name="rightMargin"><number>0</number></property>
+    <property name="bottomMargin"><number>0</number></property>
+
+    <!-- ================= SIDEBAR ================= -->
+    <item>
+     <widget class="QFrame" name="sidebar">
+      <property name="minimumSize"><size><width>250</width><height>0</height></size></property>
+      <property name="maximumSize"><size><width>250</width><height>16777215</height></size></property>
+      <layout class="QVBoxLayout" name="sidebarLayout">
+       <property name="spacing"><number>6</number></property>
+       <property name="leftMargin"><number>16</number></property>
+       <property name="rightMargin"><number>16</number></property>
+       <property name="topMargin"><number>20</number></property>
+       <property name="bottomMargin"><number>16</number></property>
+       <item>
+        <layout class="QHBoxLayout" name="brandLayout">
+         <item>
+          <widget class="QLabel" name="logoLabel">
+           <property name="minimumSize"><size><width>64</width><height>64</height></size></property>
+           <property name="maximumSize"><size><width>64</width><height>64</height></size></property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="brandTextLayout">
+           <property name="spacing"><number>0</number></property>
+           <item>
+            <widget class="QLabel" name="brandName">
+             <property name="text"><string>AUREA</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="brandSub">
+             <property name="text"><string>ATELIER HAUTE COUTURE</string></property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="spacerBrand">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>20</width><height>16</height></size></property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="navTitle">
+         <property name="text"><string>VOTRE ESPACE CLIENTS</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNavClients">
+         <property name="text"><string>  Clients</string></property>
+         <property name="checked"><bool>true</bool></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNavAjouter">
+         <property name="text"><string>  Ajouter un client</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNavMesures">
+         <property name="text"><string>  Fiche de mensurations</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNavFidelite">
+         <property name="text"><string>  Fidélité &amp; VIP</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNavStats">
+         <property name="text"><string>  Statistiques</string></property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacerSidebar">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="footerText">
+         <property name="text"><string>Des clients précieux.
+Une relation maîtrisée.
+AUREA / COLLECTION ATELIER</string></property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <!-- ================= CONTENT ================= -->
+    <item>
+     <widget class="QWidget" name="contentArea">
+      <layout class="QVBoxLayout" name="contentLayout">
+       <property name="leftMargin"><number>24</number></property>
+       <property name="rightMargin"><number>24</number></property>
+       <property name="topMargin"><number>14</number></property>
+       <property name="bottomMargin"><number>16</number></property>
+       <property name="spacing"><number>12</number></property>
+
+       <!-- top bar -->
+       <item>
+        <layout class="QHBoxLayout" name="topbarLayout">
+         <item>
+          <widget class="QLabel" name="lblBreadcrumb">
+           <property name="text"><string>ATELIER / CLIENTS</string></property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="spacerTop">
+           <property name="orientation"><enum>Qt::Horizontal</enum></property>
+           <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblDate">
+           <property name="text"><string>date</string></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblUser">
+           <property name="text"><string>CL  Responsable clientèle</string></property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+
+       <item>
+        <widget class="QStackedWidget" name="stackedWidget">
+         <property name="currentIndex"><number>0</number></property>
+
+         <!-- ========== PAGE 0 : CLIENTS (CRUD) ========== -->
+         <widget class="QWidget" name="pageClients">
+          <layout class="QVBoxLayout" name="clientsLayout">
+           <property name="spacing"><number>12</number></property>
+           <item>
+            <layout class="QHBoxLayout" name="headerLayout">
+             <item>
+              <layout class="QVBoxLayout" name="headerTextLayout">
+               <property name="spacing"><number>2</number></property>
+               <item>
+                <widget class="QLabel" name="lblTitleClients">
+                 <property name="text"><string>Clients</string></property>
+                 <property name="role" stdset="0"><string>title</string></property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblSubClients">
+                 <property name="text"><string>Clientes et clients de l'atelier : fiches, fidélité et suivi.</string></property>
+                 <property name="role" stdset="0"><string>muted</string></property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="spacerHeader">
+               <property name="orientation"><enum>Qt::Horizontal</enum></property>
+               <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnNouveau">
+               <property name="minimumSize"><size><width>150</width><height>40</height></size></property>
+               <property name="text"><string>+  Nouveau client</string></property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+
+           <!-- KPI cards -->
+           <item>
+            <layout class="QHBoxLayout" name="kpiLayout">
+             <property name="spacing"><number>14</number></property>
+             <item>
+              <widget class="QFrame" name="cardTotal">
+               <layout class="QVBoxLayout" name="cardTotalLayout">
+                <item><widget class="QLabel" name="capTotal"><property name="text"><string>Clients enregistrés</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item><widget class="QLabel" name="kpiTotal"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="cardVip">
+               <layout class="QVBoxLayout" name="cardVipLayout">
+                <item><widget class="QLabel" name="capVip"><property name="text"><string>Clients VIP</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item><widget class="QLabel" name="kpiVip"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="cardAnniv">
+               <layout class="QVBoxLayout" name="cardAnnivLayout">
+                <item><widget class="QLabel" name="capAnniv"><property name="text"><string>Anniversaires ce mois</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item><widget class="QLabel" name="kpiAnniv"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="cardScore">
+               <layout class="QVBoxLayout" name="cardScoreLayout">
+                <item><widget class="QLabel" name="capScore"><property name="text"><string>Score fidélité moyen</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item><widget class="QLabel" name="kpiScore"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </item>
+
+           <!-- search / filter / sort -->
+           <item>
+            <layout class="QHBoxLayout" name="filterLayout">
+             <item>
+              <widget class="QLineEdit" name="lineSearch">
+               <property name="placeholderText"><string>Rechercher un nom, un mail, un téléphone ou un ID...</string></property>
+               <property name="clearButtonEnabled"><bool>true</bool></property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboFiltre">
+               <property name="minimumSize"><size><width>170</width><height>0</height></size></property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboTri">
+               <property name="minimumSize"><size><width>190</width><height>0</height></size></property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+
+           <!-- table -->
+           <item>
+            <widget class="QFrame" name="panelTable">
+             <layout class="QVBoxLayout" name="panelTableLayout">
+              <item>
+               <widget class="QLabel" name="lblCatalogue">
+                <property name="text"><string>Liste des clients</string></property>
+                <property name="role" stdset="0"><string>section</string></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTableWidget" name="tableClients"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblCount">
+                <property name="text"><string>0 client(s) affiché(s)</string></property>
+                <property name="role" stdset="0"><string>muted</string></property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+
+           <!-- action buttons -->
+           <item>
+            <layout class="QHBoxLayout" name="actionsLayout">
+             <item><widget class="QPushButton" name="btnModifier"><property name="text"><string>Modifier</string></property></widget></item>
+             <item><widget class="QPushButton" name="btnSupprimer"><property name="text"><string>Supprimer</string></property></widget></item>
+             <item><widget class="QPushButton" name="btnVoirMesures"><property name="text"><string>Voir la fiche de mensurations</string></property></widget></item>
+             <item>
+              <spacer name="spacerActions">
+               <property name="orientation"><enum>Qt::Horizontal</enum></property>
+               <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+              </spacer>
+             </item>
+             <item><widget class="QPushButton" name="btnExportPdf"><property name="text"><string>Exporter PDF</string></property></widget></item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+
+         <!-- ========== PAGE 1 : FORMULAIRE AJOUT / MODIF ========== -->
+         <widget class="QWidget" name="pageForm">
+          <layout class="QVBoxLayout" name="formPageLayout">
+           <property name="spacing"><number>14</number></property>
+           <item>
+            <widget class="QLabel" name="lblFormTitle">
+             <property name="text"><string>Ajouter un client</string></property>
+             <property name="role" stdset="0"><string>title</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="panelForm">
+             <layout class="QVBoxLayout" name="panelFormLayout">
+              <property name="spacing"><number>14</number></property>
+              <property name="leftMargin"><number>24</number></property>
+              <property name="rightMargin"><number>24</number></property>
+              <property name="topMargin"><number>20</number></property>
+              <property name="bottomMargin"><number>20</number></property>
+              <item>
+               <layout class="QFormLayout" name="formLayout">
+                <property name="verticalSpacing"><number>14</number></property>
+                <property name="horizontalSpacing"><number>20</number></property>
+                <item row="0" column="0"><widget class="QLabel" name="l0"><property name="text"><string>ID</string></property></widget></item>
+                <item row="0" column="1"><widget class="QLabel" name="labelId"><property name="text"><string>Automatique</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item row="1" column="0"><widget class="QLabel" name="l1"><property name="text"><string>Nom complet *</string></property></widget></item>
+                <item row="1" column="1"><widget class="QLineEdit" name="leNom"><property name="placeholderText"><string>ex : Amira Trabelsi</string></property></widget></item>
+                <item row="2" column="0"><widget class="QLabel" name="l2"><property name="text"><string>Adresse mail *</string></property></widget></item>
+                <item row="2" column="1"><widget class="QLineEdit" name="leMail"><property name="placeholderText"><string>ex : amira@mail.com</string></property></widget></item>
+                <item row="3" column="0"><widget class="QLabel" name="l3"><property name="text"><string>Téléphone *</string></property></widget></item>
+                <item row="3" column="1"><widget class="QLineEdit" name="leTel"><property name="placeholderText"><string>8 chiffres, ex : 22123456</string></property></widget></item>
+                <item row="4" column="0"><widget class="QLabel" name="l4"><property name="text"><string>Date de naissance</string></property></widget></item>
+                <item row="4" column="1"><widget class="QDateEdit" name="deNaissance"><property name="displayFormat"><string>dd/MM/yyyy</string></property><property name="calendarPopup"><bool>true</bool></property></widget></item>
+                <item row="5" column="0"><widget class="QLabel" name="l5"><property name="text"><string>Mensuration (résumé)</string></property></widget></item>
+                <item row="5" column="1"><widget class="QLineEdit" name="leMensuration"><property name="placeholderText"><string>ex : P90 / T70 / H95 (détails dans la fiche de mensurations)</string></property></widget></item>
+                <item row="6" column="0"><widget class="QLabel" name="l6"><property name="text"><string>Catégorie</string></property></widget></item>
+                <item row="6" column="1"><widget class="QComboBox" name="comboCategorie"/></item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="formButtonsLayout">
+                <item>
+                 <spacer name="spacerForm">
+                  <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                  <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+                 </spacer>
+                </item>
+                <item><widget class="QPushButton" name="btnAnnuler"><property name="text"><string>Annuler</string></property></widget></item>
+                <item><widget class="QPushButton" name="btnEnregistrer"><property name="minimumSize"><size><width>150</width><height>40</height></size></property><property name="text"><string>Enregistrer</string></property></widget></item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spacerFormPage">
+             <property name="orientation"><enum>Qt::Vertical</enum></property>
+             <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+
+         <!-- ========== PAGE 2 : FICHE DE MENSURATIONS ========== -->
+         <widget class="QWidget" name="pageMesures">
+          <layout class="QVBoxLayout" name="mesuresPageLayout">
+           <property name="spacing"><number>14</number></property>
+           <item>
+            <widget class="QLabel" name="lblMesTitle">
+             <property name="text"><string>Fiche de mensurations</string></property>
+             <property name="role" stdset="0"><string>title</string></property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="mesuresRowLayout">
+             <property name="spacing"><number>14</number></property>
+             <item>
+              <widget class="QFrame" name="panelMesure">
+               <property name="maximumSize"><size><width>380</width><height>16777215</height></size></property>
+               <layout class="QVBoxLayout" name="panelMesureLayout">
+                <property name="spacing"><number>10</number></property>
+                <item><widget class="QLabel" name="lblNouvMes"><property name="text"><string>Nouvelle prise de mesures</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
+                <item><widget class="QComboBox" name="comboClientMes"/></item>
+                <item>
+                 <layout class="QFormLayout" name="mesFormLayout">
+                  <property name="verticalSpacing"><number>10</number></property>
+                  <item row="0" column="0"><widget class="QLabel" name="m0"><property name="text"><string>Poitrine</string></property></widget></item>
+                  <item row="0" column="1"><widget class="QDoubleSpinBox" name="sbPoitrine"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>90.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                  <item row="1" column="0"><widget class="QLabel" name="m1"><property name="text"><string>Taille</string></property></widget></item>
+                  <item row="1" column="1"><widget class="QDoubleSpinBox" name="sbTaille"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>70.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                  <item row="2" column="0"><widget class="QLabel" name="m2"><property name="text"><string>Hanches</string></property></widget></item>
+                  <item row="2" column="1"><widget class="QDoubleSpinBox" name="sbHanches"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>95.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                  <item row="3" column="0"><widget class="QLabel" name="m3"><property name="text"><string>Épaules</string></property></widget></item>
+                  <item row="3" column="1"><widget class="QDoubleSpinBox" name="sbEpaules"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>40.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                  <item row="4" column="0"><widget class="QLabel" name="m4"><property name="text"><string>Longueur manche</string></property></widget></item>
+                  <item row="4" column="1"><widget class="QDoubleSpinBox" name="sbManche"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>60.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                  <item row="5" column="0"><widget class="QLabel" name="m5"><property name="text"><string>Hauteur</string></property></widget></item>
+                  <item row="5" column="1"><widget class="QDoubleSpinBox" name="sbHauteur"><property name="decimals"><number>1</number></property><property name="maximum"><double>300.0</double></property><property name="value"><double>170.0</double></property><property name="suffix"><string> cm</string></property></widget></item>
+                 </layout>
+                </item>
+                <item><widget class="QPushButton" name="btnAjouterMesure"><property name="minimumSize"><size><width>0</width><height>40</height></size></property><property name="text"><string>Enregistrer ces mesures</string></property></widget></item>
+                <item>
+                 <spacer name="spacerMes">
+                  <property name="orientation"><enum>Qt::Vertical</enum></property>
+                  <property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="panelHistorique">
+               <layout class="QVBoxLayout" name="panelHistLayout">
+                <item><widget class="QLabel" name="lblHist"><property name="text"><string>Historique des mesures</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
+                <item><widget class="QTableWidget" name="tableMesures"/></item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QFrame" name="panelRappel">
+             <layout class="QHBoxLayout" name="rappelLayout">
+              <item><widget class="QLabel" name="lblRappel"><property name="text"><string>Rappel d'essayage par mail :</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
+              <item><widget class="QDateTimeEdit" name="dtEssayage"><property name="displayFormat"><string>dd/MM/yyyy HH:mm</string></property><property name="calendarPopup"><bool>true</bool></property></widget></item>
+              <item>
+               <spacer name="spacerRappel">
+                <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+               </spacer>
+              </item>
+              <item><widget class="QPushButton" name="btnRappel"><property name="minimumSize"><size><width>200</width><height>40</height></size></property><property name="text"><string>Envoyer le rappel</string></property></widget></item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <!-- ========== PAGE 3 : FIDELITE ========== -->
+         <widget class="QWidget" name="pageFidelite">
+          <layout class="QVBoxLayout" name="fidPageLayout">
+           <property name="spacing"><number>14</number></property>
+           <item>
+            <widget class="QLabel" name="lblFidTitle">
+             <property name="text"><string>Fidélité &amp; statut VIP</string></property>
+             <property name="role" stdset="0"><string>title</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblRegle">
+             <property name="text"><string>Score = (montant total ÷ 100) + (10 × nombre de commandes des 12 derniers mois).  Score ≥ 100 : le client devient VIP automatiquement.</string></property>
+             <property name="role" stdset="0"><string>muted</string></property>
+             <property name="wordWrap"><bool>true</bool></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="panelCmd">
+             <layout class="QHBoxLayout" name="cmdLayout">
+              <item><widget class="QLabel" name="lblCmd"><property name="text"><string>Nouvelle commande :</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
+              <item><widget class="QComboBox" name="comboClientCmd"><property name="minimumSize"><size><width>240</width><height>0</height></size></property></widget></item>
+              <item><widget class="QDoubleSpinBox" name="sbMontant"><property name="maximum"><double>1000000.0</double></property><property name="value"><double>500.0</double></property><property name="suffix"><string> DT</string></property></widget></item>
+              <item>
+               <spacer name="spacerCmd">
+                <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+               </spacer>
+              </item>
+              <item><widget class="QPushButton" name="btnAjouterCommande"><property name="minimumSize"><size><width>180</width><height>40</height></size></property><property name="text"><string>Ajouter la commande</string></property></widget></item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="panelFid">
+             <layout class="QVBoxLayout" name="panelFidLayout">
+              <item><widget class="QLabel" name="lblClassement"><property name="text"><string>Classement fidélité</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
+              <item><widget class="QTableWidget" name="tableFidelite"/></item>
+              <item>
+               <layout class="QHBoxLayout" name="annivLayout">
+                <item><widget class="QLabel" name="labelAnniv"><property name="text"><string>Aucun anniversaire aujourd'hui.</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                <item>
+                 <spacer name="spacerAnniv">
+                  <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                  <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+                 </spacer>
+                </item>
+                <item><widget class="QPushButton" name="btnAnniv"><property name="minimumSize"><size><width>260</width><height>40</height></size></property><property name="text"><string>Envoyer le mail d'anniversaire</string></property></widget></item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <!-- ========== PAGE 4 : STATISTIQUES ========== -->
+         <widget class="QWidget" name="pageStats">
+          <layout class="QVBoxLayout" name="statsPageLayout">
+           <property name="spacing"><number>14</number></property>
+           <item>
+            <widget class="QLabel" name="lblStatsTitle">
+             <property name="text"><string>Statistiques</string></property>
+             <property name="role" stdset="0"><string>title</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="panelCharts">
+             <layout class="QHBoxLayout" name="chartsLayout"/>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

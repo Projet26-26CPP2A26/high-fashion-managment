@@ -1,0 +1,74 @@
+/* ===== AUREA — dark & gold theme ===== */
+* { font-family: "Segoe UI", "Roboto", sans-serif; font-size: 13px; color: #e9e4d8; }
+
+QMainWindow, QWidget#centralwidget, QStackedWidget, QWidget#pageClients, QWidget#pageForm,
+QWidget#pageMesures, QWidget#pageFidelite, QWidget#pageStats { background: #1b1e21; }
+
+/* ---- Sidebar ---- */
+#sidebar { background: #23272a; border-right: 1px solid #33383c; }
+#brandName { font-family: "Georgia", serif; font-size: 28px; letter-spacing: 3px; color: #e8d5a0; }
+#brandSub, #navTitle, #footerText { color: #c9b57a; font-size: 10px; letter-spacing: 1px; }
+#logoLabel { background: transparent; }
+
+QPushButton[nav="true"] {
+    text-align: left; padding: 11px 14px; border: none; border-radius: 8px;
+    background: transparent; color: #d8d2c4;
+}
+QPushButton[nav="true"]:hover:!checked { background: #2e3337; }
+QPushButton[nav="true"]:checked { background: #e8d5a0; color: #1b1e21; font-weight: bold; }
+
+/* ---- Top bar & titles ---- */
+#lblBreadcrumb { color: #c9b57a; font-size: 11px; letter-spacing: 1px; }
+#lblDate, #lblUser { color: #a9a496; font-size: 12px; }
+QLabel[role="title"] { font-size: 30px; font-weight: bold; }
+QLabel[role="muted"] { color: #a9a496; }
+QLabel[role="kpi"] { font-size: 28px; font-weight: bold; }
+QLabel[role="section"] { font-size: 16px; font-weight: bold; color: #e8d5a0; }
+
+/* ---- Cards & panels ---- */
+#cardTotal, #cardVip, #cardAnniv, #cardScore,
+#panelTable, #panelForm, #panelMesure, #panelHistorique, #panelRappel,
+#panelCmd, #panelFid, #panelCharts {
+    background: #23272a; border: 1px solid #33383c; border-radius: 14px;
+}
+
+/* ---- Inputs ---- */
+QLineEdit, QComboBox, QDateEdit, QDateTimeEdit, QDoubleSpinBox {
+    background: #23272a; border: 1px solid #3a4045; border-radius: 8px; padding: 8px 10px;
+    selection-background-color: #e8d5a0; selection-color: #1b1e21;
+}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QDateTimeEdit:focus, QDoubleSpinBox:focus {
+    border: 1px solid #e8d5a0;
+}
+QComboBox QAbstractItemView { background: #23272a; selection-background-color: #e8d5a0; selection-color: #1b1e21; }
+
+/* ---- Buttons ---- */
+QPushButton { background: #2b3034; border: 1px solid #3a4045; border-radius: 8px; padding: 9px 16px; }
+QPushButton:hover { border-color: #e8d5a0; }
+QPushButton:disabled { color: #6d6a62; }
+
+#btnNouveau, #btnEnregistrer, #btnAjouterMesure, #btnAjouterCommande, #btnRappel, #btnAnniv {
+    background: #e8d5a0; color: #1b1e21; font-weight: bold; border: none;
+}
+#btnNouveau:hover, #btnEnregistrer:hover, #btnAjouterMesure:hover,
+#btnAjouterCommande:hover, #btnRappel:hover, #btnAnniv:hover { background: #f3e4b8; }
+#btnSupprimer { background: #3a2229; border: 1px solid #7a2f3d; color: #f0b8c2; }
+#btnSupprimer:hover { background: #4a2a33; }
+
+/* ---- Tables ---- */
+QTableWidget { background: #23272a; border: none; outline: 0; }
+QTableWidget::item { padding: 6px; border-bottom: 1px solid #2f3438; }
+QTableWidget::item:selected { background: #3a3526; color: #e8d5a0; }
+QHeaderView::section {
+    background: #23272a; color: #c9b57a; border: none; border-bottom: 1px solid #3a4045;
+    padding: 8px; font-weight: bold;
+}
+
+/* ---- Scrollbars ---- */
+QScrollBar:vertical { background: transparent; width: 10px; }
+QScrollBar::handle:vertical { background: #3a4045; border-radius: 5px; min-height: 30px; }
+QScrollBar::add-line, QScrollBar::sub-line { height: 0; width: 0; }
+QScrollBar:horizontal { background: transparent; height: 10px; }
+QScrollBar::handle:horizontal { background: #3a4045; border-radius: 5px; }
+
+QMessageBox, QDialog { background: #23272a; }
