@@ -1,0 +1,10 @@
+release/main.o
+release/mainwindow.o
+release/pages.o
+release/uikit.o
+release/store.o
+release/database.o
+release/pdfexport.o
+release/qrc_assets.o
+release/moc_mainwindow.o
+release/moc_pages.o

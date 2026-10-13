@@ -1,0 +1,10 @@
+debug/main.o
+debug/mainwindow.o
+debug/pages.o
+debug/uikit.o
+debug/store.o
+debug/database.o
+debug/pdfexport.o
+debug/qrc_assets.o
+debug/moc_mainwindow.o
+debug/moc_pages.o
