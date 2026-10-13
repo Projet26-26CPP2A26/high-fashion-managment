@@ -1,0 +1,9 @@
+<RCC>
+    <!-- Flèches des listes déroulantes / champs numériques (référencées par theme.qss : url(:/clients/chevron_*.png)) -->
+    <qresource prefix="/clients">
+        <file alias="chevron_down.png">resources/chevron_down.png</file>
+        <file alias="chevron_down@2x.png">resources/chevron_down@2x.png</file>
+        <file alias="chevron_up.png">resources/chevron_up.png</file>
+        <file alias="chevron_up@2x.png">resources/chevron_up@2x.png</file>
+    </qresource>
+</RCC>
