@@ -1,0 +1,3024 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ui version="4.0">
+  <class>EmployeeModule</class>
+  <widget class="QWidget" name="EmployeeModule">
+    <property name="windowTitle">
+      <string>AUREA — Gestion des employés</string>
+    </property>
+    <layout class="QVBoxLayout" name="employeeRoot">
+      <property name="spacing">
+        <number>12</number>
+      </property>
+      <property name="leftMargin">
+        <number>12</number>
+      </property>
+      <property name="topMargin">
+        <number>12</number>
+      </property>
+      <property name="rightMargin">
+        <number>12</number>
+      </property>
+      <property name="bottomMargin">
+        <number>12</number>
+      </property>
+      <item>
+        <widget class="QTabWidget" name="employeeTabs">
+          <widget class="QWidget" name="employeeDashboard">
+            <attribute name="title">
+              <string>Tableau de bord</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="employeeDashboardLayout">
+              <property name="leftMargin">
+                <number>0</number>
+              </property>
+              <property name="topMargin">
+                <number>0</number>
+              </property>
+              <property name="rightMargin">
+                <number>0</number>
+              </property>
+              <property name="bottomMargin">
+                <number>0</number>
+              </property>
+              <property name="spacing">
+                <number>8</number>
+              </property>
+              <item>
+                <widget class="QScrollArea" name="dashboardScroll">
+                  <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="widgetResizable">
+                    <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="dashboardContents">
+                    <layout class="QVBoxLayout" name="dashboardContentsLayout">
+                      <property name="leftMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                        <number>10</number>
+                      </property>
+                      <property name="bottomMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="spacing">
+                        <number>16</number>
+                      </property>
+                      <item>
+                        <layout class="QHBoxLayout" name="kpiRow" stretch="1,1,1,1,0">
+                          <property name="leftMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="spacing">
+                            <number>14</number>
+                          </property>
+                          <item>
+                            <widget class="QFrame" name="kpiEmployeesCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="kpiEmployeesLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiEmployeesHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiEmployeesTitle">
+                                        <property name="text">
+                                          <string>Employés</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiEmployeesSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiEmployeesIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiEmployeesRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiEmployeesValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiEmployeesSub">
+                                        <property name="text">
+                                          <string>fiches</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiEmployeesSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="kpiAvailableCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="kpiAvailableLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiAvailableHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiAvailableTitle">
+                                        <property name="text">
+                                          <string>Disponibles</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiAvailableSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiAvailableIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiAvailableRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiAvailableValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiAvailableSub">
+                                        <property name="text">
+                                          <string>0 %</string>
+                                        </property>
+                                        <property name="delta" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiAvailableSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="kpiPresentCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="kpiPresentLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiPresentHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiPresentTitle">
+                                        <property name="text">
+                                          <string>Pointés du jour</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiPresentSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiPresentIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiPresentRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiPresentValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiPresentSub">
+                                        <property name="text">
+                                          <string>sur 0</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiPresentSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="kpiHoursCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="kpiHoursLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiHoursHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiHoursTitle">
+                                        <property name="text">
+                                          <string>Travail net</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiHoursSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiHoursIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="kpiHoursRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="kpiHoursValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="kpiHoursSub">
+                                        <property name="text">
+                                          <string>0 h sup.</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="kpiHoursSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QPushButton" name="alertButton">
+                              <property name="text">
+                                <string>Charge élevée : 0 employé</string>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>210</width>
+                                  <height>52</height>
+                                </size>
+                              </property>
+                              <property name="cursor">
+                                <cursorShape>PointingHandCursor</cursorShape>
+                              </property>
+                            </widget>
+                          </item>
+                        </layout>
+                      </item>
+                      <item>
+                        <layout class="QHBoxLayout" name="dashboardColumns" stretch="6,5">
+                          <property name="leftMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="spacing">
+                            <number>16</number>
+                          </property>
+                          <item>
+                            <layout class="QVBoxLayout" name="leftColumn">
+                              <property name="leftMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="topMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="rightMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="bottomMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="spacing">
+                                <number>16</number>
+                              </property>
+                              <item>
+                                <widget class="QFrame" name="hoursCard">
+                                  <property name="card" stdset="0">
+                                    <bool>true</bool>
+                                  </property>
+                                  <property name="minimumSize">
+                                    <size>
+                                      <width>0</width>
+                                      <height>0</height>
+                                    </size>
+                                  </property>
+                                  <layout class="QVBoxLayout" name="hoursLayout">
+                                    <property name="leftMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>16</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>14</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>10</number>
+                                    </property>
+                                    <item>
+                                      <layout class="QHBoxLayout" name="hoursHead">
+                                        <property name="leftMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="topMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="rightMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="bottomMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="spacing">
+                                          <number>8</number>
+                                        </property>
+                                        <item>
+                                          <widget class="QLabel" name="hoursTitle">
+                                            <property name="text">
+                                              <string>Heures travaillées</string>
+                                            </property>
+                                            <property name="section" stdset="0">
+                                              <bool>true</bool>
+                                            </property>
+                                          </widget>
+                                        </item>
+                                        <item>
+                                          <spacer name="hoursSp">
+                                            <property name="orientation">
+                                              <enum>Qt::Horizontal</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                              <size>
+                                                <width>20</width>
+                                                <height>10</height>
+                                              </size>
+                                            </property>
+                                          </spacer>
+                                        </item>
+                                        <item>
+                                          <widget class="QLabel" name="hoursPill">
+                                            <property name="text">
+                                              <string>7 derniers jours</string>
+                                            </property>
+                                            <property name="pill" stdset="0">
+                                              <bool>true</bool>
+                                            </property>
+                                          </widget>
+                                        </item>
+                                      </layout>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="hoursChart">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>0</width>
+                                            <height>210</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QFrame" name="todayCard">
+                                  <property name="card" stdset="0">
+                                    <bool>true</bool>
+                                  </property>
+                                  <property name="minimumSize">
+                                    <size>
+                                      <width>0</width>
+                                      <height>0</height>
+                                    </size>
+                                  </property>
+                                  <layout class="QVBoxLayout" name="todayLayout">
+                                    <property name="leftMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>16</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>14</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="todayTitle">
+                                        <property name="text">
+                                          <string>Pointage du jour</string>
+                                        </property>
+                                        <property name="section" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QTableWidget" name="todayTable">
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>0</width>
+                                            <height>200</height>
+                                          </size>
+                                        </property>
+                                        <property name="editTriggers">
+                                          <set>QAbstractItemView::NoEditTriggers</set>
+                                        </property>
+                                        <property name="selectionMode">
+                                          <enum>QAbstractItemView::SingleSelection</enum>
+                                        </property>
+                                        <property name="selectionBehavior">
+                                          <enum>QAbstractItemView::SelectRows</enum>
+                                        </property>
+                                        <property name="showGrid">
+                                          <bool>false</bool>
+                                        </property>
+                                        <property name="alternatingRowColors">
+                                          <bool>false</bool>
+                                        </property>
+                                        <column>
+                                          <property name="text">
+                                            <string>Employé</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Arrivée</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Départ</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Pause</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Travail net</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Heures sup.</string>
+                                          </property>
+                                        </column>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </widget>
+                              </item>
+                            </layout>
+                          </item>
+                          <item>
+                            <layout class="QVBoxLayout" name="rightColumn">
+                              <property name="leftMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="topMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="rightMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="bottomMargin">
+                                <number>0</number>
+                              </property>
+                              <property name="spacing">
+                                <number>16</number>
+                              </property>
+                              <item>
+                                <widget class="QFrame" name="teamCard">
+                                  <property name="card" stdset="0">
+                                    <bool>true</bool>
+                                  </property>
+                                  <property name="minimumSize">
+                                    <size>
+                                      <width>0</width>
+                                      <height>0</height>
+                                    </size>
+                                  </property>
+                                  <layout class="QVBoxLayout" name="teamLayout">
+                                    <property name="leftMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>16</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>14</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>12</number>
+                                    </property>
+                                    <item>
+                                      <layout class="QHBoxLayout" name="teamHead">
+                                        <property name="leftMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="topMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="rightMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="bottomMargin">
+                                          <number>0</number>
+                                        </property>
+                                        <property name="spacing">
+                                          <number>8</number>
+                                        </property>
+                                        <item>
+                                          <widget class="QLabel" name="teamTitle">
+                                            <property name="text">
+                                              <string>Équipe disponible</string>
+                                            </property>
+                                            <property name="section" stdset="0">
+                                              <bool>true</bool>
+                                            </property>
+                                          </widget>
+                                        </item>
+                                        <item>
+                                          <spacer name="teamSp">
+                                            <property name="orientation">
+                                              <enum>Qt::Horizontal</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                              <size>
+                                                <width>20</width>
+                                                <height>10</height>
+                                              </size>
+                                            </property>
+                                          </spacer>
+                                        </item>
+                                        <item>
+                                          <widget class="QLabel" name="teamPill">
+                                            <property name="text">
+                                              <string>Moins chargés en premier</string>
+                                            </property>
+                                            <property name="pill" stdset="0">
+                                              <bool>true</bool>
+                                            </property>
+                                          </widget>
+                                        </item>
+                                      </layout>
+                                    </item>
+                                    <item>
+                                      <layout class="QGridLayout" name="teamGrid">
+                                        <property name="horizontalSpacing">
+                                          <number>12</number>
+                                        </property>
+                                        <property name="verticalSpacing">
+                                          <number>12</number>
+                                        </property>
+                                      </layout>
+                                    </item>
+                                  </layout>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QFrame" name="recentCard">
+                                  <property name="card" stdset="0">
+                                    <bool>true</bool>
+                                  </property>
+                                  <property name="minimumSize">
+                                    <size>
+                                      <width>0</width>
+                                      <height>0</height>
+                                    </size>
+                                  </property>
+                                  <layout class="QVBoxLayout" name="recentLayout">
+                                    <property name="leftMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>16</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>18</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>14</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="activityTitle">
+                                        <property name="text">
+                                          <string>Affectations récentes</string>
+                                        </property>
+                                        <property name="section" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QTableWidget" name="recentTable">
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>0</width>
+                                            <height>250</height>
+                                          </size>
+                                        </property>
+                                        <property name="editTriggers">
+                                          <set>QAbstractItemView::NoEditTriggers</set>
+                                        </property>
+                                        <property name="selectionMode">
+                                          <enum>QAbstractItemView::SingleSelection</enum>
+                                        </property>
+                                        <property name="selectionBehavior">
+                                          <enum>QAbstractItemView::SelectRows</enum>
+                                        </property>
+                                        <property name="showGrid">
+                                          <bool>false</bool>
+                                        </property>
+                                        <property name="alternatingRowColors">
+                                          <bool>false</bool>
+                                        </property>
+                                        <column>
+                                          <property name="text">
+                                            <string>Date</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Employé</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>Tâche</string>
+                                          </property>
+                                        </column>
+                                        <column>
+                                          <property name="text">
+                                            <string>État</string>
+                                          </property>
+                                        </column>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </widget>
+                              </item>
+                            </layout>
+                          </item>
+                        </layout>
+                      </item>
+                      <item>
+                        <spacer name="dashboardBottom">
+                          <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                          </property>
+                          <property name="sizeHint">
+                            <size>
+                              <width>20</width>
+                              <height>10</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                    </layout>
+                  </widget>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="employeeListPage">
+            <attribute name="title">
+              <string>Employés</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="employeeListPageLayout">
+              <property name="spacing">
+                <number>12</number>
+              </property>
+              <property name="leftMargin">
+                <number>12</number>
+              </property>
+              <property name="topMargin">
+                <number>12</number>
+              </property>
+              <property name="rightMargin">
+                <number>12</number>
+              </property>
+              <property name="bottomMargin">
+                <number>12</number>
+              </property>
+              <item>
+                <layout class="QHBoxLayout" name="employeeFilters">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QLineEdit" name="employeeSearch">
+                      <property name="placeholderText">
+                        <string>Rechercher : nom, ID ou e-mail…</string>
+                      </property>
+                      <property name="clearButtonEnabled">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="availabilityFilter">
+                      <item>
+                        <property name="text">
+                          <string>Toutes les disponibilités</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Disponible</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Indisponible</string>
+                        </property>
+                      </item>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="positionFilter">
+                      <item>
+                        <property name="text">
+                          <string>Tous les postes</string>
+                        </property>
+                      </item>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="employeeSort">
+                      <item>
+                        <property name="text">
+                          <string>Nom A → Z</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Nom Z → A</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Identifiant</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Embauche récente</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Embauche ancienne</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Spécialité A → Z</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Charge croissante</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Charge décroissante</string>
+                        </property>
+                      </item>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="employeeActions">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QPushButton" name="addEmployeeButton">
+                      <property name="text">
+                        <string>Ajouter un employé</string>
+                      </property>
+                      <property name="primary" stdset="0">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="editEmployeeButton">
+                      <property name="text">
+                        <string>Modifier</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="deleteEmployeeButton">
+                      <property name="text">
+                        <string>Supprimer</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="employeesPdfButton">
+                      <property name="text">
+                        <string>Exporter PDF</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="openStatsButton">
+                      <property name="text">
+                        <string>Statistiques</string>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QLabel" name="employeeCount">
+                  <property name="text">
+                    <string>Employés enregistrés</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>true</bool>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QTableWidget" name="employeesTable">
+                  <property name="editTriggers">
+                    <set>QAbstractItemView::NoEditTriggers</set>
+                  </property>
+                  <property name="selectionMode">
+                    <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <property name="alternatingRowColors">
+                    <bool>true</bool>
+                  </property>
+                  <column>
+                    <property name="text">
+                      <string>ID</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Nom</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>E-mail</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Poste</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Spécialité</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Embauche</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Disponibilité</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Charge</string>
+                    </property>
+                  </column>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLabel" name="employeeHelp">
+                  <property name="text">
+                    <string>Charge totale = charge initiale + tâches en cours (base de 40 h). Double-cliquez pour modifier.</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>true</bool>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="assignmentPage">
+            <attribute name="title">
+              <string>Affectation</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="assignmentPageLayout">
+              <property name="spacing">
+                <number>12</number>
+              </property>
+              <property name="leftMargin">
+                <number>12</number>
+              </property>
+              <property name="topMargin">
+                <number>12</number>
+              </property>
+              <property name="rightMargin">
+                <number>12</number>
+              </property>
+              <property name="bottomMargin">
+                <number>12</number>
+              </property>
+              <item>
+                <widget class="QComboBox" name="taskTemplate">
+                  <item>
+                    <property name="text">
+                      <string>Modèle de tâche (facultatif)…</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Assemblage d’une robe de soirée</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Broderie de fils d’or sur manteau</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Création du patron d’une veste</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Drapé sur mannequin d’une robe longue</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Finitions et ourlets d’une collection capsule</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text">
+                      <string>Contrôle qualité avant livraison</string>
+                    </property>
+                  </item>
+                </widget>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="assignmentForm">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QLineEdit" name="taskTitle">
+                      <property name="placeholderText">
+                        <string>Intitulé de la tâche…</string>
+                      </property>
+                      <property name="clearButtonEnabled">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="taskSpecialty" />
+                  </item>
+                  <item>
+                    <widget class="QSpinBox" name="taskHours">
+                      <property name="minimum">
+                        <number>1</number>
+                      </property>
+                      <property name="maximum">
+                        <number>80</number>
+                      </property>
+                      <property name="value">
+                        <number>8</number>
+                      </property>
+                      <property name="suffix">
+                        <string> h</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="recommendButton">
+                      <property name="text">
+                        <string>Recommander</string>
+                      </property>
+                      <property name="primary" stdset="0">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QLabel" name="assignmentExplanation">
+                  <property name="text">
+                    <string>Score : spécialité 50 pts + marge de charge 40 pts + capacité 10 pts. Les employés indisponibles sont exclus ; une surcharge empêche l’affectation.</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>true</bool>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QTableWidget" name="candidatesTable">
+                  <property name="editTriggers">
+                    <set>QAbstractItemView::NoEditTriggers</set>
+                  </property>
+                  <property name="selectionMode">
+                    <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <property name="alternatingRowColors">
+                    <bool>true</bool>
+                  </property>
+                  <column>
+                    <property name="text">
+                      <string>Employé</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Spécialité</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Charge</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Spécialité /50</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Charge /40</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Capacité /10</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Score /100</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Capacité</string>
+                    </property>
+                  </column>
+                </widget>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="assignmentActions">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QPushButton" name="assignButton">
+                      <property name="text">
+                        <string>Affecter au candidat sélectionné</string>
+                      </property>
+                      <property name="primary" stdset="0">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="completeTaskButton">
+                      <property name="text">
+                        <string>Terminer la tâche sélectionnée</string>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QTableWidget" name="assignmentsTable">
+                  <property name="editTriggers">
+                    <set>QAbstractItemView::NoEditTriggers</set>
+                  </property>
+                  <property name="selectionMode">
+                    <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <property name="alternatingRowColors">
+                    <bool>true</bool>
+                  </property>
+                  <column>
+                    <property name="text">
+                      <string>Date</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Employé</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Tâche</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Spécialité</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Durée</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>État</string>
+                    </property>
+                  </column>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="attendancePage">
+            <attribute name="title">
+              <string>Pointage</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="attendancePageLayout">
+              <property name="spacing">
+                <number>12</number>
+              </property>
+              <property name="leftMargin">
+                <number>12</number>
+              </property>
+              <property name="topMargin">
+                <number>12</number>
+              </property>
+              <property name="rightMargin">
+                <number>12</number>
+              </property>
+              <property name="bottomMargin">
+                <number>12</number>
+              </property>
+              <item>
+                <layout class="QHBoxLayout" name="instantAttendance">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QComboBox" name="attendanceEmployee" />
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="clockInButton">
+                      <property name="text">
+                        <string>Pointer l’arrivée maintenant</string>
+                      </property>
+                      <property name="primary" stdset="0">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="clockOutButton">
+                      <property name="text">
+                        <string>Pointer le départ maintenant</string>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="attendanceForm">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QLabel" name="attendanceDateLabel">
+                      <property name="text">
+                        <string>Date</string>
+                      </property>
+                      <property name="wordWrap">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QDateEdit" name="attendanceDate">
+                      <property name="calendarPopup">
+                        <bool>true</bool>
+                      </property>
+                      <property name="displayFormat">
+                        <string>dd/MM/yyyy</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="arrivalLabel">
+                      <property name="text">
+                        <string>Arrivée</string>
+                      </property>
+                      <property name="wordWrap">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QTimeEdit" name="attendanceArrival">
+                      <property name="displayFormat">
+                        <string>HH:mm</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="departureLabel">
+                      <property name="text">
+                        <string>Départ</string>
+                      </property>
+                      <property name="wordWrap">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QTimeEdit" name="attendanceDeparture">
+                      <property name="displayFormat">
+                        <string>HH:mm</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLabel" name="pauseLabel">
+                      <property name="text">
+                        <string>Pause</string>
+                      </property>
+                      <property name="wordWrap">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QSpinBox" name="attendancePause">
+                      <property name="maximum">
+                        <number>240</number>
+                      </property>
+                      <property name="value">
+                        <number>60</number>
+                      </property>
+                      <property name="suffix">
+                        <string> min</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="saveAttendanceButton">
+                      <property name="text">
+                        <string>Enregistrer</string>
+                      </property>
+                      <property name="primary" stdset="0">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QLabel" name="attendanceCalculation">
+                  <property name="text">
+                    <string>Calcul automatique</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>true</bool>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="attendanceFilters">
+                  <property name="spacing">
+                    <number>12</number>
+                  </property>
+                  <property name="leftMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>12</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>12</number>
+                  </property>
+                  <item>
+                    <widget class="QLineEdit" name="attendanceSearch">
+                      <property name="placeholderText">
+                        <string>Rechercher un employé…</string>
+                      </property>
+                      <property name="clearButtonEnabled">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="attendanceDayFilter">
+                      <item>
+                        <property name="text">
+                          <string>Tous les jours</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>Aujourd’hui</string>
+                        </property>
+                      </item>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="deleteAttendanceButton">
+                      <property name="text">
+                        <string>Supprimer le pointage</string>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QTableWidget" name="attendanceTable">
+                  <property name="editTriggers">
+                    <set>QAbstractItemView::NoEditTriggers</set>
+                  </property>
+                  <property name="selectionMode">
+                    <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <property name="alternatingRowColors">
+                    <bool>true</bool>
+                  </property>
+                  <column>
+                    <property name="text">
+                      <string>Date</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Employé</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Arrivée</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Départ</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Pause</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Travail net</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Heures sup.</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>État</string>
+                    </property>
+                  </column>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLabel" name="attendanceHelp">
+                  <property name="text">
+                    <string>Double-cliquez pour corriger un pointage. Un enregistrement par employé et par jour ; confirmez avant de remplacer une saisie. Les horaires doivent appartenir à la même journée. Pointage instantané : pause initiale de 0 min, à corriger selon la pause réelle.</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>true</bool>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="employeeStatsPage">
+            <attribute name="title">
+              <string>Statistiques</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="employeeStatsPageLayout">
+              <property name="leftMargin">
+                <number>0</number>
+              </property>
+              <property name="topMargin">
+                <number>0</number>
+              </property>
+              <property name="rightMargin">
+                <number>0</number>
+              </property>
+              <property name="bottomMargin">
+                <number>0</number>
+              </property>
+              <property name="spacing">
+                <number>8</number>
+              </property>
+              <item>
+                <widget class="QScrollArea" name="statsScroll">
+                  <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="widgetResizable">
+                    <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="statsContents">
+                    <layout class="QVBoxLayout" name="statsContentsLayout">
+                      <property name="leftMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                        <number>10</number>
+                      </property>
+                      <property name="bottomMargin">
+                        <number>0</number>
+                      </property>
+                      <property name="spacing">
+                        <number>16</number>
+                      </property>
+                      <item>
+                        <layout class="QHBoxLayout" name="statsHead">
+                          <property name="leftMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="spacing">
+                            <number>12</number>
+                          </property>
+                          <item>
+                            <widget class="QPushButton" name="statsBackButton">
+                              <property name="text">
+                                <string>←  Retour</string>
+                              </property>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QLabel" name="employeeStatsSummary">
+                              <property name="text">
+                                <string>Répartition de l’effectif</string>
+                              </property>
+                            </widget>
+                          </item>
+                          <item>
+                            <spacer name="statsHeadSp">
+                              <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
+                              </property>
+                              <property name="sizeHint">
+                                <size>
+                                  <width>20</width>
+                                  <height>10</height>
+                                </size>
+                              </property>
+                            </spacer>
+                          </item>
+                          <item>
+                            <widget class="QPushButton" name="employeeStatsPdfButton">
+                              <property name="text">
+                                <string>Exporter en PDF</string>
+                              </property>
+                              <property name="primary" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                            </widget>
+                          </item>
+                        </layout>
+                      </item>
+                      <item>
+                        <layout class="QHBoxLayout" name="statsKpiRow">
+                          <property name="leftMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="spacing">
+                            <number>14</number>
+                          </property>
+                          <item>
+                            <widget class="QFrame" name="statStaffCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="statStaffLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statStaffHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statStaffTitle">
+                                        <property name="text">
+                                          <string>Effectif</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statStaffSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statStaffIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statStaffRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statStaffValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statStaffSub">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statStaffSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="statLoadCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="statLoadLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statLoadHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statLoadTitle">
+                                        <property name="text">
+                                          <string>Charge moyenne</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statLoadSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statLoadIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statLoadRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statLoadValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statLoadSub">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statLoadSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="statHoursCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="statHoursLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statHoursHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statHoursTitle">
+                                        <property name="text">
+                                          <string>Heures du mois</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statHoursSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statHoursIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statHoursRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statHoursValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statHoursSub">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statHoursSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="statOvertimeCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>88</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="statOvertimeLayout">
+                                <property name="leftMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>12</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>4</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statOvertimeHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>6</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statOvertimeTitle">
+                                        <property name="text">
+                                          <string>Heures sup. du mois</string>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statOvertimeSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statOvertimeIcon">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="iconbox" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                          <size>
+                                            <width>30</width>
+                                            <height>30</height>
+                                          </size>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignCenter</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <layout class="QHBoxLayout" name="statOvertimeRow">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="statOvertimeValue">
+                                        <property name="text">
+                                          <string>0</string>
+                                        </property>
+                                        <property name="kpi" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="statOvertimeSub">
+                                        <property name="text">
+                                          <string/>
+                                        </property>
+                                        <property name="muted" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                        <property name="alignment">
+                                          <set>Qt::AlignLeft|Qt::AlignBottom</set>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="statOvertimeSp2">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                        </layout>
+                      </item>
+                      <item>
+                        <layout class="QHBoxLayout" name="statsCharts" stretch="1,1">
+                          <property name="leftMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                            <number>0</number>
+                          </property>
+                          <property name="spacing">
+                            <number>16</number>
+                          </property>
+                          <item>
+                            <widget class="QFrame" name="specialtyCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>0</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="specialtyLayout">
+                                <property name="leftMargin">
+                                  <number>18</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>18</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>10</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="specialtyHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="specialtyTitle">
+                                        <property name="text">
+                                          <string>Effectif par spécialité</string>
+                                        </property>
+                                        <property name="section" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="specialtySp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <widget class="QLabel" name="employeeChart">
+                                    <property name="text">
+                                      <string/>
+                                    </property>
+                                    <property name="minimumSize">
+                                      <size>
+                                        <width>0</width>
+                                        <height>200</height>
+                                      </size>
+                                    </property>
+                                    <property name="alignment">
+                                      <set>Qt::AlignTop|Qt::AlignLeft</set>
+                                    </property>
+                                  </widget>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QFrame" name="loadCard">
+                              <property name="card" stdset="0">
+                                <bool>true</bool>
+                              </property>
+                              <property name="minimumSize">
+                                <size>
+                                  <width>0</width>
+                                  <height>0</height>
+                                </size>
+                              </property>
+                              <layout class="QVBoxLayout" name="loadLayout">
+                                <property name="leftMargin">
+                                  <number>18</number>
+                                </property>
+                                <property name="topMargin">
+                                  <number>16</number>
+                                </property>
+                                <property name="rightMargin">
+                                  <number>18</number>
+                                </property>
+                                <property name="bottomMargin">
+                                  <number>14</number>
+                                </property>
+                                <property name="spacing">
+                                  <number>10</number>
+                                </property>
+                                <item>
+                                  <layout class="QHBoxLayout" name="loadHead">
+                                    <property name="leftMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="topMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="rightMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="bottomMargin">
+                                      <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                      <number>8</number>
+                                    </property>
+                                    <item>
+                                      <widget class="QLabel" name="loadTitle">
+                                        <property name="text">
+                                          <string>Charge de travail par employé</string>
+                                        </property>
+                                        <property name="section" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                    <item>
+                                      <spacer name="loadSp">
+                                        <property name="orientation">
+                                          <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                          <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                          </size>
+                                        </property>
+                                      </spacer>
+                                    </item>
+                                    <item>
+                                      <widget class="QLabel" name="loadPill">
+                                        <property name="text">
+                                          <string>Du plus chargé au moins chargé</string>
+                                        </property>
+                                        <property name="pill" stdset="0">
+                                          <bool>true</bool>
+                                        </property>
+                                      </widget>
+                                    </item>
+                                  </layout>
+                                </item>
+                                <item>
+                                  <widget class="QLabel" name="loadChart">
+                                    <property name="text">
+                                      <string/>
+                                    </property>
+                                    <property name="minimumSize">
+                                      <size>
+                                        <width>0</width>
+                                        <height>200</height>
+                                      </size>
+                                    </property>
+                                    <property name="alignment">
+                                      <set>Qt::AlignTop|Qt::AlignLeft</set>
+                                    </property>
+                                  </widget>
+                                </item>
+                              </layout>
+                            </widget>
+                          </item>
+                        </layout>
+                      </item>
+                      <item>
+                        <widget class="QFrame" name="detailCard">
+                          <property name="card" stdset="0">
+                            <bool>true</bool>
+                          </property>
+                          <property name="minimumSize">
+                            <size>
+                              <width>0</width>
+                              <height>0</height>
+                            </size>
+                          </property>
+                          <layout class="QVBoxLayout" name="detailLayout">
+                            <property name="leftMargin">
+                              <number>18</number>
+                            </property>
+                            <property name="topMargin">
+                              <number>16</number>
+                            </property>
+                            <property name="rightMargin">
+                              <number>18</number>
+                            </property>
+                            <property name="bottomMargin">
+                              <number>14</number>
+                            </property>
+                            <property name="spacing">
+                              <number>8</number>
+                            </property>
+                            <item>
+                              <widget class="QLabel" name="detailTitle">
+                                <property name="text">
+                                  <string>Détail des effectifs</string>
+                                </property>
+                                <property name="section" stdset="0">
+                                  <bool>true</bool>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QTableWidget" name="employeeStatsTable">
+                                <property name="minimumSize">
+                                  <size>
+                                    <width>0</width>
+                                    <height>260</height>
+                                  </size>
+                                </property>
+                                <property name="editTriggers">
+                                  <set>QAbstractItemView::NoEditTriggers</set>
+                                </property>
+                                <property name="selectionMode">
+                                  <enum>QAbstractItemView::SingleSelection</enum>
+                                </property>
+                                <property name="selectionBehavior">
+                                  <enum>QAbstractItemView::SelectRows</enum>
+                                </property>
+                                <property name="showGrid">
+                                  <bool>false</bool>
+                                </property>
+                                <property name="alternatingRowColors">
+                                  <bool>false</bool>
+                                </property>
+                                <column>
+                                  <property name="text">
+                                    <string>Catégorie</string>
+                                  </property>
+                                </column>
+                                <column>
+                                  <property name="text">
+                                    <string>Groupe</string>
+                                  </property>
+                                </column>
+                                <column>
+                                  <property name="text">
+                                    <string>Effectif</string>
+                                  </property>
+                                </column>
+                              </widget>
+                            </item>
+                          </layout>
+                        </widget>
+                      </item>
+                      <item>
+                        <spacer name="statsBottom">
+                          <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                          </property>
+                          <property name="sizeHint">
+                            <size>
+                              <width>20</width>
+                              <height>10</height>
+                            </size>
+                          </property>
+                        </spacer>
+                      </item>
+                    </layout>
+                  </widget>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+        </widget>
+      </item>
+      <item>
+        <widget class="QLabel" name="employeeStatus">
+          <property name="text">
+            <string>Enregistrement SQLite local</string>
+          </property>
+          <property name="wordWrap">
+            <bool>true</bool>
+          </property>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+  <resources />
+  <connections />
+</ui>

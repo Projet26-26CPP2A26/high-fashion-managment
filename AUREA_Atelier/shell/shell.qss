@@ -1,0 +1,32 @@
+/* AUREA — fenêtre principale (thème sombre / or, identique aux modules) */
+QMainWindow, QWidget#shellCentral, QStackedWidget#shellStack { background: #1b1b1d; }
+
+/* colonne de gauche : les deux gestions */
+QFrame#shellSidebar { background: #151517; border: none; border-right: 1px solid #2a2a2d; }
+QFrame#shellSidebar QLabel { background: transparent; border: none; }
+QLabel#shellBrand { font-family: 'Cormorant Garamond', 'Georgia'; font-size: 26pt; font-weight: 600; color: #e2cf9f; letter-spacing: 4px; }
+QLabel#shellTagline { color: #8f8c86; font-size: 6.5pt; font-weight: 500; letter-spacing: 1px; }
+QLabel#shellCaption { color: #77746d; font-size: 7.5pt; font-weight: 600; letter-spacing: 2px; padding-left: 8px; }
+QLabel#shellFooter { color: #6d6a64; font-size: 7pt; letter-spacing: 1px; }
+
+QPushButton[module="true"] {
+    font-family: 'Inter', 'Segoe UI'; font-size: 10.5pt; font-weight: 500; color: #c9c5bb; text-align: left;
+    background: transparent; border: 1px solid transparent; border-radius: 12px; padding: 13px 14px;
+}
+QPushButton[module="true"]:hover:!checked { background: #222225; color: #fff7e0; border-color: #2e2e32; }
+QPushButton[module="true"]:checked {
+    color: #1c1c1e; font-weight: 600; border: none;
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #bfa370, stop:0.5 #e9d8a8, stop:1 #c4a876);
+}
+
+/* rangée horizontale en haut à droite : les boutons du module ouvert */
+QStackedWidget#shellTabs { background: #151517; border-bottom: 1px solid #2a2a2d; }
+QPushButton[tab="true"] {
+    font-family: 'Inter', 'Segoe UI'; font-size: 10pt; font-weight: 500; color: #c9c5bb;
+    background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 9px 18px;
+}
+QPushButton[tab="true"]:hover:!checked { background: #222225; color: #fff7e0; border-color: #2e2e32; }
+QPushButton[tab="true"]:checked {
+    color: #1c1c1e; font-weight: 600; border: none;
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #bfa370, stop:0.5 #e9d8a8, stop:1 #c4a876);
+}
