@@ -1,0 +1,11 @@
+# Qt Creator : contient l'environnement d'exécution (donc AUREA_ORACLE_PASSWORD) — ne jamais versionner
+*.pro.user*
+CMakeLists.txt.user*
+build/
+build-*/
+# Données locales
+*.sqlite
+*.db
+# Configuration locale éventuelle
+oracle.local*
+*.env
