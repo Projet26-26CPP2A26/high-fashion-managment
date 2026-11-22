@@ -1,5 +1,7 @@
 #pragma once
+#include "arduino.h"
 #include <QColor>
+#include <QElapsedTimer>
 #include <QDate>
 #include <QList>
 #include <QMainWindow>
@@ -78,6 +80,11 @@ public:
     static bool supprimer(int id);
     static QVector<AtelierOrder> afficher();
     static QString derniereErreur();
+
+    // Métiers liés à l'alerte Arduino
+    bool enRetard() const;
+    static int compterRetards();
+    static int livrerPlusUrgente();   // marque « Livrée » la commande en retard la plus urgente, renvoie son id (ou -1)
 
 private:
     int m_id = 0;
@@ -229,6 +236,9 @@ private slots:
     void exportDevisPdf();
     void createCommandeFromDevis();
 
+    // arduino
+    void arduinoTick();
+
 private:
     bool openDatabase();
     QSqlDatabase ordersDb() const;
@@ -252,6 +262,10 @@ private:
     void refreshDashboard();
     void refreshCommandes();
     void reloadCombos();
+
+    // arduino
+    void connectArduino();
+    void updateFooter();
 
     QSqlDatabase m_db;
     QString m_dbPath;
@@ -299,4 +313,12 @@ private:
     QLabel *m_dvVipLabel = nullptr;
     QVector<QuoteLine> m_dvLines;
     int m_dvLastVip = -1;
+
+    // Arduino
+    Arduino m_arduino;
+    QTimer *m_arduinoTimer = nullptr;
+    QElapsedTimer m_arduinoClock;
+    int m_retards = 0;        // nombre de commandes en retard (calculé depuis Oracle)
+    int m_lastSent = -1;      // dernier nombre envoyé à la carte
+    int m_arduinoWait = 0;    // compteur pour retenter la connexion
 };

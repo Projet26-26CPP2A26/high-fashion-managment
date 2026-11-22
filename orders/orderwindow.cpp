@@ -123,6 +123,39 @@ QVector<AtelierOrder> AtelierOrder::afficher()
     return list;
 }
 
+bool AtelierOrder::enRetard() const
+{
+    if (m_statut == QStringLiteral("Livrée") || m_statut == QStringLiteral("Terminée"))
+        return false;
+    const int jours = QDate::currentDate().daysTo(m_livraison);
+    if (jours < 0) return true;
+    return m_statut == QStringLiteral("En attente") && jours <= 3;
+}
+
+int AtelierOrder::compterRetards()
+{
+    int n = 0;
+    for (const AtelierOrder &c : afficher())
+        if (c.enRetard()) ++n;
+    return n;
+}
+
+int AtelierOrder::livrerPlusUrgente()
+{
+    AtelierOrder cible;
+    bool trouve = false;
+    for (const AtelierOrder &c : afficher()) {
+        if (!c.enRetard()) continue;
+        if (!trouve || c.livraison() < cible.livraison()) {
+            cible = c;
+            trouve = true;
+        }
+    }
+    if (!trouve) return -1;
+    cible.setStatut(QStringLiteral("Livrée"));
+    return cible.modifier() ? cible.id() : -1;
+}
+
 // ============================================================ Utilitaires
 static QString fmtMoney(double v, int dec = 2)
 {
@@ -698,6 +731,18 @@ OrderWindow::OrderWindow(QWidget *parent) : QMainWindow(parent)
 
     refreshAll();
 
+    // Arduino : connexion, réception du bouton « LIVRE », envoi du nombre de retards
+    connect(m_arduino.getserial(), &QSerialPort::errorOccurred, this, [this](QSerialPort::SerialPortError e) {
+        if (e == QSerialPort::ResourceError) {   // carte débranchée
+            m_arduino.close_arduino();
+            updateFooter();
+        }
+    });
+    connectArduino();
+    m_arduinoTimer = new QTimer(this);
+    connect(m_arduinoTimer, &QTimer::timeout, this, &OrderWindow::arduinoTick);
+    m_arduinoTimer->start(200);
+
     m_clock = new QTimer(this);
     connect(m_clock, &QTimer::timeout, this, &OrderWindow::updateClock);
     m_clock->start(20 * 1000);
@@ -923,9 +968,9 @@ void OrderWindow::buildUi()
     m_pages->addWidget(buildDevisPage());
     cv->addWidget(m_pages, 1);
 
-    m_footer = new QLabel(m_ready ? QStringLiteral("Gestion des commandes · base Oracle")
-                                  : QStringLiteral("Gestion des commandes · base de données indisponible"));
+    m_footer = new QLabel;
     m_footer->setObjectName(QStringLiteral("footerNote"));
+    updateFooter();
     cv->addWidget(m_footer);
 
     root->addWidget(column, 1);
@@ -1367,6 +1412,8 @@ void OrderWindow::refreshDashboard()
         if (suiviFor(c).niveau() == 2) ++retards;
     }
 
+    m_retards = retards;   // envoyé à l'Arduino par arduinoTick()
+
     const QLocale fr(QLocale::French);
     m_statTotal->setText(QString::number(cmds.size()));
     m_statTotalSub->setText(QStringLiteral("au total"));
@@ -1458,6 +1505,57 @@ void OrderWindow::refreshCommandes()
     }
     m_cmdTable->setSortingEnabled(true);
     applyCommandeFilter();
+}
+
+// ------------------------------------------------------------ Arduino
+void OrderWindow::connectArduino()
+{
+    const int r = m_arduino.connect_arduino();   // 0 = connecté
+    m_lastSent = -1;
+    if (r == 0) m_arduinoClock.start();          // la carte redémarre à l'ouverture du port
+    updateFooter();
+}
+
+void OrderWindow::updateFooter()
+{
+    QString t = m_ready ? QStringLiteral("Gestion des commandes · base Oracle")
+                        : QStringLiteral("Gestion des commandes · base de données indisponible");
+    t += m_arduino.isConnected()
+             ? QStringLiteral(" · Arduino connecté (%1)").arg(m_arduino.getarduino_port_name())
+             : QStringLiteral(" · Arduino non détecté");
+    m_footer->setText(t);
+}
+
+void OrderWindow::arduinoTick()
+{
+    if (!m_arduino.isConnected()) {
+        if (++m_arduinoWait >= 25) {   // nouvelle tentative toutes les ~5 s
+            m_arduinoWait = 0;
+            connectArduino();
+        }
+        return;
+    }
+
+    // Oracle -> Arduino : envoyer le nombre de retards quand il change
+    if (m_arduinoClock.elapsed() > 2500 && m_lastSent != m_retards) {
+        m_arduino.write_to_arduino(QByteArray::number(m_retards) + '\n');
+        qDebug() << "Envoi à l'Arduino :" << m_retards;
+        m_lastSent = m_retards;
+    }
+
+    // Arduino -> Oracle : le bouton envoie « LIVRE »
+    for (QString line = m_arduino.readLine(); !line.isEmpty(); line = m_arduino.readLine()) {
+        qDebug() << "Reçu de l'Arduino :" << line;
+        if (line == QLatin1String("LIVRE")) {
+            const int id = AtelierOrder::livrerPlusUrgente();
+            if (id > 0) {
+                qDebug() << "Commande livrée (Oracle) :" << cmdCode(id);
+                refreshAll();            // met à jour m_retards, l'envoi suivra
+            } else {
+                qDebug() << "Aucune commande en retard à livrer.";
+            }
+        }
+    }
 }
 
 // ------------------------------------------------------------ Slots généraux
