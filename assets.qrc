@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="/">
+    <file>assets/logo_aurea.png</file>
+    <file>assets/fonts/Inter.ttf</file>
+    <file>assets/fonts/CormorantGaramond.ttf</file>
+    <file>assets/fonts/CormorantGaramond-Italic.ttf</file>
+  </qresource>
+</RCC>
