@@ -1,0 +1,9 @@
+*.pro.user*
+.qtcreator/
+CMakeLists.txt.user*
+build/
+build-*/
+*.sqlite*
+*.db
+oracle.local*
+*.env
