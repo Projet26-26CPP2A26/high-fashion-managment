@@ -10,6 +10,7 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QTableWidget;
+class QTimer;
 class VirtualBoard;
 
 class BadgePage : public QWidget {
@@ -26,6 +27,7 @@ signals:
 private:
     void refreshPorts();
     void toggleSerial();
+    void connectWokwi();
     void readSerial();
     void readNetwork();
     void process(QIODevice &link);
@@ -39,6 +41,7 @@ private:
     QSerialPort m_serial;
     QTcpSocket m_tcp;
     int m_telnet = 0;
+    QTimer *m_auto = nullptr;
     QByteArray m_buffer;
     bool m_ready = false;
     QLabel *m_state, *m_count, *m_hint;

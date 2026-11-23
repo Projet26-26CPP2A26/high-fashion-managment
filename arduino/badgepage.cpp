@@ -117,7 +117,10 @@ BadgePage::BadgePage(EmployeeRepository &repository, QWidget *parent) : QWidget(
     root->addLayout(right, 3);
 
     connect(reload, &QPushButton::clicked, this, &BadgePage::refreshPorts);
-    connect(m_connect, &QPushButton::clicked, this, &BadgePage::toggleSerial);
+    connect(m_connect, &QPushButton::clicked, this, [this] {
+        if (m_auto) m_auto->stop();
+        toggleSerial();
+    });
     connect(&m_serial, &QSerialPort::readyRead, this, &BadgePage::readSerial);
     connect(&m_tcp, &QTcpSocket::readyRead, this, &BadgePage::readNetwork);
     connect(&m_tcp, &QTcpSocket::connected, this, [this] {
@@ -157,6 +160,23 @@ BadgePage::BadgePage(EmployeeRepository &repository, QWidget *parent) : QWidget(
         report(ok, ok ? QStringLiteral("Badge retiré.") : m_service.error());
     });
     refreshPorts();
+    if (qEnvironmentVariableIsSet("AUREA_WOKWI")) {
+        m_ports->setCurrentIndex(m_ports->findData(QStringLiteral("wokwi")));
+        m_auto = new QTimer(this);
+        connect(m_auto, &QTimer::timeout, this, [this] {
+            if (!m_serial.isOpen() && m_tcp.state() == QAbstractSocket::UnconnectedState) connectWokwi();
+        });
+        m_auto->start(2000);
+    }
+}
+
+void BadgePage::connectWokwi()
+{
+    m_buffer.clear();
+    m_telnet = 0;
+    m_connect->setText(QStringLiteral("Annuler"));
+    m_state->setText(QStringLiteral("○  Connexion à Wokwi…"));
+    m_tcp.connectToHost(QStringLiteral("127.0.0.1"), 4000);
 }
 
 void BadgePage::report(bool ok, const QString &text)
@@ -204,14 +224,11 @@ void BadgePage::toggleSerial()
         showDisconnected(QStringLiteral("○  Non connectée"));
         return;
     }
-    m_buffer.clear();
     if (m_ports->currentData().toString() == "wokwi") {
-        m_telnet = 0;
-        m_connect->setText(QStringLiteral("Annuler"));
-        m_state->setText(QStringLiteral("○  Connexion à Wokwi…"));
-        m_tcp.connectToHost(QStringLiteral("127.0.0.1"), 4000);
+        connectWokwi();
         return;
     }
+    m_buffer.clear();
     m_serial.setPortName(m_ports->currentData().toString());
     m_serial.setBaudRate(QSerialPort::Baud9600);
     if (!m_serial.open(QIODevice::ReadWrite)) {
