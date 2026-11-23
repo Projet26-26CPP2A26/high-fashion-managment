@@ -1,4 +1,4 @@
-QT += widgets sql printsupport serialport
+QT += widgets sql printsupport serialport network
 CONFIG += c++17
 TEMPLATE = app
 TARGET = AureaEmployes

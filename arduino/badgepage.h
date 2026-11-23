@@ -2,6 +2,7 @@
 #include "badgeservice.h"
 #include "employeerepository.h"
 #include <QSerialPort>
+#include <QTcpSocket>
 #include <QWidget>
 
 class QComboBox;
@@ -26,6 +27,9 @@ private:
     void refreshPorts();
     void toggleSerial();
     void readSerial();
+    void readNetwork();
+    void process(QIODevice &link);
+    void showDisconnected(const QString &text);
     void refresh();
     void report(bool ok, const QString &text);
     QString handle(const QString &line);
@@ -33,6 +37,8 @@ private:
     EmployeeRepository &m_repository;
     BadgeService m_service;
     QSerialPort m_serial;
+    QTcpSocket m_tcp;
+    int m_telnet = 0;
     QByteArray m_buffer;
     bool m_ready = false;
     QLabel *m_state, *m_count, *m_hint;

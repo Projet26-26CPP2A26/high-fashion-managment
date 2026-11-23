@@ -119,6 +119,15 @@ BadgePage::BadgePage(EmployeeRepository &repository, QWidget *parent) : QWidget(
     connect(reload, &QPushButton::clicked, this, &BadgePage::refreshPorts);
     connect(m_connect, &QPushButton::clicked, this, &BadgePage::toggleSerial);
     connect(&m_serial, &QSerialPort::readyRead, this, &BadgePage::readSerial);
+    connect(&m_tcp, &QTcpSocket::readyRead, this, &BadgePage::readNetwork);
+    connect(&m_tcp, &QTcpSocket::connected, this, [this] {
+        m_connect->setText(QStringLiteral("Déconnecter"));
+        m_state->setText(QStringLiteral("●  Connectée à Wokwi"));
+    });
+    connect(&m_tcp, &QTcpSocket::errorOccurred, this, [this] {
+        m_tcp.abort();
+        showDisconnected(QStringLiteral("○  Wokwi ne répond pas"));
+    });
     connect(&m_serial, &QSerialPort::errorOccurred, this, [this](QSerialPort::SerialPortError error) {
         if (error != QSerialPort::ResourceError) return;
         m_serial.close();
@@ -174,24 +183,35 @@ void BadgePage::enter()
 
 void BadgePage::refreshPorts()
 {
-    if (m_serial.isOpen()) return;
+    if (m_serial.isOpen() || m_tcp.state() != QAbstractSocket::UnconnectedState) return;
     m_ports->clear();
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     for (const QSerialPortInfo &info : ports)
         m_ports->addItem(info.portName() + QStringLiteral(" · ") + (info.description().isEmpty() ? QStringLiteral("port série") : info.description()), info.portName());
-    if (m_ports->count() == 0) m_ports->addItem(QStringLiteral("Aucune carte détectée"));
-    m_connect->setEnabled(!m_ports->currentData().toString().isEmpty());
+    m_ports->addItem(QStringLiteral("Wokwi · simulateur"), QStringLiteral("wokwi"));
+    m_connect->setEnabled(true);
 }
 
 void BadgePage::toggleSerial()
 {
     if (m_serial.isOpen()) {
         m_serial.close();
-        m_connect->setText(QStringLiteral("Connecter"));
-        m_state->setText(QStringLiteral("○  Non connectée"));
+        showDisconnected(QStringLiteral("○  Non connectée"));
+        return;
+    }
+    if (m_tcp.state() != QAbstractSocket::UnconnectedState) {
+        m_tcp.abort();
+        showDisconnected(QStringLiteral("○  Non connectée"));
         return;
     }
     m_buffer.clear();
+    if (m_ports->currentData().toString() == "wokwi") {
+        m_telnet = 0;
+        m_connect->setText(QStringLiteral("Annuler"));
+        m_state->setText(QStringLiteral("○  Connexion à Wokwi…"));
+        m_tcp.connectToHost(QStringLiteral("127.0.0.1"), 4000);
+        return;
+    }
     m_serial.setPortName(m_ports->currentData().toString());
     m_serial.setBaudRate(QSerialPort::Baud9600);
     if (!m_serial.open(QIODevice::ReadWrite)) {
@@ -205,12 +225,44 @@ void BadgePage::toggleSerial()
 void BadgePage::readSerial()
 {
     m_buffer += m_serial.readAll();
+    process(m_serial);
+}
+
+void BadgePage::readNetwork()
+{
+    const QByteArray data = m_tcp.readAll();
+    for (const char ch : data) {
+        const uchar c = uchar(ch);
+        if (m_telnet == 0) {
+            if (c == 255) m_telnet = 1;
+            else m_buffer += ch;
+        } else if (m_telnet == 1) {
+            m_telnet = c == 250 ? 3 : c >= 251 && c <= 254 ? 2 : 0;
+        } else if (m_telnet == 2) {
+            m_telnet = 0;
+        } else if (m_telnet == 3) {
+            if (c == 255) m_telnet = 4;
+        } else {
+            m_telnet = c == 240 ? 0 : 3;
+        }
+    }
+    process(m_tcp);
+}
+
+void BadgePage::showDisconnected(const QString &text)
+{
+    m_connect->setText(QStringLiteral("Connecter"));
+    m_state->setText(text);
+}
+
+void BadgePage::process(QIODevice &link)
+{
     if (m_buffer.size() > 4096) m_buffer.clear();
     int end;
     while ((end = int(m_buffer.indexOf('\n'))) >= 0) {
         const QString reply = handle(QString::fromLatin1(m_buffer.left(end)));
         m_buffer.remove(0, end + 1);
-        if (!reply.isEmpty()) m_serial.write(reply.toLatin1() + '\n');
+        if (!reply.isEmpty()) link.write(reply.toLatin1() + '\n');
     }
 }
 

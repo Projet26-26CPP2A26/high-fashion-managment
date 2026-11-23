@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network)
 
 add_executable(AureaEmployes WIN32 main.cpp
     connexion/logindialog.cpp
@@ -77,7 +77,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     crud/employeewindow.ui
     extras/assets.qrc)
 target_include_directories(AureaEmployes PRIVATE connexion crud metiers suivi arduino extras)
-target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort)
+target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network)
 if(WIN32)
     target_link_libraries(AureaEmployes PRIVATE user32 dwmapi)
 endif()

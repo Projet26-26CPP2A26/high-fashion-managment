@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = "build/pointage_badge.ino.hex"
+elf = "build/pointage_badge.ino.elf"
+rfc2217ServerPort = 4000
