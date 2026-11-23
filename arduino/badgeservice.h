@@ -1,0 +1,37 @@
+#pragma once
+#include <QDateTime>
+#include <QObject>
+#include <QVector>
+
+struct BadgeScan {
+    QDateTime at;
+    QString uid, name, kind;
+};
+
+class BadgeService : public QObject {
+    Q_OBJECT
+public:
+    using QObject::QObject;
+    static QString normalize(const QString &uid);
+    static QString plain(const QString &text, int length);
+    bool ready();
+    QString error() const { return m_error; }
+    QString receive(const QString &line);
+    bool assign(const QString &uid, int employeeId);
+    bool release(int employeeId);
+    QString badgeOf(int employeeId);
+    QVector<QPair<QString, QString>> badges();
+    QVector<BadgeScan> scans(int limit = 60);
+    QString lastUid() const { return m_lastUid; }
+
+signals:
+    void scanned(int employeeId, bool arrival);
+    void changed();
+
+private:
+    QString scan(const QString &uid);
+    bool insert(const QString &uid, int employeeId, const QString &kind);
+    int workedMinutes(int employeeId);
+    bool fail(const QString &text);
+    QString m_error, m_lastUid;
+};

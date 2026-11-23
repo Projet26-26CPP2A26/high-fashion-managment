@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-lcd1602", "id": "lcd", "top": -220, "left": 20, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-buzzer", "id": "bz", "top": -40, "left": 330, "attrs": {} },
+    { "type": "wokwi-servo", "id": "sv", "top": 100, "left": 330, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "b1", "top": 230, "left": -20, "attrs": { "color": "green", "label": "Badge 1" } },
+    { "type": "wokwi-pushbutton", "id": "b2", "top": 230, "left": 90, "attrs": { "color": "blue", "label": "Badge 2" } },
+    { "type": "wokwi-pushbutton", "id": "b3", "top": 230, "left": 200, "attrs": { "color": "red", "label": "Inconnu" } }
+  ],
+  "connections": [
+    [ "uno:5V", "lcd:VCC", "red", [] ],
+    [ "uno:GND.1", "lcd:GND", "black", [] ],
+    [ "uno:A4", "lcd:SDA", "green", [] ],
+    [ "uno:A5", "lcd:SCL", "orange", [] ],
+    [ "uno:8", "bz:2", "purple", [] ],
+    [ "uno:GND.1", "bz:1", "black", [] ],
+    [ "uno:6", "sv:PWM", "gold", [] ],
+    [ "uno:5V", "sv:V+", "red", [] ],
+    [ "uno:GND.2", "sv:GND", "black", [] ],
+    [ "uno:2", "b1:1.l", "green", [] ],
+    [ "uno:GND.3", "b1:2.l", "black", [] ],
+    [ "uno:3", "b2:1.l", "blue", [] ],
+    [ "uno:GND.3", "b2:2.l", "black", [] ],
+    [ "uno:4", "b3:1.l", "red", [] ],
+    [ "uno:GND.3", "b3:2.l", "black", [] ]
+  ]
+}
