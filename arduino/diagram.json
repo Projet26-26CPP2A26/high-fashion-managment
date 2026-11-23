@@ -3,28 +3,27 @@
   "editor": "wokwi",
   "parts": [
     { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-lcd1602", "id": "lcd", "top": -220, "left": 20, "attrs": { "pins": "i2c" } },
-    { "type": "wokwi-buzzer", "id": "bz", "top": -40, "left": 330, "attrs": {} },
-    { "type": "wokwi-servo", "id": "sv", "top": 100, "left": 330, "attrs": {} },
-    { "type": "wokwi-pushbutton", "id": "b1", "top": 230, "left": -20, "attrs": { "color": "green", "label": "Badge 1" } },
-    { "type": "wokwi-pushbutton", "id": "b2", "top": 230, "left": 90, "attrs": { "color": "blue", "label": "Badge 2" } },
-    { "type": "wokwi-pushbutton", "id": "b3", "top": 230, "left": 200, "attrs": { "color": "red", "label": "Inconnu" } }
+    { "type": "wokwi-lcd1602", "id": "lcd", "top": -290, "left": 20, "attrs": { "pins": "i2c" } },
+    { "type": "board-mfrc522", "id": "rfid", "top": 60, "left": -360, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "bz", "top": -140, "left": 340, "attrs": {} },
+    { "type": "wokwi-servo", "id": "sv", "top": 110, "left": 370, "attrs": {} }
   ],
   "connections": [
-    [ "uno:5V", "lcd:VCC", "red", [] ],
-    [ "uno:GND.1", "lcd:GND", "black", [] ],
-    [ "uno:A4", "lcd:SDA", "green", [] ],
-    [ "uno:A5", "lcd:SCL", "orange", [] ],
-    [ "uno:8", "bz:2", "purple", [] ],
-    [ "uno:GND.1", "bz:1", "black", [] ],
-    [ "uno:6", "sv:PWM", "gold", [] ],
-    [ "uno:5V", "sv:V+", "red", [] ],
-    [ "uno:GND.2", "sv:GND", "black", [] ],
-    [ "uno:2", "b1:1.l", "green", [] ],
-    [ "uno:GND.3", "b1:2.l", "black", [] ],
-    [ "uno:3", "b2:1.l", "blue", [] ],
-    [ "uno:GND.3", "b2:2.l", "black", [] ],
-    [ "uno:4", "b3:1.l", "red", [] ],
-    [ "uno:GND.3", "b3:2.l", "black", [] ]
+    [ "uno:5V", "lcd:VCC", "red", [ "v25", "*", "h-56" ] ],
+    [ "uno:GND.2", "lcd:GND", "black", [ "v35", "*", "h-66" ] ],
+    [ "uno:A4", "lcd:SDA", "green", [ "v45", "*", "h-46" ] ],
+    [ "uno:A5", "lcd:SCL", "orange", [ "v55", "*", "h-36" ] ],
+    [ "uno:8", "bz:2", "purple", [ "v-25", "*", "v15" ] ],
+    [ "uno:GND.1", "bz:1", "black", [ "v-15", "*", "v25" ] ],
+    [ "uno:6", "sv:PWM", "gold", [ "v-35", "*", "h-15" ] ],
+    [ "uno:5V", "sv:V+", "red", [ "v25", "*", "h-25" ] ],
+    [ "uno:GND.3", "sv:GND", "black", [ "v15", "*", "h-35" ] ],
+    [ "uno:10", "rfid:SDA", "blue", [ "v-75", "*", "h-75" ] ],
+    [ "uno:13", "rfid:SCK", "yellow", [ "v-65", "*", "h-65" ] ],
+    [ "uno:11", "rfid:MOSI", "cyan", [ "v-55", "*", "h-55" ] ],
+    [ "uno:12", "rfid:MISO", "magenta", [ "v-45", "*", "h-45" ] ],
+    [ "uno:9", "rfid:RST", "white", [ "v-85", "*", "h-85" ] ],
+    [ "uno:3.3V", "rfid:3.3V", "red", [ "v75", "*", "h-25" ] ],
+    [ "uno:GND.2", "rfid:GND", "black", [ "v85", "*", "h-35" ] ]
   ]
 }
