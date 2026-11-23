@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file alias="logo.jpeg">resources/logo.jpeg</file>
-        <file alias="logo.png">resources/logo_transparent.png</file>
-        <file alias="style.qss">resources/style.qss</file>
-    </qresource>
-</RCC>
