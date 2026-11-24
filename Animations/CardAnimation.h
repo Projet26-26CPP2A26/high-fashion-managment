@@ -6,8 +6,8 @@
 #include <QTimer>
 #include <QWidget>
 
-// Un bloc surgit en profondeur, à son tour, quand on ouvre une page.
-class PopIn : public QWidget {
+class PopIn : public QWidget
+{
 public:
     static void play(QWidget *target, int delay);
 
@@ -24,8 +24,8 @@ private:
     QTimer m_timer;
 };
 
-// Carte vivante : contour doré et reflet au survol.
-class CardGlow : public QWidget {
+class CardGlow : public QWidget
+{
 public:
     explicit CardGlow(QWidget *card);
 

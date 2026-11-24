@@ -25,7 +25,8 @@ bool LivingLogo::eventFilter(QObject *object, QEvent *event)
 QRect LivingLogo::place(const QLabel *logo, const QWidget *in)
 {
     const QSize size = (QSizeF(logo->pixmap().size()) / logo->pixmap().devicePixelRatio()).toSize();
-    return QRect(logo->mapTo(in, QPoint((logo->width() - size.width()) / 2, (logo->height() - size.height()) / 2)), size);
+    return QRect(logo->mapTo(in, QPoint((logo->width() - size.width()) / 2, (logo->height() - size.height()) / 2)),
+                 size);
 }
 
 void LivingLogo::paintEvent(QPaintEvent *)
@@ -63,7 +64,10 @@ void LivingIcon::paintEvent(QPaintEvent *)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     const double ms = m_clock.elapsed(), t = ms / 1000, k = width() / 76.0;
-    const QColor tone(m_kind == Alert ? "#e6ce89" : m_kind == Error ? "#e08f8f" : m_kind == Success ? "#7fc08a" : "#e2cf9f");
+    const QColor tone(m_kind == Alert     ? "#e6ce89"
+                      : m_kind == Error   ? "#e08f8f"
+                      : m_kind == Success ? "#7fc08a"
+                                          : "#e2cf9f");
     p.translate(width() / 2.0, height() / 2.0);
     p.scale(k, k);
     QRadialGradient glow(0, 0, 38);
@@ -74,7 +78,7 @@ void LivingIcon::paintEvent(QPaintEvent *)
     glow.setColorAt(1, soft);
     p.fillRect(QRectF(-38, -38, 76, 76), glow);
     p.setBrush(Qt::NoBrush);
-    for (int i = 0; i < 3; ++i) {             // anneaux inclinés qui tournent
+    for (int i = 0; i < 3; ++i) {
         p.save();
         p.rotate(i * 60 + t * (i % 2 ? -32 : 24));
         QColor ring = tone;
@@ -93,8 +97,16 @@ void LivingIcon::paintEvent(QPaintEvent *)
     p.setBrush(soft);
     p.drawEllipse(QPointF(0, 0), 18, 18);
     QPainterPath mark;
-    if (m_kind == Success) { mark.moveTo(-8, 1); mark.lineTo(-2, 7); mark.lineTo(9, -6); }
-    else if (m_kind == Error) { mark.moveTo(-6, -6); mark.lineTo(6, 6); mark.moveTo(6, -6); mark.lineTo(-6, 6); }
+    if (m_kind == Success) {
+        mark.moveTo(-8, 1);
+        mark.lineTo(-2, 7);
+        mark.lineTo(9, -6);
+    } else if (m_kind == Error) {
+        mark.moveTo(-6, -6);
+        mark.lineTo(6, 6);
+        mark.moveTo(6, -6);
+        mark.lineTo(-6, 6);
+    }
     QPen pen(tone, 3, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
     if (!mark.isEmpty()) {
         const double length = mark.length() / 3;
@@ -144,7 +156,7 @@ void SpoolAnimation::paintEvent(QPaintEvent *)
     p.drawRect(body);
     p.save();
     p.setClipRect(body);
-    for (int i = -2; i < 13; ++i) {           // spires qui défilent
+    for (int i = -2; i < 13; ++i) {
         const double y = body.top() + std::fmod(i * 4.2 + m_turn * 6, 13 * 4.2) - 4;
         p.setPen(QPen(QColor(241, 225, 180, 120), 1.1));
         p.drawLine(QPointF(body.left(), y), QPointF(body.right(), y + 5));
@@ -165,7 +177,7 @@ void SpoolAnimation::paintEvent(QPaintEvent *)
     p.setBrush(Qt::NoBrush);
     p.setPen(QPen(QBrush(fade), 1.5, Qt::SolidLine, Qt::RoundCap));
     p.drawPath(thread);
-    for (int i = 0; i < 2; ++i) {             // reflets qui glissent sur le fil
+    for (int i = 0; i < 2; ++i) {
         const double u = std::fmod(m_turn * 0.16 + i * 0.5, 1.0);
         QColor c(255, 246, 220);
         c.setAlphaF(std::sin(u * Motion::Pi));

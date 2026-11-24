@@ -7,9 +7,8 @@
 
 #include <QLabel>
 
-// Ouverture : le logo surgit en profondeur, l'application avance derrière lui,
-// puis ce même logo va se poser à sa place dans le menu (un seul logo à l'écran).
-class TransitionAnimation : public QWidget {
+class TransitionAnimation : public QWidget
+{
     Q_OBJECT
 public:
     TransitionAnimation(QWidget *window, QLabel *logo, const QString &title, const QString &subtitle);

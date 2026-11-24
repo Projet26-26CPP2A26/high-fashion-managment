@@ -1,5 +1,4 @@
 #include "arduino.h"
-#include <QDebug>
 #include <QHostAddress>
 
 Arduino::Arduino()
@@ -52,8 +51,8 @@ int Arduino::connect_arduino()
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     for (const QSerialPortInfo &port : ports) {
         const quint16 vendor = port.vendorIdentifier(), product = port.productIdentifier();
-        if ((vendor == arduino_uno_vendor_id && product == arduino_uno_producy_id)
-            || (vendor == ch340_vendor_id && product == ch340_product_id)) {
+        if ((vendor == arduino_uno_vendor_id && product == arduino_uno_producy_id) ||
+            (vendor == ch340_vendor_id && product == ch340_product_id)) {
             arduino_is_available = true;
             arduino_port_name = port.portName();
             break;
@@ -87,7 +86,6 @@ QByteArray Arduino::read_from_arduino()
     data.clear();
     if (serial->isOpen())
         return data = serial->readAll();
-    // Simulateur : retirer les commandes telnet (0xFF ...) du protocole RFC2217.
     telnet += simulator->readAll();
     int i = 0;
     while (i < telnet.size()) {
@@ -98,7 +96,7 @@ QByteArray Arduino::read_from_arduino()
         if (i + 1 >= telnet.size())
             break;
         const uchar command = uchar(telnet[i + 1]);
-        if (command == 0xFA) {                       // sous-négociation, jusqu'à FF F0
+        if (command == 0xFA) {
             const int end = telnet.indexOf(QByteArray("\xFF\xF0", 2), i + 2);
             if (end < 0)
                 break;

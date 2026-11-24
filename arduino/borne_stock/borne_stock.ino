@@ -1,24 +1,18 @@
-// AUREA - Borne de stock (Arduino Uno + clavier 4x4 + LCD I2C 16x2 + buzzer)
-// Clavier : ID, puis C = voir ; ID, A = entree ou B = sortie, quantite, # = valider
-//           apres un resultat, A, B et C reprennent la meme matiere
-//           * = effacer le dernier chiffre, D = annuler
-// Vers Qt : C6   E6:10   S6:2          Depuis Qt : ligne1|ligne2|etat
-// etat : 0 = normal, 1 = sous le seuil (buzzer), 2 = erreur
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 #define PIN_BUZZER 10
-LiquidCrystal_I2C lcd(0x27, 16, 2);   // si l'ecran reste vide : essayer 0x3F
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 const char touches[4][4] = {
   {'1', '2', '3', 'A'}, {'4', '5', '6', 'B'}, {'7', '8', '9', 'C'}, {'*', '0', '#', 'D'}};
 const byte lignes[4] = {9, 8, 7, 6};
 const byte colonnes[4] = {5, 4, 3, 2};
 
-char derniere = 0;          // derniere touche lue (anti-rebond)
+char derniere = 0;
 String id = "", quantite = "", reponse = "", dernierId = "";
-char operation = 0;         // 'E' entree, 'S' sortie, 0 = saisie de l'ID
-bool attente = false;       // en attente de la reponse de Qt
+char operation = 0;
+bool attente = false;
 unsigned long debut = 0;
 
 char lireClavier()
@@ -79,14 +73,14 @@ void traiterReponse()
   id = "";
   quantite = "";
   operation = 0;
-  attente = false;           // le resultat reste affiche jusqu'a la prochaine touche
+  attente = false;
 }
 
 void traiterTouche(char t)
 {
   if (t == 'D') { accueil(); return; }
   if (attente) return;
-  if (t == '*') {                       // effacer le dernier chiffre
+  if (t == '*') {
     if (operation != 0 && quantite.length() == 0) operation = 0;
     else if (operation != 0) quantite.remove(quantite.length() - 1);
     else if (id.length() > 0) id.remove(id.length() - 1);
@@ -97,7 +91,7 @@ void traiterTouche(char t)
     else if (operation != 0 && quantite.length() < 5) quantite += t;
   }
   else {
-    if (operation == 0 && id.length() == 0) id = dernierId;   // meme matiere
+    if (operation == 0 && id.length() == 0) id = dernierId;
     if (id.length() == 0) { afficher("Tapez d'abord", "l'ID matiere"); return; }
     if (t == 'A' || t == 'B') {
       operation = t == 'A' ? 'E' : 'S';

@@ -3,11 +3,11 @@
 #include <QTimer>
 #include <QWidget>
 
-// Guide du réapprovisionnement : 1 Choisir, 2 Commander, 3 Recevoir.
-class OrderAnimation : public QWidget {
+class OrderAnimation : public QWidget
+{
 public:
     explicit OrderAnimation(QWidget *parent = nullptr);
-    void setStep(int step);   // 0 = rien à commander, 1, 2, 3
+    void setStep(int step);
 
 protected:
     void paintEvent(QPaintEvent *) override;

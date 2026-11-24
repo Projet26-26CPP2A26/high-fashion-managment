@@ -16,8 +16,10 @@ FieldGlow::FieldGlow(QWidget *field, std::function<bool()> filled)
     connect(&m_timer, &QTimer::timeout, this, [this] {
         m_focus += (m_focusTo - m_focus) * 0.16;
         m_check += (m_checkTo - m_check) * 0.16;
-        if (std::abs(m_focusTo - m_focus) < 0.005) m_focus = m_focusTo;
-        if (std::abs(m_checkTo - m_check) < 0.005) m_check = m_checkTo;
+        if (std::abs(m_focusTo - m_focus) < 0.005)
+            m_focus = m_focusTo;
+        if (std::abs(m_checkTo - m_check) < 0.005)
+            m_check = m_checkTo;
         if (m_focus == m_focusTo && m_check == m_checkTo)
             m_timer.stop();
         update();
@@ -69,7 +71,7 @@ void FieldGlow::paintEvent(QPaintEvent *)
             p.setPen(QPen(halo, i * 2.6));
             p.drawPath(path);
         }
-        const double length = path.length() / 1.6;          // le contour se dessine des deux côtés
+        const double length = path.length() / 1.6;
         QPen pen(QColor("#e2cf9f"), 1.6);
         pen.setDashPattern({std::max(0.01, length * m_focus), length * 2});
         p.setPen(pen);
@@ -107,10 +109,10 @@ FormAnimation::FormAnimation(QWidget *parent) : QWidget(parent)
     m_timer.start(Motion::frame(this));
 }
 
-void FormAnimation::show(const Data &data)
+void FormAnimation::show(const Material &data)
 {
-    if (data.type != m_data.type || m_icon.isNull()) {
-        QString key = data.type.toLower();
+    if (data.type() != m_data.type() || m_icon.isNull()) {
+        QString key = data.type().toLower();
         if (!QStringList{"tissu", "dentelle", "fil", "bouton", "fermeture", "doublure", "ruban"}.contains(key))
             key = "autre";
         m_icon = QPixmap(":/assets/icons/" + key + ".png");
@@ -123,8 +125,10 @@ void FormAnimation::show(const Data &data)
         done += f->filled();
     }
     m_progressTo = m_fields.isEmpty() ? 0 : done / double(m_fields.size());
-    m_levelTo = data.minimum > 0 ? std::min(1.0, data.quantity / (2 * data.minimum)) : data.quantity > 0 ? 1 : 0;
-    m_valueTo = data.quantity * data.price;
+    m_levelTo = data.minimum() > 0    ? std::min(1.0, data.quantity() / (2 * data.minimum()))
+                : data.quantity() > 0 ? 1
+                                      : 0;
+    m_valueTo = data.quantity() * data.price();
 }
 
 void FormAnimation::paintEvent(QPaintEvent *)
@@ -132,7 +136,6 @@ void FormAnimation::paintEvent(QPaintEvent *)
     QPainter p(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     const double t = m_life.elapsed() / 1000.0;
-    // Fil de progression, cousu par une aiguille.
     const double x0 = 6, x1 = width() - 74, y = 18, head = x0 + (x1 - x0) * m_progress;
     QPen guide(QColor("#3a3a3f"), 1.6, Qt::CustomDashLine, Qt::RoundCap);
     guide.setDashPattern({4, 4});
@@ -147,7 +150,8 @@ void FormAnimation::paintEvent(QPaintEvent *)
     p.setPen(QPen(QColor("#f7f0dc"), 2.4, Qt::SolidLine, Qt::RoundCap));
     p.drawLine(QPointF(head, y), QPointF(head + 20, y - 5));
     p.setPen(QColor(complete ? "#7fc08a" : "#b9b4a8"));
-    p.drawText(QRectF(x1 + 4, y - 12, 70, 24), Qt::AlignRight | Qt::AlignVCenter, QString::number(std::lround(m_progress * 100)) + " %");
+    p.drawText(QRectF(x1 + 4, y - 12, 70, 24), Qt::AlignRight | Qt::AlignVCenter,
+               QString::number(std::lround(m_progress * 100)) + " %");
 
     const QRectF card(1, 42, width() - 2, height() - 44);
     QLinearGradient back(card.topLeft(), card.bottomRight());
@@ -177,26 +181,35 @@ void FormAnimation::paintEvent(QPaintEvent *)
     title.setPixelSize(26);
     QFont normal = p.font();
     p.setFont(title);
-    p.setPen(QColor(m_data.name.isEmpty() ? "#77746d" : "#e9d8a8"));
+    p.setPen(QColor(m_data.name().isEmpty() ? "#77746d" : "#e9d8a8"));
     const double left = card.left() + 122, middle = card.left() + card.width() * 0.56;
     p.drawText(QRectF(left, card.top() + 18, middle - left - 10, 34), Qt::AlignVCenter,
-               p.fontMetrics().elidedText(m_data.name.isEmpty() ? QStringLiteral("Nouvelle matière") : m_data.name, Qt::ElideRight, int(middle - left - 10)));
+               p.fontMetrics().elidedText(m_data.name().isEmpty() ? QStringLiteral("Nouvelle matière") : m_data.name(),
+                                          Qt::ElideRight, int(middle - left - 10)));
     p.setFont(normal);
     p.setPen(QColor("#b9b4a8"));
-    const QStringList details = QStringList{m_data.type, m_data.color, m_data.supplier}.filter(QRegularExpression("\\S"));
-    p.drawText(QRectF(left, card.top() + 54, middle - left - 10, 22), Qt::AlignVCenter, p.fontMetrics().elidedText(details.join(QStringLiteral("  ·  ")), Qt::ElideRight, int(middle - left - 10)));
+    const QStringList details =
+        QStringList{m_data.type(), m_data.color(), m_data.supplier()}.filter(QRegularExpression("\\S"));
+    p.drawText(
+        QRectF(left, card.top() + 54, middle - left - 10, 22), Qt::AlignVCenter,
+        p.fontMetrics().elidedText(details.join(QStringLiteral("  ·  ")), Qt::ElideRight, int(middle - left - 10)));
     p.setPen(QColor("#8f8c86"));
-    p.drawText(QRectF(left, card.top() + 78, middle - left - 10, 22), Qt::AlignVCenter, m_data.lot.isEmpty() ? QStringLiteral("Lot à renseigner") : QStringLiteral("Lot ") + m_data.lot);
+    p.drawText(QRectF(left, card.top() + 78, middle - left - 10, 22), Qt::AlignVCenter,
+               m_data.lot().isEmpty() ? QStringLiteral("Lot à renseigner") : QStringLiteral("Lot ") + m_data.lot());
 
-    const bool low = m_data.quantity < m_data.minimum;
-    const QColor tone(m_data.quantity == 0 ? "#e8a9b0" : low ? "#e6ce89" : "#b7ccb3");
+    const bool low = m_data.quantity() < m_data.minimum();
+    const QColor tone(m_data.quantity() == 0 ? "#e8a9b0" : low ? "#e6ce89" : "#b7ccb3");
     const QRectF track(middle, card.top() + 48, card.right() - 24 - middle, 9);
     p.setPen(QColor("#b9b4a8"));
-    p.drawText(QRectF(track.left(), card.top() + 18, track.width(), 24), Qt::AlignVCenter | Qt::AlignLeft,
-               QStringLiteral("Stock %1 %2  /  seuil %3").arg(StockReports::quantity(m_data.quantity), m_data.unit, StockReports::quantity(m_data.minimum)));
+    p.drawText(
+        QRectF(track.left(), card.top() + 18, track.width(), 24), Qt::AlignVCenter | Qt::AlignLeft,
+        QStringLiteral("Stock %1 %2  /  seuil %3")
+            .arg(StockReports::quantity(m_data.quantity()), m_data.unit(), StockReports::quantity(m_data.minimum())));
     p.setPen(tone);
     p.drawText(QRectF(track.left(), card.top() + 18, track.width(), 24), Qt::AlignVCenter | Qt::AlignRight,
-               m_data.quantity == 0 ? QStringLiteral("Rupture") : low ? QStringLiteral("À commander") : QStringLiteral("Disponible"));
+               m_data.quantity() == 0 ? QStringLiteral("Rupture")
+               : low                  ? QStringLiteral("À commander")
+                                      : QStringLiteral("Disponible"));
     p.setPen(Qt::NoPen);
     p.setBrush(QColor("#38383c"));
     p.drawRoundedRect(track, 4.5, 4.5);
@@ -206,11 +219,13 @@ void FormAnimation::paintEvent(QPaintEvent *)
     p.setPen(QPen(QColor("#f1e1b4"), 1.4));
     p.drawLine(QPointF(track.center().x(), track.top() - 4), QPointF(track.center().x(), track.bottom() + 4));
     p.setPen(QColor("#8f8c86"));
-    p.drawText(QRectF(track.left(), card.top() + 74, track.width(), 24), Qt::AlignVCenter | Qt::AlignLeft, QStringLiteral("Valeur du stock"));
+    p.drawText(QRectF(track.left(), card.top() + 74, track.width(), 24), Qt::AlignVCenter | Qt::AlignLeft,
+               QStringLiteral("Valeur du stock"));
     QFont strong = normal;
     strong.setBold(true);
     strong.setPointSizeF(13);
     p.setFont(strong);
     p.setPen(QColor("#f1e1b4"));
-    p.drawText(QRectF(track.left(), card.top() + 72, track.width(), 28), Qt::AlignVCenter | Qt::AlignRight, StockReports::money(std::abs(m_valueTo - m_value) < 0.01 ? m_valueTo : m_value));
+    p.drawText(QRectF(track.left(), card.top() + 72, track.width(), 28), Qt::AlignVCenter | Qt::AlignRight,
+               StockReports::money(std::abs(m_valueTo - m_value) < 0.01 ? m_valueTo : m_value));
 }

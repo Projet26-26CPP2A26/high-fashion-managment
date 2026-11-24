@@ -6,8 +6,8 @@
 #include <QTimer>
 #include <QWidget>
 
-// Voyant de la barre d'état.
-class LinkLight : public QWidget {
+class LinkLight : public QWidget
+{
 public:
     explicit LinkLight(QWidget *parent = nullptr) : QWidget(parent)
     {
@@ -48,8 +48,8 @@ private:
     QTimer m_timer;
 };
 
-// Trajet d'un message : Borne -> Qt -> Oracle, puis la réponse en sens inverse.
-class DataFlow : public QWidget {
+class DataFlow : public QWidget
+{
 public:
     explicit DataFlow(QWidget *parent = nullptr) : QWidget(parent)
     {
@@ -101,7 +101,10 @@ protected:
             }
         }
         node(p, a, "Borne", go < 1.2 ? std::max(0.0, 1 - std::abs(go - 1) * 5) : 0, answer);
-        node(p, b, "Qt", go < 1 ? std::max(std::max(0.0, 1 - std::abs(go - 0.25) * 7), std::max(0.0, 1 - std::abs(go - 0.75) * 7)) : 0, gold);
+        node(p, b, "Qt",
+             go < 1 ? std::max(std::max(0.0, 1 - std::abs(go - 0.25) * 7), std::max(0.0, 1 - std::abs(go - 0.75) * 7))
+                    : 0,
+             gold);
         node(p, c, "Oracle", go < 1 ? std::max(0.0, 1 - std::abs(go - 0.5) * 5) : 0, answer);
     }
 
@@ -124,7 +127,8 @@ private:
         if (name == "Borne") {
             p.drawRoundedRect(QRectF(c.x() - 9, c.y() - 11, 18, 22), 3, 3);
             p.drawLine(c + QPointF(-5, -6), c + QPointF(5, -6));
-            for (int i = 0; i < 6; ++i) p.drawPoint(c + QPointF(-5 + 5 * (i % 3), 1 + 5 * (i / 3)));
+            for (int i = 0; i < 6; ++i)
+                p.drawPoint(c + QPointF(-5 + 5 * (i % 3), 1 + 5 * (i / 3)));
         } else if (name == "Qt") {
             p.drawRoundedRect(QRectF(c.x() - 11, c.y() - 9, 22, 16), 2, 2);
             p.drawLine(c + QPointF(-5, 11), c + QPointF(5, 11));

@@ -5,8 +5,9 @@
 #include <QPainterPath>
 #include <QRandomGenerator>
 
-namespace {
-const int Margin = 16;              // place des coins dorés autour du QR
+namespace
+{
+const int Margin = 16;
 const double Sew = 1500, Scan = 900, Result_ = 1600;
 }
 
@@ -44,10 +45,10 @@ void QrAnimation::setCode(const QImage &modules)
         for (int x = 0; x < n; ++x)
             if (qGray(modules.pixel(x, y)) < 128) {
                 const double angle = random.generateDouble() * 6.2832;
-                // Couture ligne par ligne, en aller-retour comme une aiguille.
                 const double along = (y % 2 ? n - x : x) / double(n);
-                m_stitches.append({QPoint(x, y), QPointF(std::cos(angle), std::sin(angle)) * (0.15 + 0.35 * random.generateDouble()),
-                                   0.72 * (y + along) / n});
+                m_stitches.append(Stitch(
+                    QPoint(x, y), QPointF(std::cos(angle), std::sin(angle)) * (0.15 + 0.35 * random.generateDouble()),
+                    0.72 * (y + along) / n));
             }
     render();
     show();
@@ -95,7 +96,8 @@ void QrAnimation::render()
         return;
     const double ratio = devicePixelRatioF();
     const int scale = std::max(1, int((std::min(width(), height()) - 2 * Margin) * ratio) / m_modules.width());
-    m_final = QPixmap::fromImage(m_modules.scaled(m_modules.size() * scale, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    m_final =
+        QPixmap::fromImage(m_modules.scaled(m_modules.size() * scale, Qt::IgnoreAspectRatio, Qt::FastTransformation));
     m_final.setDevicePixelRatio(ratio);
 }
 
@@ -103,7 +105,6 @@ QRectF QrAnimation::codeRect() const
 {
     const QSizeF size = m_final.deviceIndependentSize();
     const double ratio = devicePixelRatioF();
-    // Aligné sur les pixels de l'écran pour que les modules restent nets.
     const QPointF global = mapTo(window(), QPointF((width() - size.width()) / 2, (height() - size.height()) / 2));
     const QPointF snapped(std::round(global.x() * ratio) / ratio, std::round(global.y() * ratio) / ratio);
     return QRectF(mapFrom(window(), snapped), size);
@@ -136,12 +137,12 @@ void QrAnimation::paintEvent(QPaintEvent *)
         QPointF needle;
         bool sewing = false;
         for (const Stitch &s : std::as_const(m_stitches)) {
-            const double go = Motion::part(t, s.delay, s.delay + 0.28);
+            const double go = Motion::part(t, s.delay(), s.delay() + 0.28);
             if (go <= 0)
-                break;                       // les points sont dans l'ordre de couture
+                break;
             const double e = Motion::soft(go);
-            const QPointF home = code.topLeft() + QPointF(s.cell) * cell;
-            const QPointF at = home + s.from * code.width() * (1 - e);
+            const QPointF home = code.topLeft() + QPointF(s.cell()) * cell;
+            const QPointF at = home + s.from() * code.width() * (1 - e);
             const QColor c(int(201 * (1 - e)), int(178 * (1 - e)), int(124 * (1 - e)));
             p.setOpacity(std::min(1.0, go * 3));
             p.fillRect(QRectF(at, QSizeF(cell, cell)), c);
@@ -149,7 +150,7 @@ void QrAnimation::paintEvent(QPaintEvent *)
             sewing = true;
         }
         p.setOpacity(1);
-        if (sewing && t < 0.78) {            // l'aiguille
+        if (sewing && t < 0.78) {
             p.setRenderHint(QPainter::Antialiasing);
             p.setPen(QPen(QColor("#8f7434"), 3, Qt::SolidLine, Qt::RoundCap));
             p.drawLine(needle, needle + QPointF(20, -20));
@@ -159,16 +160,16 @@ void QrAnimation::paintEvent(QPaintEvent *)
     }
     p.setRenderHint(QPainter::Antialiasing);
     const double scan = Motion::part(ms, Sew, Sew + Scan);
-    if (scan > 0 && scan < 1) {              // un seul passage, puis le QR reste dégagé
+    if (scan > 0 && scan < 1) {
         const double y = code.top() + code.height() * Motion::both(scan);
         QLinearGradient light(0, y - 34, 0, y);
         light.setColorAt(0, QColor(201, 178, 124, 0));
         light.setColorAt(1, QColor(201, 178, 124, 130));
-        p.fillRect(QRectF(code.left(), std::max(code.top(), y - 34), code.width(), std::min(34.0, y - code.top())), light);
+        p.fillRect(QRectF(code.left(), std::max(code.top(), y - 34), code.width(), std::min(34.0, y - code.top())),
+                   light);
         p.setPen(QPen(QColor("#c9b27c"), 2));
         p.drawLine(QPointF(code.left(), y), QPointF(code.right(), y));
     }
-    // Coins dorés, hors du QR.
     const double breath = ms < Sew + Scan ? 2 * std::sin(ms / 160) : 0;
     const QRectF f = code.adjusted(-7 - breath, -7 - breath, 7 + breath, 7 + breath);
     const double l = 26;
@@ -180,7 +181,8 @@ void QrAnimation::paintEvent(QPaintEvent *)
         p.drawPolyline(QPolygonF({c + QPointF(dx, 0), c, c + QPointF(0, dy)}));
     }
     if (m_result == Ok && result < Result_) {
-        const double in = Motion::soft(result / 320), out = 1 - Motion::both(Motion::part(result, Result_ - 350, Result_));
+        const double in = Motion::soft(result / 320),
+                     out = 1 - Motion::both(Motion::part(result, Result_ - 350, Result_));
         p.setOpacity(out);
         const QPointF c = code.center();
         p.setPen(Qt::NoPen);
@@ -192,7 +194,8 @@ void QrAnimation::paintEvent(QPaintEvent *)
             QColor ring = tone;
             ring.setAlphaF(0.7 * (1 - wave));
             p.setPen(QPen(ring, 2));
-            if (wave > 0) p.drawEllipse(c, 62 + 46 * wave, 62 + 46 * wave);
+            if (wave > 0)
+                p.drawEllipse(c, 62 + 46 * wave, 62 + 46 * wave);
         }
         QPainterPath check(c + QPointF(-20, -6));
         check.lineTo(c + QPointF(-5, 9));

@@ -1,7 +1,8 @@
 #pragma once
 #include <QString>
 
-class Material {
+class Material
+{
 public:
     Material();
 

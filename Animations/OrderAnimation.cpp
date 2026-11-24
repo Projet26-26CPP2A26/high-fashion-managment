@@ -24,8 +24,10 @@ void OrderAnimation::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    const QString titles[3] = {QStringLiteral("Choisir la matière"), QStringLiteral("Envoyer le bon de commande"), QStringLiteral("Enregistrer la réception")};
-    const QString texts[3] = {QStringLiteral("une ligne du tableau"), QStringLiteral("PDF pour le fournisseur"), QStringLiteral("le stock remonte")};
+    const QString titles[3] = {QStringLiteral("Choisir la matière"), QStringLiteral("Envoyer le bon de commande"),
+                               QStringLiteral("Enregistrer la réception")};
+    const QString texts[3] = {QStringLiteral("une ligne du tableau"), QStringLiteral("PDF pour le fournisseur"),
+                              QStringLiteral("le stock remonte")};
     const double w = width() / 3.0, t = m_life.elapsed() / 1000.0;
     for (int i = 0; i < 3; ++i) {
         const double lit = std::clamp(m_position - i, 0.0, 1.0);
@@ -74,6 +76,7 @@ void OrderAnimation::paintEvent(QPaintEvent *)
         p.drawText(area, Qt::AlignVCenter, p.fontMetrics().elidedText(titles[i], Qt::ElideRight, int(area.width())));
         p.setFont(font());
         p.setPen(QColor("#8f8c86"));
-        p.drawText(area.translated(0, 22), Qt::AlignVCenter, p.fontMetrics().elidedText(texts[i], Qt::ElideRight, int(area.width())));
+        p.drawText(area.translated(0, 22), Qt::AlignVCenter,
+                   p.fontMetrics().elidedText(texts[i], Qt::ElideRight, int(area.width())));
     }
 }

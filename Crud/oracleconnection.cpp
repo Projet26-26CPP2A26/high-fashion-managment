@@ -1,12 +1,9 @@
 #include "oracleconnection.h"
-#include <QSqlDatabase>
 #include <QSqlError>
+#include <QSqlDatabase>
 #include <QSqlQuery>
-#include <QVariant>
 
-OracleConnection::OracleConnection()
-{
-}
+OracleConnection::OracleConnection() {}
 
 OracleConnection &OracleConnection::instance()
 {
@@ -36,8 +33,7 @@ bool OracleConnection::open()
     db.setUserName(user);
     db.setPassword(password);
     if (!db.open()) {
-        message = "Connexion Oracle impossible (DSN " + dsn + ", utilisateur " + user + ").\n"
-                  + db.lastError().text();
+        message = "Connexion Oracle impossible (DSN " + dsn + ", utilisateur " + user + ").\n" + db.lastError().text();
         return false;
     }
     return true;

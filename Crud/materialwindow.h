@@ -7,7 +7,10 @@
 #include <QHash>
 #include <QSet>
 
-namespace Ui { class MaterialWindow; }
+namespace Ui
+{
+class MaterialWindow;
+}
 class BornePage;
 class ChartAnimation;
 class FormAnimation;
@@ -20,25 +23,28 @@ class QPushButton;
 class QTableWidget;
 class QrAnimation;
 
-class MaterialWindow : public QMainWindow {
+class MaterialWindow : public QMainWindow
+{
     Q_OBJECT
 public:
-    explicit MaterialWindow(QWidget *parent=nullptr);
+    explicit MaterialWindow(QWidget *parent = nullptr);
     ~MaterialWindow() override;
     void setPage(int index);
     void setSidebarVisible(bool visible);
     QList<QPushButton *> navButtons() const;
     QPushButton *helpButton() const;
     void playOpening();
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MaterialWindow *ui;
     MaterialRepository repo;
     QVector<Material> materials;
     QSet<int> lowIds;
-    int editingId=0;
+    int editingId = 0;
     QImage currentQr;
     QString currentQrText;
     void refresh();
@@ -49,10 +55,10 @@ private:
     void selectQrLot(int id);
     int selectedId(QTableWidget *table) const;
     QVector<Material> filteredMaterials() const;
-    void edit(int id=0);
+    void edit(int id = 0);
     void save();
     void removeSelected();
-    void changeStock(int id,bool receiptOnly=false);
+    void changeStock(int id, bool receiptOnly = false);
     void purchaseOrder();
     Arduino A;
     QByteArray arduinoData;
@@ -64,17 +70,17 @@ private:
     ChartAnimation *chart;
     FormAnimation *form;
     OrderAnimation *orderGuide;
-    QHash<int,double> ordered;   // commandes préparées pendant cette session
+    QHash<int, double> ordered;
     void showOrderStep();
-    void orderReady(const QString &path,const QString &text);
+    void orderReady(const QString &path, const QString &text);
     void buildForm();
     void enterPage(int index);
     void previewForm();
     LivingLogo *livingLogo;
     SpoolAnimation *spool;
-    bool opening=false, leaving=false;
+    bool opening = false, leaving = false;
     QVector<Material> waitingAlerts;
-    void setArduinoState(bool on,const QString &text);
+    void setArduinoState(bool on, const QString &text);
     void connectArduino();
     void readArduino();
     QByteArray arduinoAnswer(const QString &message);

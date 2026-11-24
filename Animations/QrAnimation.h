@@ -6,16 +6,15 @@
 #include <QVector>
 #include <QWidget>
 
-// Le QR se « coud » : des points dorés partent du bord, se posent un par un, puis une ligne le vérifie.
-// Une fois posé, le QR est dessiné net (pixels entiers) pour rester lisible par un téléphone.
-class QrAnimation : public QWidget {
+class QrAnimation : public QWidget
+{
     Q_OBJECT
 public:
     explicit QrAnimation(QWidget *parent = nullptr);
-    void setCode(const QImage &modules);   // image à 1 pixel par module
+    void setCode(const QImage &modules);
     void clear();
-    void succeed(const QString &text);     // coche verte
-    void refuse();                         // secousse rouge
+    void succeed(const QString &text);
+    void refuse();
     void replay();
 
 protected:
@@ -26,7 +25,19 @@ protected:
 
 private:
     enum Result { None, Ok, Refused };
-    struct Stitch { QPoint cell; QPointF from; double delay; };
+    class Stitch
+    {
+    public:
+        Stitch(const QPoint &cell, const QPointF &from, double delay) : m_cell(cell), m_from(from), m_delay(delay) {}
+        QPoint cell() const { return m_cell; }
+        QPointF from() const { return m_from; }
+        double delay() const { return m_delay; }
+
+    private:
+        QPoint m_cell;
+        QPointF m_from;
+        double m_delay;
+    };
     void render();
     QRectF codeRect() const;
 

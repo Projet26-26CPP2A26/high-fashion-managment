@@ -74,7 +74,8 @@ void ChartAnimation::paintEvent(QPaintEvent *)
     for (const auto &d : m_data)
         max = std::max(max, d.second);
     const double ms = m_clock.isValid() ? m_clock.elapsed() : 1e9;
-    const double left = 124, right = 140, step = height() / double(m_data.size()), bar = std::min(26.0, step - 10), full = width() - left - right;
+    const double left = 124, right = 140, step = height() / double(m_data.size()), bar = std::min(26.0, step - 10),
+                 full = width() - left - right;
     for (int i = 0; i < m_data.size(); ++i) {
         const double grow = Motion::soft(Motion::part(ms, 90 * i, 90 * i + 900)), y = i * step + (step - bar) / 2;
         const bool hover = i == m_hover;
@@ -111,13 +112,14 @@ void ChartAnimation::paintEvent(QPaintEvent *)
             p.fillRect(value, light);
             p.restore();
         }
-        if (grow < 1) {                       // tête lumineuse
+        if (grow < 1) {
             QRadialGradient head(value.right(), value.center().y(), 18);
             head.setColorAt(0, QColor(255, 246, 220, 200));
             head.setColorAt(1, QColor(255, 246, 220, 0));
             p.fillRect(QRectF(value.right() - 18, value.center().y() - 18, 36, 36), head);
         }
         p.setPen(QColor("#f3f0ea"));
-        p.drawText(QRectF(left + full + 14, y, right - 14, bar), Qt::AlignVCenter, StockReports::money(m_data[i].second * grow));
+        p.drawText(QRectF(left + full + 14, y, right - 14, bar), Qt::AlignVCenter,
+                   StockReports::money(m_data[i].second * grow));
     }
 }

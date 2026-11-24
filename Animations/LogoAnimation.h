@@ -6,8 +6,8 @@
 
 class QLabel;
 
-// Logo du menu : un reflet discret le traverse.
-class LivingLogo : public QWidget {
+class LivingLogo : public QWidget
+{
 public:
     explicit LivingLogo(QLabel *logo);
     static QRect place(const QLabel *logo, const QWidget *in);
@@ -22,8 +22,8 @@ private:
     QTimer m_timer;
 };
 
-// Icône animée des messages.
-class LivingIcon : public QWidget {
+class LivingIcon : public QWidget
+{
 public:
     enum Kind { Question, Info, Alert, Error, Success };
     explicit LivingIcon(Kind kind, int size = 76, QWidget *parent = nullptr);
@@ -37,8 +37,8 @@ private:
     QTimer m_timer;
 };
 
-// Bobine de fil qui tourne doucement (bas du menu).
-class SpoolAnimation : public QWidget {
+class SpoolAnimation : public QWidget
+{
 public:
     explicit SpoolAnimation(QWidget *parent = nullptr);
     void hurry() { m_boost.start(); }

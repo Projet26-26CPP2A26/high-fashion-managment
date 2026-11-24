@@ -6,23 +6,23 @@
 #include <QPainter>
 #include <QPainterPath>
 
-namespace {
+namespace
+{
 const double Leave = 1350, End = 2150;
 }
 
 TransitionAnimation::TransitionAnimation(QWidget *window, QLabel *logo, const QString &title, const QString &subtitle)
     : QWidget(window), m_logo(logo), m_title(title), m_subtitle(subtitle), m_menuLogo(logo->pixmap())
 {
-    // Opaque : Qt n'a pas à redessiner toute la fenêtre à chaque image.
     setAttribute(Qt::WA_OpaquePaintEvent);
-    // Le logo du menu est vidé avant la photo : il n'y en a jamais deux.
     QPixmap empty = m_menuLogo;
     empty.fill(Qt::transparent);
     m_logo->setPixmap(empty);
     m_shot = window->grab();
     setGeometry(window->rect());
     window->installEventFilter(this);
-    m_big = QPixmap(":/assets/logo_aurea.png").scaled(QSize(190, 190) * devicePixelRatioF(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    m_big = QPixmap(":/assets/logo_aurea.png")
+                .scaled(QSize(190, 190) * devicePixelRatioF(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     connect(&m_timer, &QTimer::timeout, this, [this] {
         update();
         if (m_clock.elapsed() > End)
@@ -93,7 +93,6 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
     }
     p.drawPixmap(0, 0, m_back);
 
-    // L'application arrive du fond : elle grandit et devient nette.
     const double come = Motion::soft(Motion::part(ms, Leave - 60, End - 120));
     if (come > 0) {
         const double zoom = Motion::mix(0.90, 1, come);
@@ -108,7 +107,6 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
         p.restore();
     }
 
-    // Lumière unique, qui s'ouvre quand le logo surgit puis s'éteint.
     const double flash = Motion::part(ms, 160, 900);
     const double fade = 1 - Motion::part(ms, Leave - 150, Leave + 350);
     if (fade > 0) {
@@ -125,7 +123,6 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
         p.drawEllipse(center, 70 + 130 * Motion::soft(flash), 70 + 130 * Motion::soft(flash));
     }
 
-    // Le logo : il vient de loin, dépasse un peu sa taille, se stabilise, puis rejoint le menu.
     const double in = Motion::part(ms, 0, 820);
     const double size = 190 * std::max(0.0, Motion::mix(0.12, 1, Motion::spring(in)));
     const double ratio = m_big.width() ? double(m_big.height()) / m_big.width() : 1;
@@ -134,16 +131,18 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
     const QRectF at(Motion::mix(from.x(), to.x(), leave), Motion::mix(from.y(), to.y(), leave),
                     Motion::mix(from.width(), to.width(), leave), Motion::mix(from.height(), to.height(), leave));
     const double depth = (1 - Motion::soft(in)) * (1 - leave);
-    for (int i = 3; i > 0 && depth > 0.02; --i) {      // profondeur : échos qui se rejoignent
+    for (int i = 3; i > 0 && depth > 0.02; --i) {
         const double k = 1 + 0.16 * i * depth;
         p.setOpacity(0.16 * depth * Motion::part(ms, 40, 220));
-        p.drawPixmap(QRectF(at.center() - QPointF(at.width() * k / 2, at.height() * k / 2), at.size() * k), m_big, QRectF(m_big.rect()));
+        p.drawPixmap(QRectF(at.center() - QPointF(at.width() * k / 2, at.height() * k / 2), at.size() * k), m_big,
+                     QRectF(m_big.rect()));
     }
     p.setOpacity(Motion::part(ms, 0, 240));
     p.drawPixmap(at, m_big, QRectF(m_big.rect()));
     p.setOpacity(1);
 
-    const double words = Motion::soft(Motion::part(ms, 480, 980)), gone = 1 - Motion::part(ms, Leave - 120, Leave + 160);
+    const double words = Motion::soft(Motion::part(ms, 480, 980)),
+                 gone = 1 - Motion::part(ms, Leave - 120, Leave + 160);
     if (words * gone <= 0)
         return;
     p.setOpacity(words * gone);

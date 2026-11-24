@@ -1,5 +1,3 @@
-// Module commun de l'équipe AUREA : animation de fermeture reprise telle quelle du projet AUREA_Employes
-// (Animations/ClosingAnimation), écrite par le responsable du module Employés.
 #include "ClosingAnimation.h"
 #include <QEventLoop>
 #include <QFont>
@@ -11,7 +9,8 @@
 #include <algorithm>
 #include <cmath>
 
-namespace {
+namespace
+{
 const char *Vertex = R"(#version 330 core
 out vec2 uv;
 void main()
@@ -172,7 +171,8 @@ QSurfaceFormat ClosingView::surface()
 
 bool ClosingView::available()
 {
-    if (QGuiApplication::platformName() != "windows") return false;
+    if (QGuiApplication::platformName() != "windows")
+        return false;
     QOpenGLContext context;
     context.setFormat(surface());
     return context.create() && context.format().version() >= qMakePair(3, 3) && context.format().alphaBufferSize() >= 8;
@@ -188,7 +188,8 @@ ClosingView::ClosingView(const Scene &scene) : m_scene(scene)
 
 ClosingView::~ClosingView()
 {
-    if (!context()) return;
+    if (!context())
+        return;
     makeCurrent();
     m_shot.reset();
     m_mark.reset();
@@ -200,7 +201,8 @@ ClosingView::~ClosingView()
 
 std::unique_ptr<QOpenGLTexture> ClosingView::texture(const QImage &image)
 {
-    auto t = std::make_unique<QOpenGLTexture>(image.convertToFormat(QImage::Format_RGBA8888_Premultiplied), QOpenGLTexture::GenerateMipMaps);
+    auto t = std::make_unique<QOpenGLTexture>(image.convertToFormat(QImage::Format_RGBA8888_Premultiplied),
+                                              QOpenGLTexture::GenerateMipMaps);
     t->setMinMagFilters(QOpenGLTexture::LinearMipMapLinear, QOpenGLTexture::Linear);
     t->setWrapMode(QOpenGLTexture::ClampToEdge);
     return t;
@@ -246,7 +248,12 @@ bool ClosingView::begin()
     QTimer check;
     QElapsedTimer limit;
     limit.start();
-    QObject::connect(&check, &QTimer::timeout, &loop, [&] { if (m_frames >= 2 || limit.elapsed() > 900) loop.quit(); else update(); });
+    QObject::connect(&check, &QTimer::timeout, &loop, [&] {
+        if (m_frames >= 2 || limit.elapsed() > 900)
+            loop.quit();
+        else
+            update();
+    });
     check.start(2);
     loop.exec(QEventLoop::ExcludeUserInputEvents);
     if (!m_ready || !m_frames) {
@@ -254,7 +261,8 @@ bool ClosingView::begin()
         return false;
     }
     m_started = true;
-    QMetaObject::invokeMethod(this, [this] { step(); }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(
+        this, [this] { step(); }, Qt::QueuedConnection);
     return true;
 }
 
@@ -270,14 +278,19 @@ void ClosingView::step()
     paintGL();
     context()->swapBuffers(this);
     emit frameSwapped();
-    if (!over()) QMetaObject::invokeMethod(this, [this] { step(); }, Qt::QueuedConnection);
+    if (!over())
+        QMetaObject::invokeMethod(
+            this, [this] { step(); }, Qt::QueuedConnection);
 }
 
 void ClosingView::initializeGL()
 {
     initializeOpenGLFunctions();
-    m_ready = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, Vertex) && m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, Fragment) && m_program.link() && m_vao.create();
-    if (!m_ready) return;
+    m_ready = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, Vertex) &&
+              m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, Fragment) && m_program.link() &&
+              m_vao.create();
+    if (!m_ready)
+        return;
     m_shot = texture(m_scene.shot);
     m_mark = texture(m_scene.mark);
     m_text = texture(message());
@@ -288,18 +301,22 @@ void ClosingView::paintGL()
     glDisable(GL_BLEND);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    if (!m_ready) return;
+    if (!m_ready)
+        return;
     if (m_started && !m_frozen) {
-        if (!m_clock.isValid()) m_clock.start();
+        if (!m_clock.isValid())
+            m_clock.start();
         const qint64 now = m_clock.nsecsElapsed();
-        if (m_last >= 0) m_time += std::min((now - m_last) / 1e9, 0.030) * m_rate;
+        if (m_last >= 0)
+            m_time += std::min((now - m_last) / 1e9, 0.030) * m_rate;
         m_last = now;
     }
     if (m_textDirty) {
         m_text = texture(message());
         m_textDirty = false;
     }
-    const QRectF w = m_scene.window.translated(-QPointF(m_scene.area.topLeft())), l = m_scene.logo.translated(-QPointF(m_scene.area.topLeft()));
+    const QRectF w = m_scene.window.translated(-QPointF(m_scene.area.topLeft())),
+                 l = m_scene.logo.translated(-QPointF(m_scene.area.topLeft()));
     m_vao.bind();
     m_program.bind();
     m_shot->bind(0);

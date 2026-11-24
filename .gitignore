@@ -4,7 +4,6 @@ build/
 build-*/
 oracle.local*
 *.env
-.claude/
 .qtcreator/
 *.sqlite
 *.db

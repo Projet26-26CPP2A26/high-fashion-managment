@@ -5,8 +5,8 @@
 #include <QVector>
 #include <QWidget>
 
-// Graphique animé : les barres poussent l'une après l'autre, un reflet les traverse.
-class ChartAnimation : public QWidget {
+class ChartAnimation : public QWidget
+{
 public:
     explicit ChartAnimation(QWidget *parent);
     void setData(const QVector<QPair<QString, double>> &data);

@@ -1,7 +1,8 @@
 #pragma once
 #include <QString>
 
-class OracleConnection {
+class OracleConnection
+{
 public:
     static OracleConnection &instance();
     bool open();

@@ -3,7 +3,8 @@
 #include <QString>
 #include <QVector>
 
-class MaterialRepository {
+class MaterialRepository
+{
 public:
     MaterialRepository();
 

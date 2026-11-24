@@ -7,8 +7,8 @@
 
 class QTableWidget;
 
-// Tableaux : lignes qui arrivent en cascade, survol doux, icône de la matière, jauge du stock, pastille d'état.
-class TableAnimation : public QStyledItemDelegate {
+class TableAnimation : public QStyledItemDelegate
+{
 public:
     explicit TableAnimation(QTableWidget *table);
     void replay();

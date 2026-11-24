@@ -41,7 +41,10 @@ TableAnimation::TableAnimation(QTableWidget *table) : QStyledItemDelegate(table)
         if (!moving)
             m_timer.stop();
     });
-    connect(&m_pulse, &QTimer::timeout, this, [this] { if (m_table->isVisible()) m_table->viewport()->update(); });
+    connect(&m_pulse, &QTimer::timeout, this, [this] {
+        if (m_table->isVisible())
+            m_table->viewport()->update();
+    });
     for (int c = 0; c < table->columnCount(); ++c)
         if (header(c) == QStringLiteral("État"))
             m_pulse.start(50);
@@ -75,8 +78,11 @@ bool TableAnimation::eventFilter(QObject *object, QEvent *event)
     if (object == m_table && event->type() == QEvent::Show) {
         m_enter.start();
         wake();
-    } else if (object == m_table->viewport() && (event->type() == QEvent::MouseMove || event->type() == QEvent::Leave)) {
-        const int row = event->type() == QEvent::Leave ? -1 : m_table->rowAt(int(static_cast<QMouseEvent *>(event)->position().y()));
+    } else if (object == m_table->viewport() &&
+               (event->type() == QEvent::MouseMove || event->type() == QEvent::Leave)) {
+        const int row = event->type() == QEvent::Leave
+                            ? -1
+                            : m_table->rowAt(int(static_cast<QMouseEvent *>(event)->position().y()));
         if (row != m_hover) {
             m_hover = row;
             if (row >= 0 && !m_glow.contains(row))
@@ -125,11 +131,18 @@ void TableAnimation::paint(QPainter *p, const QStyleOptionViewItem &option, cons
     p->translate(0, 26 * (1 - in));
     QRect r = option.rect.adjusted(10, 0, -8, 0);
     if (name == QStringLiteral("État")) {
-        const QColor tone(text == QStringLiteral("Rupture") ? "#e8a9b0" : text == QStringLiteral("Disponible") ? "#b7ccb3" : text == QStringLiteral("Commandé") ? "#9fbfe0" : "#e6ce89");
-        const double beat = text == QStringLiteral("Disponible") ? 0 : 0.5 + 0.5 * std::sin(m_life.elapsed() / (text == QStringLiteral("Rupture") ? 260.0 : 520.0));
+        const QColor tone(text == QStringLiteral("Rupture")      ? "#e8a9b0"
+                          : text == QStringLiteral("Disponible") ? "#b7ccb3"
+                          : text == QStringLiteral("Commandé")   ? "#9fbfe0"
+                                                                 : "#e6ce89");
+        const double beat =
+            text == QStringLiteral("Disponible")
+                ? 0
+                : 0.5 + 0.5 * std::sin(m_life.elapsed() / (text == QStringLiteral("Rupture") ? 260.0 : 520.0));
         QColor back = tone;
         back.setAlpha(int(32 + 22 * beat));
-        const QRect box(r.left(), r.center().y() - 12, std::min(r.width(), p->fontMetrics().horizontalAdvance(text) + 36), 25);
+        const QRect box(r.left(), r.center().y() - 12,
+                        std::min(r.width(), p->fontMetrics().horizontalAdvance(text) + 36), 25);
         p->setPen(Qt::NoPen);
         p->setBrush(back);
         p->drawRoundedRect(box, 12, 12);
@@ -172,11 +185,16 @@ void TableAnimation::paint(QPainter *p, const QStyleOptionViewItem &option, cons
     if (name == QStringLiteral("Stock")) {
         double minimum = 0;
         const QLocale french(QLocale::French, QLocale::France);
-        const auto value = [&](QString s) { s.remove(QChar(0x202F)).remove(QChar(0x00A0)).remove(' '); return french.toDouble(s); };
+        const auto value = [&](QString s) {
+            s.remove(QChar(0x202F)).remove(QChar(0x00A0)).remove(' ');
+            return french.toDouble(s);
+        };
         for (int c = 0; c < m_table->columnCount(); ++c)
             if (header(c) == QStringLiteral("Seuil"))
                 minimum = value(index.sibling(row, c).data().toString());
-        const double stock = value(text), level = minimum > 0 ? std::min(1.0, stock / (2 * minimum)) : stock > 0 ? 1 : 0;
+        const double stock = value(text), level = minimum > 0 ? std::min(1.0, stock / (2 * minimum))
+                                                  : stock > 0 ? 1
+                                                              : 0;
         p->drawText(r.adjusted(0, -7, 0, -7), flags, text);
         const QRectF track(r.left(), r.center().y() + 8, r.width(), 4);
         p->setPen(Qt::NoPen);

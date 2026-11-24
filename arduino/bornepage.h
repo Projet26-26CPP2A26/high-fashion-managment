@@ -13,11 +13,11 @@ class QComboBox;
 class QLabel;
 class QTableWidget;
 
-// Écran LCD 16x2 dessiné : le texte s'écrit lettre par lettre.
-class LcdScreen : public QWidget {
+class LcdScreen : public QWidget
+{
 public:
     explicit LcdScreen(QWidget *parent = nullptr);
-    void display(const QString &top, const QString &bottom, int state = 0);   // 0 normal, 1 alerte, 2 erreur
+    void display(const QString &top, const QString &bottom, int state = 0);
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -29,11 +29,11 @@ private:
     QTimer m_timer;
 };
 
-// Page « Borne Arduino » : état de la liaison, borne virtuelle et journal des échanges.
-class BornePage : public QWidget {
+class BornePage : public QWidget
+{
 public:
     explicit BornePage(QWidget *parent = nullptr);
-    std::function<QByteArray(const QString &)> ask;       // réponse calculée depuis Oracle
+    std::function<QByteArray(const QString &)> ask;
     void setLink(bool on, const QString &text);
     void setMaterials(const QVector<Material> &materials);
     void exchange(const QString &source, const QString &request, const QByteArray &reply);
@@ -49,7 +49,7 @@ private:
     DataFlow *m_flow;
     QLabel *m_link;
     QTableWidget *m_feed;
-    QString m_id, m_quantity, m_last;          // m_last : dernière matière consultée, réutilisée par A, B et C
+    QString m_id, m_quantity, m_last;
     QLabel *m_step;
     QComboBox *m_pick;
     QChar m_operation;

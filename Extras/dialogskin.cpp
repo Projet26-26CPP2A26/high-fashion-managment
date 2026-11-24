@@ -8,7 +8,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DialogSkin::DialogSkin(QWidget *parent, LivingIcon::Kind kind, const QString &title, const QString &text, const QString &accept, const QString &reject)
+DialogSkin::DialogSkin(QWidget *parent, LivingIcon::Kind kind, const QString &title, const QString &text,
+                       const QString &accept, const QString &reject)
     : QDialog(parent, Qt::Dialog | Qt::FramelessWindowHint)
 {
     setWindowTitle(title);
@@ -21,7 +22,8 @@ DialogSkin::DialogSkin(QWidget *parent, LivingIcon::Kind kind, const QString &ti
     auto *column = new QVBoxLayout;
     column->setSpacing(12);
     auto *head = new QLabel(title);
-    head->setStyleSheet("font-family:'Cormorant Garamond','Georgia';font-size:20pt;color:#e9d8a8;background:transparent;");
+    head->setStyleSheet(
+        "font-family:'Cormorant Garamond','Georgia';font-size:20pt;color:#e9d8a8;background:transparent;");
     auto *body = new QLabel(text);
     body->setTextFormat(Qt::PlainText);
     body->setWordWrap(true);

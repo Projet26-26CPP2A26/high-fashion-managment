@@ -5,7 +5,8 @@
 #include <QFile>
 #include <QTemporaryDir>
 
-class MaterialTests : public QObject {
+class MaterialTests : public QObject
+{
     Q_OBJECT
 
 private:
@@ -96,7 +97,8 @@ private slots:
         const QVector<Material> materials = {sampleMaterial()};
         const QString path = dir.filePath("inventaire.pdf");
         QString error;
-        QVERIFY2(StockReports::writePdf(path, StockReports::inventoryHtml(materials, "Test"), &error, true), qPrintable(error));
+        QVERIFY2(StockReports::writePdf(path, StockReports::inventoryHtml(materials, "Test"), &error, true),
+                 qPrintable(error));
         QFile pdf(path);
         QVERIFY(pdf.open(QIODevice::ReadOnly));
         QCOMPARE(pdf.read(5), QByteArray("%PDF-"));

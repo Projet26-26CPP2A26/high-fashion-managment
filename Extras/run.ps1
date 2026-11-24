@@ -1,6 +1,3 @@
-# Lance tout : Oracle, programme Arduino, simulateur Wokwi, compilation Qt et AUREA.
-# Run.bat            tout lancer
-# Run.bat -SansWokwi sans le simulateur (vraie carte ou borne virtuelle)
 param([switch]$SansWokwi)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
@@ -17,7 +14,6 @@ function Test-Port([int]$port) {
     try { $c.Connect('127.0.0.1', $port); return $true } catch { return $false } finally { $c.Close() }
 }
 function Test-Listening([int]$port) {
-    # Sans s'y connecter : le simulateur ne doit parler qu'a AUREA.
     return [bool](Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue)
 }
 

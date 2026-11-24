@@ -17,7 +17,6 @@ void PopIn::play(QWidget *target, int delay)
 PopIn::PopIn(QWidget *target, int delay) : QWidget(target->parentWidget()), m_home(target->geometry()), m_delay(delay)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents);
-    // Photo sur fond transparent, puis la couleur du bloc parent derrière.
     m_shot = QPixmap(target->size() * devicePixelRatioF());
     m_shot.setDevicePixelRatio(devicePixelRatioF());
     m_shot.fill(Qt::transparent);
@@ -52,7 +51,8 @@ void PopIn::paintEvent(QPaintEvent *)
     p.translate(home.center() + QPointF(0, y));
     p.scale(s, s);
     p.setOpacity(Motion::part(t, 0, 0.45));
-    p.drawPixmap(QRectF(-home.width() / 2, -home.height() / 2, home.width(), home.height()), m_shot, QRectF(m_shot.rect()));
+    p.drawPixmap(QRectF(-home.width() / 2, -home.height() / 2, home.width(), home.height()), m_shot,
+                 QRectF(m_shot.rect()));
 }
 
 CardGlow::CardGlow(QWidget *card) : QWidget(card)

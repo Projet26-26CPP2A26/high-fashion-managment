@@ -1,5 +1,3 @@
-// Module commun de l'équipe AUREA : animation de fermeture reprise telle quelle du projet AUREA_Employes
-// (Animations/ClosingAnimation), écrite par le responsable du module Employés.
 #pragma once
 #include <QElapsedTimer>
 #include <QImage>
@@ -11,11 +9,14 @@
 #include <QRectF>
 #include <memory>
 
-class ClosingView : public QOpenGLWindow, protected QOpenGLFunctions {
+class ClosingView : public QOpenGLWindow, protected QOpenGLFunctions
+{
 public:
     static constexpr double Length = 1.68;
 
-    struct Scene {
+    class Scene
+    {
+    public:
         QRect area;
         QRectF window, logo;
         QImage shot, mark;

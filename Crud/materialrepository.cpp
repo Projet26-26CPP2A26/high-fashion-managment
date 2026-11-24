@@ -1,9 +1,8 @@
 #include "materialrepository.h"
-#include "oracleconnection.h"
 #include <QSqlError>
+#include "oracleconnection.h"
 #include <QSqlQuery>
 #include <QStringList>
-#include <QVariant>
 #include <cmath>
 
 static double rounded(double value)
@@ -27,9 +26,7 @@ static Material readMaterial(const QSqlQuery &query)
     return m;
 }
 
-MaterialRepository::MaterialRepository()
-{
-}
+MaterialRepository::MaterialRepository() {}
 
 QString MaterialRepository::error() const
 {
@@ -44,21 +41,21 @@ bool MaterialRepository::fail(const QString &message)
 
 QString MaterialRepository::validate(const Material &m)
 {
-    if (m.name().trimmed().isEmpty() || m.type().trimmed().isEmpty() || m.color().trimmed().isEmpty()
-        || m.supplier().trimmed().isEmpty() || m.lot().trimmed().isEmpty())
+    if (m.name().trimmed().isEmpty() || m.type().trimmed().isEmpty() || m.color().trimmed().isEmpty() ||
+        m.supplier().trimmed().isEmpty() || m.lot().trimmed().isEmpty())
         return "Renseignez le nom, le type, la couleur, le fournisseur et le lot.";
     if (m.name().size() > 120 || m.supplier().size() > 120 || m.color().size() > 60 || m.lot().size() > 80)
         return "Nom et fournisseur : 120 caractères maximum ; couleur : 60 ; lot : 80.";
-    if (!std::isfinite(m.quantity()) || !std::isfinite(m.minimum()) || !std::isfinite(m.price())
-        || m.quantity() < 0 || m.minimum() < 0 || m.price() < 0
-        || m.quantity() > 9999999.99 || m.minimum() > 9999999.99 || m.price() > 9999999.99)
+    if (!std::isfinite(m.quantity()) || !std::isfinite(m.minimum()) || !std::isfinite(m.price()) || m.quantity() < 0 ||
+        m.minimum() < 0 || m.price() < 0 || m.quantity() > 9999999.99 || m.minimum() > 9999999.99 ||
+        m.price() > 9999999.99)
         return "Quantité, seuil et prix doivent être compris entre 0 et 9 999 999,99.";
     const QStringList units = {"m", "pièce", "bobine", "kg"};
     if (!units.contains(m.unit()))
         return "Choisissez une unité valide.";
     if (m.unit() == "pièce" || m.unit() == "bobine") {
-        if (std::abs(m.quantity() - std::round(m.quantity())) > 0.00001
-            || std::abs(m.minimum() - std::round(m.minimum())) > 0.00001)
+        if (std::abs(m.quantity() - std::round(m.quantity())) > 0.00001 ||
+            std::abs(m.minimum() - std::round(m.minimum())) > 0.00001)
             return "Les pièces et les bobines doivent avoir des quantités et des seuils entiers.";
     }
     const QString lot = m.lot();

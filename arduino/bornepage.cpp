@@ -6,8 +6,8 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QSignalBlocker>
 #include <QPainter>
+#include <QSignalBlocker>
 #include <QTime>
 #include <QVBoxLayout>
 #include <algorithm>
@@ -39,7 +39,7 @@ void LcdScreen::paintEvent(QPaintEvent *)
         p.translate(std::sin(ms / 17) * 5 * (1 - ms / 420), 0);
     const QColor tone(m_state == 1 ? "#e6ce89" : m_state == 2 ? "#e08f8f" : "#b7ccb3");
     const QRectF box = QRectF(rect()).adjusted(8, 8, -8, -8);
-    if (m_state && ms < 1600) {                    // alerte : trois pulsations, comme les trois bips
+    if (m_state && ms < 1600) {
         QColor halo = tone;
         halo.setAlphaF(0.45 * std::pow(std::sin(ms / 1600 * 3 * 3.1416), 2));
         p.setPen(QPen(halo, 8));
@@ -61,10 +61,12 @@ void LcdScreen::paintEvent(QPaintEvent *)
     const int shown = std::min(16, int(ms / 22) + 1);
     const QRectF text = glass.adjusted(14, 4, -6, -4);
     p.drawText(QRectF(text.topLeft(), QSizeF(text.width(), text.height() / 2)), Qt::AlignVCenter, m_top.left(shown));
-    p.drawText(QRectF(text.left(), text.center().y(), text.width(), text.height() / 2), Qt::AlignVCenter, m_bottom.left(shown));
+    p.drawText(QRectF(text.left(), text.center().y(), text.width(), text.height() / 2), Qt::AlignVCenter,
+               m_bottom.left(shown));
 }
 
-namespace {
+namespace
+{
 QFrame *card(QLayout *content)
 {
     auto *frame = new QFrame;
@@ -113,8 +115,13 @@ BornePage::BornePage(QWidget *parent) : QWidget(parent)
     const QString keys = "123A456B789C*0#D";
     for (int i = 0; i < 16; ++i) {
         const QChar k = keys[i];
-        const QString label = k == 'A' ? QStringLiteral("A  Entrée +") : k == 'B' ? QStringLiteral("B  Sortie −") : k == 'C' ? QStringLiteral("C  Voir")
-                            : k == 'D' ? QStringLiteral("D  Annuler") : k == '#' ? QStringLiteral("#  Valider") : k == '*' ? QStringLiteral("*  Effacer") : QString(k);
+        const QString label = k == 'A'   ? QStringLiteral("A  Entrée +")
+                              : k == 'B' ? QStringLiteral("B  Sortie −")
+                              : k == 'C' ? QStringLiteral("C  Voir")
+                              : k == 'D' ? QStringLiteral("D  Annuler")
+                              : k == '#' ? QStringLiteral("#  Valider")
+                              : k == '*' ? QStringLiteral("*  Effacer")
+                                         : QString(k);
         auto *b = new QPushButton(label);
         b->setObjectName(QString("key_%1").arg(k.unicode()));
         b->setMinimumHeight(44);
@@ -139,7 +146,8 @@ BornePage::BornePage(QWidget *parent) : QWidget(parent)
     right->addWidget(m_flow);
     right->addWidget(text(QStringLiteral("Derniers échanges"), "section"));
     m_feed = new QTableWidget(0, 4);
-    m_feed->setHorizontalHeaderLabels({QStringLiteral("Heure"), QStringLiteral("Source"), QStringLiteral("Message"), QStringLiteral("Réponse")});
+    m_feed->setHorizontalHeaderLabels(
+        {QStringLiteral("Heure"), QStringLiteral("Source"), QStringLiteral("Message"), QStringLiteral("Réponse")});
     m_feed->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_feed->setSelectionMode(QAbstractItemView::NoSelection);
     m_feed->setFocusPolicy(Qt::NoFocus);
@@ -188,7 +196,7 @@ void BornePage::key(QChar k)
         home();
         return;
     }
-    if (k == '*') {                                   // efface le dernier chiffre
+    if (k == '*') {
         if (!m_operation.isNull() && m_quantity.isEmpty())
             m_operation = QChar();
         else if (!m_operation.isNull())
@@ -205,7 +213,6 @@ void BornePage::key(QChar k)
         else if (!m_operation.isNull() && m_quantity.size() < 5)
             m_quantity += k;
     } else {
-        // A, B ou C juste après un résultat : on garde la même matière.
         if (m_operation.isNull() && m_id.isEmpty())
             m_id = m_last;
         if (m_id.isEmpty()) {
@@ -233,7 +240,8 @@ void BornePage::key(QChar k)
         step(QStringLiteral("2. Choisissez : A pour ajouter, B pour retirer, C pour voir le stock."));
     } else {
         m_lcd->display((m_operation == 'E' ? "Entree ID " : "Sortie ID ") + m_id, "Qte : " + m_quantity + "  #=OK");
-        step(m_quantity.isEmpty() ? QStringLiteral("3. Tapez la quantité à %1.").arg(m_operation == 'E' ? QStringLiteral("ajouter") : QStringLiteral("retirer"))
+        step(m_quantity.isEmpty() ? QStringLiteral("3. Tapez la quantité à %1.")
+                                        .arg(m_operation == 'E' ? QStringLiteral("ajouter") : QStringLiteral("retirer"))
                                   : QStringLiteral("4. Appuyez sur # Valider pour enregistrer dans Oracle."));
     }
 }
@@ -252,8 +260,10 @@ void BornePage::send(const QString &message)
     const bool missing = reply.startsWith("ID introuvable");
     m_last = missing ? QString() : id;
     step(missing ? QStringLiteral("Cet ID n'existe pas. Tapez-en un autre.")
-                 : ok ? QStringLiteral("%1  Continuez avec A, B ou C sur la même matière, ou tapez un autre ID.").arg(message[0] == 'C' ? QStringLiteral("Stock affiché.") : QStringLiteral("Enregistré dans Oracle."))
-                      : QStringLiteral("Opération refusée (voir l'écran). Recommencez avec A ou B."));
+         : ok    ? QStringLiteral("%1  Continuez avec A, B ou C sur la même matière, ou tapez un autre ID.")
+                    .arg(message[0] == 'C' ? QStringLiteral("Stock affiché.")
+                                           : QStringLiteral("Enregistré dans Oracle."))
+              : QStringLiteral("Opération refusée (voir l'écran). Recommencez avec A ou B."));
 }
 
 void BornePage::exchange(const QString &source, const QString &request, const QByteArray &reply)
@@ -264,7 +274,8 @@ void BornePage::exchange(const QString &source, const QString &request, const QB
     m_flow->send(state);
     Sound::play(state == 1 ? "alerte" : state == 2 ? "refus" : "valide");
     m_feed->insertRow(0);
-    const QStringList values = {QTime::currentTime().toString("HH:mm:ss"), source, request, parts.value(0) + (parts.value(1).isEmpty() ? QString() : " · " + parts.value(1))};
+    const QStringList values = {QTime::currentTime().toString("HH:mm:ss"), source, request,
+                                parts.value(0) + (parts.value(1).isEmpty() ? QString() : " · " + parts.value(1))};
     for (int c = 0; c < 4; ++c) {
         m_feed->setItem(0, c, cell(values[c]));
         m_feed->item(0, c)->setForeground(QColor(state == 1 ? "#e6ce89" : state == 2 ? "#e8a9b0" : "#d3cfc5"));
