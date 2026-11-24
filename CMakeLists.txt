@@ -42,6 +42,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     Animations/TransitionAnimation.cpp
     Extras/Outils/companysimulator.cpp
     Extras/Interface/dialogskin.cpp
+    Extras/Interface/errorbanner.cpp
     Extras/Interface/logindialog.cpp
     Extras/Outils/oraclecheck.cpp
     Extras/Outils/oraclemodulecheck.cpp
@@ -85,6 +86,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     Animations/UiAnimations.h
     Extras/Outils/companysimulator.h
     Extras/Interface/dialogskin.h
+    Extras/Interface/errorbanner.h
     Extras/Interface/greeting.h
     Extras/Interface/icons.h
     Extras/Interface/logindialog.h
@@ -99,5 +101,5 @@ add_executable(AureaEmployes WIN32 main.cpp
 target_include_directories(AureaEmployes PRIVATE Crud Metier Arduino Animations Suivi/Donnees Suivi/Employe Suivi/Responsable Extras/Interface Extras/Outils)
 target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network Qt6::OpenGL)
 if(WIN32)
-    target_link_libraries(AureaEmployes PRIVATE user32 dwmapi winmm)
+    target_link_libraries(AureaEmployes PRIVATE user32 dwmapi ole32 uuid)
 endif()

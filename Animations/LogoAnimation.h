@@ -31,6 +31,7 @@ protected:
 
 private:
     explicit LivingLogo(QLabel *logo);
+    double sweep() const;
     QLabel *m_logo;
     QElapsedTimer m_clock;
 };

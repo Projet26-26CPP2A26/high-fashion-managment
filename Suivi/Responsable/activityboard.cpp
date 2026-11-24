@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 enum Column { Name, Position, Status, Task, In, Out, Work, Over, Pause, Idle, Off, Percent, Count };
@@ -171,14 +172,15 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent)
         if (!isVisible() || m_views->currentIndex() != 0) {
             return;
         }
-        m_phase = m_phase > 1 ? 0 : m_phase + 0.012;
+        m_phase = std::fmod(m_phase + m_pulseClock.restart() / 2750.0, 1.0);
         for (EmployeeTile *t : std::as_const(m_tiles)) {
             if (t->isVisible()) {
                 t->setPulse(std::min(1.0, m_phase));
             }
         }
     });
-    pulse->start(33);
+    m_pulseClock.start();
+    pulse->start(Fx::ambientInterval(this) * 2);
     refresh();
 }
 

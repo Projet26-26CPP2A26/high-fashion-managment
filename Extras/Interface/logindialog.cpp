@@ -1,4 +1,5 @@
 #include "logindialog.h"
+#include "errorbanner.h"
 #include "BadgeAnimation.h"
 #include "ConnectionAnimation.h"
 #include "badgelink.h"
@@ -16,6 +17,7 @@
 #include <QLineEdit>
 #include <QLocale>
 #include <QPushButton>
+#include <QStyle>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -45,7 +47,7 @@ LoginDialog::LoginDialog(QWidget *parent)
         LoginDialog { background:#1b1b1d; }
         QLabel#loginDate { color:#c9b27c; font-size:9pt; font-weight:600; }
         QLabel#welcome { font-size:21pt; font-weight:700; color:white; }
-        QLabel#loginError { color:#f0b9bb; font-size:9pt; }
+        QLineEdit[wrong="true"] { border:1px solid #b56a6a; }
         QLineEdit { min-height:26px; font-size:11pt; }
         QPushButton[primary="true"] { min-height:26px; font-size:11pt; })");
     }
@@ -61,9 +63,19 @@ LoginDialog::LoginDialog(QWidget *parent)
     m_password = new QLineEdit;
     m_password->setPlaceholderText(QStringLiteral("••••••"));
     m_password->setEchoMode(QLineEdit::Password);
-    m_error = new QLabel;
-    m_error->setObjectName("loginError");
-    m_error->setMinimumHeight(20);
+    m_error = new ErrorBanner;
+    m_error->unlocked = [this] {
+        m_button->setEnabled(true);
+        markFields(false);
+    };
+    for (QLineEdit *field : {m_user, m_password}) {
+        connect(field, &QLineEdit::textEdited, this, [this] {
+            m_error->clear();
+            if (!m_error->locked()) {
+                markFields(false);
+            }
+        });
+    }
     m_button = new QPushButton(QStringLiteral("Se connecter"));
     m_button->setProperty("primary", true);
     m_button->setDefault(true);
@@ -138,37 +150,51 @@ QString LoginDialog::user() const
 
 void LoginDialog::submit()
 {
-    if (m_leaving || m_role != None) {
+    if (m_leaving || m_role != None || m_error->locked()) {
         return;
     }
     m_role = authenticate(m_user->text(), m_password->text());
     if (m_role != None) {
+        Sound::play(QStringLiteral("connexion"));
         for (QWidget *w : QList<QWidget *>{m_user, m_password, m_button}) {
             w->setEnabled(false);
         }
         m_error->clear();
+        markFields(false);
         auto *dots = new QTimer(this);
         connect(dots, &QTimer::timeout, this, [this, n = 0]() mutable {
             m_button->setText(QStringLiteral("Connexion") + QString(++n % 4, '.'));
         });
         dots->start(120);
-        leave(260);
+        leave(Motion::Quick);
         return;
     }
+    Sound::play(QStringLiteral("erreur"));
+    Fx::shake(this);
     if (refusedHandler) {
         refusedHandler(user().left(24));
     }
-    Fx::shake(this);
     m_password->clear();
     m_password->setFocus();
-    m_error->setText(QStringLiteral("Identifiant ou mot de passe incorrect."));
+    markFields(true);
     if (++m_failures % 5 == 0) {
         m_button->setEnabled(false);
-        m_error->setText(QStringLiteral("Trop d'essais : réessayez dans 30 secondes."));
-        QTimer::singleShot(30000, this, [this] {
-            m_button->setEnabled(true);
-            m_error->clear();
-        });
+        m_error->lock(30);
+    } else {
+        m_error->showError(QStringLiteral("Identifiant ou mot de passe incorrect"),
+            QStringLiteral("Vérifiez vos informations puis réessayez."));
+    }
+}
+
+void LoginDialog::markFields(bool wrong)
+{
+    for (QLineEdit *field : {m_user, m_password}) {
+        if (field->property("wrong").toBool() == wrong) {
+            continue;
+        }
+        field->setProperty("wrong", wrong);
+        field->style()->unpolish(field);
+        field->style()->polish(field);
     }
 }
 
@@ -273,41 +299,50 @@ QString LoginDialog::scanBadge(const QString &line, bool board)
     if (m_pages->currentIndex() != 1) {
         showBadge(true);
     }
-    const BadgeResult result = badgeHandler(line.section(':', 1));
     m_badge->present();
     m_badgeText->setText(QStringLiteral("Vérification…"));
     m_scanButton->setEnabled(false);
+    if (!board) {
+        QTimer::singleShot(Motion::Base, this, [this, line] {
+            if (!m_leaving && m_role == None) {
+                answerBadge(badgeHandler(line.section(':', 1)));
+            }
+        });
+        return QString();
+    }
+    const BadgeResult result = badgeHandler(line.section(':', 1));
+    answerBadge(result);
+    return result.reply;
+}
+
+void LoginDialog::answerBadge(const BadgeResult &result)
+{
     if (result.role != None) {
         m_role = result.role;
         m_employeeId = result.employeeId;
         m_usedBadge = true;
     }
-    QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, result, board] {
-        const bool ok = result.role != None;
-        m_badge->answer(ok);
-        if (!board) {
-            Sound::play(ok ? QStringLiteral("arrivee") : QStringLiteral("refus"));
-        }
-        m_badgeTitle->setText(ok ? QStringLiteral("Accès autorisé") : QStringLiteral("Accès refusé"));
-        m_badgeText->setText(ok         ? result.name
-                : result.reply == "ERR" ? QStringLiteral("Base de données indisponible.")
-                                        : QStringLiteral("Ce badge n'est pas reconnu."));
-        Fx::reveal(m_badgeTitle, 0, Motion::Base);
-        Fx::reveal(m_badgeText, 0, Motion::Base);
-        if (ok) {
-            leave(900);
+    const bool ok = result.role != None;
+    m_badge->answer(ok);
+    Sound::play(ok ? QStringLiteral("connexion") : QStringLiteral("erreur"));
+    m_badgeTitle->setText(ok ? QStringLiteral("Accès autorisé") : QStringLiteral("Accès refusé"));
+    m_badgeText->setText(ok         ? result.name
+            : result.reply == "ERR" ? QStringLiteral("Base de données indisponible.")
+                                    : QStringLiteral("Ce badge n'est pas reconnu."));
+    Fx::reveal(m_badgeTitle, 0, Motion::Base);
+    Fx::reveal(m_badgeText, 0, Motion::Base);
+    if (ok) {
+        leave(Motion::Slow);
+        return;
+    }
+    QTimer::singleShot(2200, this, [this] {
+        m_scanButton->setEnabled(true);
+        if (m_role != None) {
             return;
         }
-        QTimer::singleShot(2200, this, [this] {
-            m_scanButton->setEnabled(true);
-            if (m_role != None) {
-                return;
-            }
-            m_badgeTitle->setText(QStringLiteral("Badge"));
-            m_badgeText->setText(QStringLiteral("Présentez votre badge au lecteur."));
-        });
+        m_badgeTitle->setText(QStringLiteral("Badge"));
+        m_badgeText->setText(QStringLiteral("Présentez votre badge au lecteur."));
     });
-    return result.reply;
 }
 
 MorphOverlay *LoginDialog::takeOverlay()

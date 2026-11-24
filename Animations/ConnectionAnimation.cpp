@@ -11,7 +11,7 @@ LinkLight::LinkLight(QWidget *parent)
             update();
         }
     });
-    timer->start(Fx::frameInterval(this));
+    timer->start(Fx::ambientInterval(this));
 }
 
 void LinkLight::setState(State state)

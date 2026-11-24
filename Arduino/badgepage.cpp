@@ -167,7 +167,7 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     });
     connect(&m_service, &BadgeService::changed, this, &BadgePage::refresh);
     m_board->scan = [this](const QString &uid) {
-        QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, uid] {
+        QTimer::singleShot(Motion::Base, this, [this, uid] {
             virtualScan(uid);
         });
     };
@@ -334,7 +334,7 @@ QString BadgePage::handle(const QString &line, bool mirror)
     const QString reply = m_service.receive(line);
     if (mirror && !reply.isEmpty()) {
         m_board->present(m_service.lastUid());
-        QTimer::singleShot(Motion::Slow, m_board, [this, reply] {
+        QTimer::singleShot(Motion::Base, m_board, [this, reply] {
             m_board->reply(reply, false);
         });
     }

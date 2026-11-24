@@ -1,4 +1,5 @@
 #include "LogoAnimation.h"
+#include "UiAnimations.h"
 #include <QEvent>
 #include <QLabel>
 #include <QPainter>
@@ -34,7 +35,7 @@ LivingIcon::LivingIcon(Kind kind, int size, QWidget *parent)
     setFixedSize(size, size);
     setAttribute(Qt::WA_TransparentForMouseEvents);
     m_clock.start();
-    pulse(this, 16);
+    pulse(this, Fx::ambientInterval(this));
 }
 
 void LivingIcon::paintEvent(QPaintEvent *)
@@ -116,8 +117,19 @@ LivingLogo::LivingLogo(QLabel *logo)
     setGeometry(logo->rect());
     logo->installEventFilter(this);
     m_clock.start();
-    pulse(this, 33);
+    auto *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [this] {
+        if (isVisible() && sweep() < 1.8) {
+            update();
+        }
+    });
+    timer->start(Fx::ambientInterval(this));
     show();
+}
+
+double LivingLogo::sweep() const
+{
+    return std::fmod(m_clock.elapsed() / 1000.0, 9.0) - 1.6;
 }
 
 bool LivingLogo::eventFilter(QObject *object, QEvent *event)
@@ -138,13 +150,13 @@ void LivingLogo::paintEvent(QPaintEvent *)
         return;
     }
     const QSizeF size = QSizeF(image.size()) / image.devicePixelRatio();
-    const double r = std::min(size.width(), size.height()) * 0.41, t = m_clock.elapsed() / 1000.0;
+    const double r = std::min(size.width(), size.height()) * 0.41;
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     p.translate(width() / 2.0, height() / 2.0);
     QPainterPath disc;
     disc.addEllipse(QPointF(0, 0), r, r);
-    const double sweep = std::fmod(t, 9.0) / 9.0 * 9 - 1.6;
+    const double sweep = this->sweep();
     p.save();
     p.setClipPath(disc);
     QLinearGradient shine(QPointF(r * (sweep - 0.2), -r), QPointF(r * (sweep + 0.2), -r * 0.82));

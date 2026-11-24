@@ -26,7 +26,7 @@ protected:
 
 private:
     double wave(double x, int line) const;
-    QPixmap m_logo;
+    QPixmap m_logo, m_back;
     QElapsedTimer m_clock;
     bool m_logoVisible = true, m_ringsVisible = true;
     double m_t = 0, m_offset = 0;

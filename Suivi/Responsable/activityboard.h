@@ -2,6 +2,7 @@
 #include "activitystore.h"
 #include "employee.h"
 #include <QHash>
+#include <QElapsedTimer>
 #include <QWidget>
 #include <functional>
 
@@ -69,6 +70,7 @@ private:
     QHash<QString, EmployeeTile *> m_tiles;
     int m_columns = 0;
     qreal m_phase = 0;
+    QElapsedTimer m_pulseClock;
     QLabel *m_online, *m_paused, *m_work, *m_overtime, *m_status, *m_empty;
     QGridLayout *m_grid;
     QStackedWidget *m_views;

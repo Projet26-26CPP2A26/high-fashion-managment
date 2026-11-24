@@ -10,6 +10,7 @@
 #include "UiAnimations.h"
 #include "greeting.h"
 #include "logindialog.h"
+#include "sound.h"
 #include "TransitionAnimation.h"
 #include "oraclecheck.h"
 #include "oracleconnection.h"
@@ -55,6 +56,8 @@ int main(int argc, char *argv[])
     }
     app.setFont(QFont("Inter", 10));
     app.setStyleSheet("QToolTip { background: #eee2bf; color: #23292b; border: none; padding: 7px; }");
+
+    Fx::installFrames();
 
     QCommandLineParser parser;
     parser.setApplicationDescription("AUREA — Gestion des employés (C++ / Qt Widgets)");
@@ -133,6 +136,7 @@ int main(int argc, char *argv[])
 
     MorphOverlay::warmUp();
     std::unique_ptr<QThread> warm(QThread::create([] {
+        Sound::prepare();
         OracleConnection::warmUp();
     }));
     warm->start();
@@ -240,6 +244,7 @@ int main(int argc, char *argv[])
         const auto leave = [&](bool again, const QString &title, const QString &subtitle) {
             logout = again;
             if (!qApp->isSavingSession()) {
+                Sound::play(QStringLiteral("deconnexion"));
                 overlay =
                     new MorphOverlay(space, logoOf(space), again ? loginArea(space) : MorphOverlay::areaFor(space),
                         !again     ? Spectacle::Closing
@@ -285,7 +290,7 @@ int main(int argc, char *argv[])
                 const QString uid = BadgeService::normalize(line.section(':', 1));
                 const QString reply = service.receive(line);
                 if (reply.startsWith("OUT;") && service.employeeOf(uid) == employee.id() && desk) {
-                    QTimer::singleShot(900, desk.get(), [d = desk.get()] {
+                    QTimer::singleShot(Motion::Base, desk.get(), [d = desk.get()] {
                         d->leaveByBadge();
                     });
                 } else if (reply.startsWith("NO;")) {

@@ -3,6 +3,8 @@
 #include <QElapsedTimer>
 #include <QWidget>
 
+class QTimer;
+
 class BadgeAnimation : public QWidget {
 public:
     enum Mode { Idle, Checking, Granted, Denied };
@@ -19,6 +21,8 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
+    void pace();
+    QTimer *m_timer;
     Mode m_mode = Idle;
     Motion::Tween m_card, m_tone;
     QElapsedTimer m_life, m_clock;

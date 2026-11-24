@@ -81,16 +81,17 @@ PassageList::PassageList(QWidget *parent)
     : QWidget(parent)
 {
     setMouseTracking(true);
-    auto *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [this] {
-        if (isVisible() && (m_shift.running() || m_shine.running() || m_expand.running())) {
-            if (m_expand.running()) {
-                fit();
-            }
-            update();
+    m_timer = new QTimer(this);
+    m_timer->setTimerType(Qt::PreciseTimer);
+    connect(m_timer, &QTimer::timeout, this, [this] {
+        if (!m_shift.running() && !m_shine.running() && !m_expand.running()) {
+            m_timer->stop();
         }
+        if (m_expand.running()) {
+            fit();
+        }
+        update();
     });
-    timer->start(Fx::frameInterval(this));
 }
 
 void PassageList::setEntries(const QVector<AccessEntry> &entries, bool animate)
@@ -110,6 +111,7 @@ void PassageList::setEntries(const QVector<AccessEntry> &entries, bool animate)
         m_shift.go(0, Motion::Slow);
         m_shine.jump(1);
         m_shine.go(0, Motion::Glow);
+        m_timer->start(Fx::ambientInterval(this));
         QTimer::singleShot(Motion::Glow + 40, this, [this] {
             update();
         });
@@ -172,6 +174,7 @@ void PassageList::toggle(int index)
         m_expand.jump(0);
         m_expand.go(1, Motion::Slow);
     }
+    m_timer->start(Fx::ambientInterval(this));
     QTimer::singleShot(Motion::Slow + 40, this, [this] {
         if (m_expand.value() < 0.01) {
             m_open = 0;

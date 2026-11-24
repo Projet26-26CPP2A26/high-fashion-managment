@@ -7,6 +7,7 @@
 class QLabel;
 class QPushButton;
 class QScrollArea;
+class QTimer;
 
 class PassageList : public QWidget {
 public:
@@ -34,6 +35,7 @@ private:
     void paintRow(QPainter &p, const AccessEntry &e, const QRectF &row, double alpha, double shine) const;
     static constexpr int Row = 64, Extra = 104;
     QVector<AccessEntry> m_entries;
+    QTimer *m_timer;
     Motion::Tween m_shift, m_shine, m_expand;
     WorkSession m_day;
     int m_fresh = 0, m_open = 0;

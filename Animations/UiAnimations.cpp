@@ -1,4 +1,5 @@
 #include "UiAnimations.h"
+#include <QAnimationDriver>
 
 namespace Fx {
 class Glow : public QObject {
@@ -31,11 +32,60 @@ protected:
     }
 };
 
+class FrameDriver : public QAnimationDriver {
+public:
+    FrameDriver(int interval, QObject *parent)
+        : QAnimationDriver(parent)
+    {
+        m_timer.setTimerType(Qt::PreciseTimer);
+        m_timer.setInterval(interval);
+        connect(&m_timer, &QTimer::timeout, this, [this] {
+            advance();
+        });
+    }
+
+protected:
+    void start() override
+    {
+        m_timer.start();
+        QAnimationDriver::start();
+    }
+    void stop() override
+    {
+        m_timer.stop();
+        QAnimationDriver::stop();
+    }
+
+private:
+    QTimer m_timer;
+};
+
+static double refreshRate(const QScreen *screen)
+{
+    return screen && screen->refreshRate() > 20 ? screen->refreshRate() : 60;
+}
+
+static int ambientFor(const QScreen *screen)
+{
+    const double hz = refreshRate(screen);
+    const int skip = std::max(1, int(hz / 60 + 0.5));
+    return std::clamp(int(1000 * skip / hz + 0.5), 10, 33);
+}
+
 int frameInterval(const QWidget *w)
 {
-    const QScreen *screen = w->screen();
-    const double hz = screen && screen->refreshRate() > 20 ? screen->refreshRate() : 60;
-    return std::clamp(int(1000 / hz), 5, 33);
+    return std::clamp(int(1000 / refreshRate(w->screen()) + 0.5), 7, 33);
+}
+
+int ambientInterval(const QWidget *w)
+{
+    return ambientFor(w->screen());
+}
+
+void installFrames()
+{
+    auto *driver = new FrameDriver(ambientFor(QGuiApplication::primaryScreen()), qApp);
+    driver->install();
 }
 
 void steady(QWidget *w)

@@ -26,6 +26,7 @@ TimeCard::TimeCard(QWidget *parent)
     setAccessibleName(QStringLiteral("Temps de travail et pause"));
     setToolTip(QStringLiteral("Cliquez pour voir le temps passé"));
     m_timer = new QTimer(this);
+    m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, [this] {
         if (!m_flip.running()) {
             m_timer->stop();
@@ -208,6 +209,7 @@ ActivityLog::ActivityLog(QWidget *parent)
     : QWidget(parent)
 {
     m_timer = new QTimer(this);
+    m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, [this] {
         if (!m_enter.running()) {
             m_timer->stop();

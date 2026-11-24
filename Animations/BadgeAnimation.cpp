@@ -11,17 +11,28 @@ BadgeAnimation::BadgeAnimation(QWidget *parent)
 {
     setFixedHeight(210);
     m_life.start();
-    auto *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [this] {
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, [this] {
         if (m_mode == Denied && m_clock.elapsed() > 2200) {
             m_mode = Idle;
             m_tone.go(0, Motion::Base);
         }
+        pace();
         if (isVisible()) {
             update();
         }
     });
-    timer->start(Fx::frameInterval(this));
+    m_timer->start(Fx::ambientInterval(this) * 2);
+}
+
+void BadgeAnimation::pace()
+{
+    const bool busy = m_mode != Idle || m_card.running() || m_tone.running();
+    const int interval = Fx::ambientInterval(this) * (busy ? 1 : 2);
+    if (m_timer->interval() != interval) {
+        m_timer->setTimerType(busy ? Qt::PreciseTimer : Qt::CoarseTimer);
+        m_timer->setInterval(interval);
+    }
 }
 
 void BadgeAnimation::present()
@@ -30,6 +41,7 @@ void BadgeAnimation::present()
     m_clock.start();
     m_card.go(1, Motion::Slow);
     m_tone.go(1, Motion::Base);
+    pace();
 }
 
 void BadgeAnimation::answer(bool granted)

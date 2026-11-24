@@ -8,9 +8,9 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
-#include <mmsystem.h>
 #endif
 
 namespace Sound {
+void prepare();
 void play(const QString &name);
 }

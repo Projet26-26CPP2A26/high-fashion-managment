@@ -5,6 +5,7 @@
 class QLabel;
 class QLineEdit;
 class LoginScene;
+class ErrorBanner;
 class MorphOverlay;
 class QPushButton;
 class QVBoxLayout;
@@ -45,6 +46,7 @@ public:
         return m_usedBadge;
     }
     QString scanBadge(const QString &line, bool board = false);
+    void answerBadge(const BadgeResult &result);
     void showBadge(bool on);
     ~LoginDialog() override;
     static Role authenticate(const QString &user, const QString &password);
@@ -57,7 +59,8 @@ private:
     void listen();
     QLineEdit *m_user, *m_password;
     QPushButton *m_button;
-    QLabel *m_error;
+    void markFields(bool wrong);
+    ErrorBanner *m_error;
     LoginScene *m_scene;
     QList<QWidget *> m_lines;
     QVBoxLayout *m_form = nullptr;

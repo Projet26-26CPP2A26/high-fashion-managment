@@ -31,6 +31,8 @@
 
 namespace Fx {
 int frameInterval(const QWidget *w);
+int ambientInterval(const QWidget *w);
+void installFrames();
 void steady(QWidget *w);
 void openWindow(QWidget *w);
 void shake(QWidget *w);

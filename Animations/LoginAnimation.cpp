@@ -33,7 +33,7 @@ LoginScene::LoginScene(QWidget *parent)
         update();
     });
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(std::max(8, Fx::frameInterval(this)));
+    timer->start(Fx::ambientInterval(this));
 }
 
 void LoginScene::setLogoVisible(bool visible)
@@ -66,18 +66,27 @@ void LoginScene::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    QLinearGradient back(0, 0, width(), height());
-    back.setColorAt(0, QColor("#131315"));
-    back.setColorAt(0.6, QColor("#211e17"));
-    back.setColorAt(1, QColor("#453a25"));
-    p.fillRect(rect(), back);
+    const qreal ratio = devicePixelRatioF();
+    const QSize pixels = (QSizeF(size()) * ratio).toSize();
+    if (m_back.size() != pixels) {
+        m_back = QPixmap(pixels);
+        m_back.setDevicePixelRatio(ratio);
+        QPainter b(&m_back);
+        QLinearGradient back(0, 0, width(), height());
+        back.setColorAt(0, QColor("#131315"));
+        back.setColorAt(0.6, QColor("#211e17"));
+        back.setColorAt(1, QColor("#453a25"));
+        b.fillRect(rect(), back);
+    }
+    p.drawPixmap(0, 0, m_back);
 
     const QPointF center(width() / 2.0, height() * 0.33);
     const double breath = 0.5 + 0.5 * std::sin(m_t * 0.9);
     QRadialGradient glow(center, 190 + 14 * breath);
     glow.setColorAt(0, QColor(226, 207, 159, int((34 + 16 * breath) * ease(m_t / 1.6))));
     glow.setColorAt(1, QColor(226, 207, 159, 0));
-    p.fillRect(rect(), glow);
+    const double reach = 191 + 14 * breath;
+    p.fillRect(QRectF(center.x() - reach, center.y() - reach, reach * 2, reach * 2).toAlignedRect() & rect(), glow);
 
     for (int line = 4; line >= 0; --line) {
         const double drawn = width() * ease((m_t - 0.2 - line * 0.12) / 2.0);

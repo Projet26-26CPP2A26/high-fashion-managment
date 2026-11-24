@@ -1,7 +1,9 @@
 #include "employeetile.h"
+#include "UiAnimations.h"
 #include "icons.h"
 #include "AnimationSpeed.h"
 #include <QMouseEvent>
+#include <QPaintEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QTimer>
@@ -130,7 +132,7 @@ void EmployeeTile::setSession(const WorkSession &s, bool selected)
     update();
 }
 
-void EmployeeTile::paintEvent(QPaintEvent *)
+void EmployeeTile::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
@@ -177,6 +179,7 @@ void EmployeeTile::paintEvent(QPaintEvent *)
     };
 
     const QPointF center(x + 21, y + 38);
+    m_avatar = QRect(x - 6, y + 11, 54, 54);
     if (m_status == QStringLiteral("Actif")) {
         QColor halo = color;
         halo.setAlphaF(0.22 * (1 - m_pulse));
@@ -197,6 +200,9 @@ void EmployeeTile::paintEvent(QPaintEvent *)
         Qt::AlignHCenter);
 
     const int nameX = x + 54;
+    if (m_avatar.contains(event->rect())) {
+        return;
+    }
     text(QRect(nameX, y + 16, right - nameX - 20, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold,
         Qt::AlignLeft);
     text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#8f8c86"), 9, QFont::Normal,
@@ -273,7 +279,7 @@ StarRating::StarRating(QWidget *parent)
     m_frame.start();
     m_timer = new QTimer(this);
     m_timer->setTimerType(Qt::PreciseTimer);
-    m_timer->setInterval(8);
+    m_timer->setInterval(Fx::frameInterval(this));
     connect(m_timer, &QTimer::timeout, this, [this] {
         step();
     });

@@ -1,10 +1,11 @@
 QT += widgets sql printsupport serialport network opengl
 CONFIG += c++17
+QMAKE_CXXFLAGS_DEBUG += -O1
 TEMPLATE = app
 TARGET = AureaEmployes
 
 INCLUDEPATH += Crud Metier Arduino Animations Suivi/Donnees Suivi/Employe Suivi/Responsable Extras/Interface Extras/Outils
-win32: LIBS += -luser32 -ldwmapi -lwinmm
+win32: LIBS += -luser32 -ldwmapi -lole32 -luuid
 
 SOURCES += \
     main.cpp \
@@ -47,6 +48,7 @@ SOURCES += \
     Extras/Interface/icons.cpp \
     Extras/Interface/uihelpers.cpp \
     Extras/Interface/dialogskin.cpp \
+    Extras/Interface/errorbanner.cpp \
     Extras/Interface/logindialog.cpp \
     Extras/Interface/polish.cpp \
     Extras/Outils/companysimulator.cpp \
@@ -85,6 +87,7 @@ HEADERS += \
     Suivi/Responsable/passagefeed.h \
     Suivi/Responsable/reviewboard.h \
     Extras/Interface/dialogskin.h \
+    Extras/Interface/errorbanner.h \
     Extras/Interface/greeting.h \
     Extras/Interface/icons.h \
     Extras/Interface/logindialog.h \

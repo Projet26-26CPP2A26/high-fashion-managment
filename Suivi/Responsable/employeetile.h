@@ -18,8 +18,11 @@ public:
     void enter(int delay);
     void setPulse(qreal phase)
     {
+        if (m_status != QStringLiteral("Actif")) {
+            return;
+        }
         m_pulse = phase;
-        update();
+        update(m_avatar);
     }
     std::function<void()> clicked;
 
@@ -40,6 +43,7 @@ private:
     WorkSession m_session;
     QString m_status;
     QStringList m_alerts;
+    QRect m_avatar;
     bool m_selected = false, m_first = true;
     qreal m_enter = 1, m_hover = 0, m_pulse = 0, m_progress = 0, m_day = 0, m_flash = 0;
     QVariantAnimation m_hoverAnimation, m_barAnimation, m_flashAnimation;

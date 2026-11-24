@@ -16,6 +16,7 @@
 VirtualBoard::VirtualBoard(QWidget *parent)
     : QWidget(parent)
 {
+    m_timer = new QTimer(this);
     setMinimumHeight(236);
     display(QStringLiteral("AUREA Atelier"), QStringLiteral("Passez le badge"));
     m_badges = new QComboBox;
@@ -40,9 +41,18 @@ VirtualBoard::VirtualBoard(QWidget *parent)
         }
     });
     m_life.start();
-    auto *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &VirtualBoard::tick);
-    timer->start(Fx::frameInterval(this));
+    connect(m_timer, &QTimer::timeout, this, &VirtualBoard::tick);
+    m_timer->start(Fx::ambientInterval(this) * 2);
+}
+
+void VirtualBoard::pace()
+{
+    const bool busy = m_mode != Idle || m_card.running() || m_door.running() || m_text.running() || m_tone.running();
+    const int interval = Fx::ambientInterval(this) * (busy ? 1 : 2);
+    if (m_timer->interval() != interval) {
+        m_timer->setTimerType(busy ? Qt::PreciseTimer : Qt::CoarseTimer);
+        m_timer->setInterval(interval);
+    }
 }
 
 void VirtualBoard::tick()
@@ -60,6 +70,7 @@ void VirtualBoard::tick()
         m_tone.go(0, Motion::Base);
         display(QStringLiteral("AUREA Atelier"), QStringLiteral("Passez le badge"));
     }
+    pace();
     if (isVisible()) {
         update();
     }
@@ -71,6 +82,7 @@ void VirtualBoard::display(const QString &top, const QString &bottom)
     m_bottom = bottom.left(16);
     m_text.jump(0);
     m_text.go(1, Motion::Slow);
+    pace();
     update();
 }
 

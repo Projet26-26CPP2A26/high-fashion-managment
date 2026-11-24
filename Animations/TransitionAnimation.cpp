@@ -104,7 +104,7 @@ MorphOverlay::MorphOverlay(
         advance();
         update();
     });
-    timer->start(Fx::frameInterval(this));
+    timer->start(Fx::ambientInterval(this));
     current = this;
     Fx::steady(this);
     show();
@@ -142,6 +142,10 @@ void MorphOverlay::warmUp()
         p.setFont(f);
         p.drawText(0, 40, QStringLiteral("ÀBbienvôtRouj,0123456789"));
     }
+    QFont brand("Cormorant Garamond", 42);
+    brand.setWeight(QFont::DemiBold);
+    p.setFont(brand);
+    p.drawText(0, 40, QStringLiteral("AUREA"));
 }
 
 void MorphOverlay::advance()
@@ -211,7 +215,7 @@ void MorphOverlay::wait(const std::function<bool()> &done)
             loop.quit();
         }
     });
-    check.start(4);
+    check.start(7);
     loop.exec();
 }
 
@@ -259,7 +263,7 @@ void MorphOverlay::land(std::function<QRect()> logo, LogoSwitch logoVisible)
             QTimer::singleShot(50, this, &QWidget::close);
         }
     });
-    timer->start(4);
+    timer->start(7);
 }
 
 void MorphOverlay::paintEvent(QPaintEvent *)

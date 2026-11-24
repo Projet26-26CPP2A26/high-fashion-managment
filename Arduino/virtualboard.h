@@ -6,6 +6,7 @@
 #include <functional>
 
 class QComboBox;
+class QTimer;
 class QPainter;
 
 class VirtualBoard : public QWidget {
@@ -25,6 +26,8 @@ private:
     QString m_top, m_bottom;
     enum Mode { Idle, Accepted, Refused, Known, Checking };
     void tick();
+    void pace();
+    QTimer *m_timer;
     void paintScreen(QPainter &p, const QColor &tone);
     void paintDoor(QPainter &p);
     void paintReader(QPainter &p, const QColor &tone);
