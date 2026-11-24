@@ -14,6 +14,7 @@ class BadgeService : public QObject {
 public:
     using QObject::QObject;
     static QString normalize(const QString &uid);
+    static QString cardName(const QString &uid);
     static QString plain(const QString &text, int length);
     bool ready();
     QString error() const

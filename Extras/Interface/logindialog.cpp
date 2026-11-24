@@ -1,4 +1,5 @@
 #include "logindialog.h"
+#include "badgeservice.h"
 #include "errorbanner.h"
 #include "BadgeAnimation.h"
 #include "ConnectionAnimation.h"
@@ -282,7 +283,7 @@ void LoginDialog::showBadge(bool on)
         if (!m_listed && badgeList) {
             m_badges->clear();
             for (const auto &b : badgeList()) {
-                m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+                m_badges->addItem(b.second + QStringLiteral(" · ") + BadgeService::cardName(b.first), b.first);
             }
             m_badges->addItem(QStringLiteral("Badge inconnu · 0BADBAD0"), QStringLiteral("0BADBAD0"));
             m_listed = true;

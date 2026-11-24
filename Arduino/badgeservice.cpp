@@ -13,6 +13,27 @@ QString BadgeService::normalize(const QString &uid)
     return valid.match(out).hasMatch() ? out : QString();
 }
 
+QString BadgeService::cardName(const QString &uid)
+{
+    QString name;
+    if (uid == "01020304") {
+        name = QStringLiteral("Carte bleue");
+    } else if (uid == "11223344") {
+        name = QStringLiteral("Carte verte");
+    } else if (uid == "55667788") {
+        name = QStringLiteral("Carte jaune");
+    } else if (uid == "AABBCCDD") {
+        name = QStringLiteral("Carte rouge");
+    } else if (uid.startsWith("04112233")) {
+        name = QStringLiteral("Étiquette NFC");
+    } else if (uid == "C0FFEE99") {
+        name = QStringLiteral("Porte-clés");
+    } else {
+        return uid;
+    }
+    return name + QStringLiteral(" · ") + uid;
+}
+
 QString BadgeService::plain(const QString &text, int length)
 {
     QString out;

@@ -163,7 +163,8 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     });
     connect(&m_service, &BadgeService::refused, this, [this](const QString &uid) {
         m_store.addEntry(
-            QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
+            QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"),
+            BadgeService::cardName(uid));
         m_refusals->reload();
     });
     connect(&m_service, &BadgeService::changed, this, &BadgePage::refresh);
@@ -378,7 +379,7 @@ void BadgePage::refresh()
             active += with;
             present += here;
             UiHelpers::addRow(m_table,
-                {e.name(), with ? uids.value(e.id()) : QStringLiteral("—"),
+                {e.name(), with ? BadgeService::cardName(uids.value(e.id())) : QStringLiteral("—"),
                     !with      ? QStringLiteral("Sans badge")
                         : here ? QStringLiteral("Présent")
                                : QStringLiteral("Absent")},

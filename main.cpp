@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
             out.name = people.findEmployee(out.employeeId).name();
         } else if (out.reply != "ERR") {
             store.addEntry(
-                QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
+                QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), BadgeService::cardName(uid));
         }
         return out;
     };
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
                     });
                 } else if (reply.startsWith("NO;")) {
                     store.addEntry(QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"),
-                        QStringLiteral("REFUSE"), uid);
+                        QStringLiteral("REFUSE"), BadgeService::cardName(uid));
                 }
                 return reply;
             };

@@ -1,4 +1,5 @@
 #include "virtualboard.h"
+#include "badgeservice.h"
 #include "UiAnimations.h"
 #include "sound.h"
 #include <QComboBox>
@@ -92,7 +93,7 @@ void VirtualBoard::setBadges(const QVector<QPair<QString, QString>> &badges)
     const QString keep = m_badges->currentData().toString();
     m_badges->clear();
     for (const auto &b : badges) {
-        m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+        m_badges->addItem(b.second + QStringLiteral(" · ") + BadgeService::cardName(b.first), b.first);
     }
     m_badges->addItem(QStringLiteral("Badge inconnu · 0BADBAD0"), QStringLiteral("0BADBAD0"));
     m_badges->setCurrentIndex(std::max(0, m_badges->findData(keep)));
