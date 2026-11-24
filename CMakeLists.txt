@@ -17,6 +17,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     Crud/oracleconnection.cpp
     Metier/affectation.cpp
     Metier/affectation_interface.cpp
+    Metier/heures.cpp
     Metier/pdfexport.cpp
     Metier/pointage.cpp
     Metier/statistiques_pdf.cpp
@@ -59,6 +60,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     Crud/employeerepository.h
     Crud/employeewindow.h
     Crud/oracleconnection.h
+    Metier/heures.h
     Metier/pdfexport.h
     Suivi/Responsable/activityboard.h
     Suivi/Donnees/activitystore.h

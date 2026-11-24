@@ -4,6 +4,7 @@
 #include "activityboard.h"
 #include "badgepage.h"
 #include "passagefeed.h"
+#include "heures.h"
 #include "companylink.h"
 #include "companysimulator.h"
 #include "polish.h"
@@ -74,7 +75,29 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store, bool demo, QWidget *parent)
     badgeButton->setCursor(Qt::PointingHandCursor);
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navAttendance) + 1, badgeButton);
     connect(badgeButton, &QPushButton::clicked, this, &EmployeeWindow::showBadges);
-    employeeModule->findChild<QWidget *>("attendancePage")->layout()->addWidget(new PassageFeed(store));
+    auto *attendance = new QStackedWidget;
+    attendance->addWidget(new PassageFeed(store));
+    attendance->addWidget(new HoursView(employeeModule->repository(), store));
+    auto *choices = new QHBoxLayout;
+    choices->setSpacing(8);
+    auto *choice = new QButtonGroup(this);
+    const QStringList choiceNames = {QStringLiteral("Passages en direct"), QStringLiteral("Heures travaillées")};
+    for (int i = 0; i < 2; ++i) {
+        auto *b = new QPushButton(choiceNames[i]);
+        b->setCheckable(true);
+        b->setChecked(i == 0);
+        b->setCursor(Qt::PointingHandCursor);
+        b->setStyleSheet("QPushButton:checked{background:#3a3427;border:1px solid #c9b27c;color:#f1e1b4;}");
+        choice->addButton(b);
+        choices->addWidget(b);
+        connect(b, &QPushButton::clicked, this, [attendance, i] {
+            Fx::switchPage(attendance, i);
+        });
+    }
+    choices->addStretch();
+    auto *attendancePage = qobject_cast<QVBoxLayout *>(employeeModule->findChild<QWidget *>("attendancePage")->layout());
+    attendancePage->addLayout(choices);
+    attendancePage->addWidget(attendance, 1);
     connect(badges, &BadgePage::attendanceChanged, employeeModule, &EmployeeModule::refresh);
     if (employeeModule->ready()) {
         auto *simulator = new CompanySimulator(
@@ -172,7 +195,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store, bool demo, QWidget *parent)
             QStringLiteral(
                 "Employés : ajouter, modifier, supprimer, rechercher, filtrer, trier et exporter en PDF.\n\n"
                 "Affectation : modèle de tâche, spécialité, durée, classement puis confirmation. Une surcharge est refusée. Terminer une tâche libère sa charge.\n\n"
-                "Pointage : tous les passages en direct, au bureau et en ligne. Cliquez sur un passage pour voir la journée.\n\nBadges : carte Arduino, association des badges et accès refusés.\n\n"
+                "Pointage : tous les passages en direct, au bureau et en ligne. Cliquez sur un passage pour voir la journée. « Heures travaillées » : arrivée, départ, pause, travail net et heures supplémentaires, par jour ou par employé, avec export PDF.\n\nBadges : carte Arduino, association des badges et accès refusés.\n\n"
                 "Statistiques : bouton « Statistiques » de la page Employés ; « Retour » pour en sortir.\n\n"
                 "Ctrl+1 à Ctrl+4 : changer de page. F11 : plein écran. Double-clic sur une fiche pour modifier.\n\nBase active : ")
                 + QSqlDatabase::database().databaseName());
@@ -249,7 +272,7 @@ void EmployeeWindow::setPage(int index)
         "Tableau de bord", "Employés", "Affectation intelligente", "Pointage", "Statistiques"};
     static const QStringList subtitles = {"Activité, temps de travail et pauses de l'équipe, en direct.",
         "Fiches, disponibilité et charge de travail.", "Spécialité, disponibilité et capacité : un choix expliqué.",
-        "Tous les passages, au bureau et en ligne, en direct.", "Comprendre la répartition de votre effectif."};
+        "Passages en direct, heures travaillées et heures supplémentaires.", "Comprendre la répartition de votre effectif."};
     if (index < 0 || index >= titles.size()) {
         return;
     }

@@ -17,6 +17,7 @@ SOURCES += \
     Crud/oracleconnection.cpp \
     Metier/affectation.cpp \
     Metier/affectation_interface.cpp \
+    Metier/heures.cpp \
     Metier/pdfexport.cpp \
     Metier/pointage.cpp \
     Metier/statistiques_pdf.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
     Crud/employeerepository.h \
     Crud/employeewindow.h \
     Crud/oracleconnection.h \
+    Metier/heures.h \
     Metier/pdfexport.h \
     Arduino/badgelink.h \
     Arduino/badgepage.h \
