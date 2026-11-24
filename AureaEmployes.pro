@@ -27,6 +27,7 @@ SOURCES += main.cpp \
     Suivi/passagefeed.cpp \
     Suivi/reviewboard.cpp \
     Suivi/submitdialog.cpp \
+    Suivi/timecard.cpp \
     Arduino/badgelink.cpp \
     Arduino/badgepage.cpp \
     Arduino/badgeservice.cpp \
@@ -60,6 +61,7 @@ HEADERS += Crud/employee.h \
     Suivi/reviewboard.h \
     Suivi/submitdialog.h \
     Suivi/taskcatalog.h \
+    Suivi/timecard.h \
     Arduino/badgelink.h \
     Arduino/badgepage.h \
     Arduino/badgeservice.h \

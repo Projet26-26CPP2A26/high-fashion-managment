@@ -230,15 +230,15 @@ void VirtualBoard::paintReader(QPainter &p, const QColor &tone)
             p.drawArc(QRectF(45 - radius, 152 - radius, radius * 2, radius * 2), -45 * 16, 90 * 16);
         }
     }
-    QFont small("Segoe UI");
+    QFont small("Inter");
     small.setPointSizeF(8.5);
     p.setFont(small);
-    p.setPen(QColor("#b3aea3"));
+    p.setPen(QColor("#8f8c86"));
     p.drawText(QRectF(104, 128, width() - 190, 24), Qt::AlignVCenter, QStringLiteral("Lecteur RC522"));
     p.setPen(Qt::NoPen);
-    p.setBrush(m_mode ? tone : QColor("#a39e94"));
+    p.setBrush(m_mode ? tone : QColor("#77746e"));
     p.drawEllipse(QPointF(108, 163), 3, 3);
-    p.setPen(m_mode ? tone : QColor("#b3aea3"));
+    p.setPen(m_mode ? tone : QColor("#8f8c86"));
     const QString text = m_mode == Accepted ? QStringLiteral("Porte ouverte") : m_mode == Refused ? QStringLiteral("Accès refusé") : m_mode == Known ? QStringLiteral("Déjà enregistré") : m_mode == Checking ? QStringLiteral("Lecture du badge") : QStringLiteral("En attente");
     p.drawText(QRectF(118, 151, width() - 200, 24), Qt::AlignVCenter, text);
 }

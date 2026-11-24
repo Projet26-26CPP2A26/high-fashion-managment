@@ -125,7 +125,7 @@ void PassageList::paintEvent(QPaintEvent *event)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     if (m_entries.isEmpty()) {
-        p.setPen(QColor("#a39e94"));
+        p.setPen(QColor("#77746e"));
         p.drawText(rect(), Qt::AlignCenter, emptyText);
         return;
     }
@@ -187,21 +187,21 @@ void PassageList::paintRow(QPainter &p, const AccessEntry &e, const QRectF &row,
     p.drawPixmap(QPointF(b.x() - 6, b.y() - 6), Icons::pixmap(e.via == "BADGE" ? Icons::Office : Icons::Online, QColor("#1b1b1d"), 12));
 
     const double left = row.left() + 68, right = row.right() - 12;
-    f.setPointSizeF(10.5);
+    f.setPointSizeF(10);
     f.setWeight(QFont::DemiBold);
     p.setFont(f);
     p.setPen(QColor("#ffffff"));
-    const double space = right - 160 - left;
+    const double space = right - 96 - left;
     p.drawText(QRectF(left, row.top() + 8, space, 22), Qt::AlignVCenter, p.fontMetrics().elidedText(e.label, Qt::ElideRight, int(space)));
-    f.setPointSizeF(9.5);
+    f.setPointSizeF(9);
     f.setWeight(QFont::Normal);
     p.setFont(f);
-    p.setPen(QColor("#bdb8ad"));
+    p.setPen(QColor("#9a968d"));
     const QString line = (e.via == "BADGE" ? QStringLiteral("Bureau · ") : QStringLiteral("En ligne · ")) + kindText(e) + (e.detail.isEmpty() ? QString() : QStringLiteral(" · ") + e.detail);
     p.drawText(QRectF(left, row.top() + 29, space, 20), Qt::AlignVCenter, p.fontMetrics().elidedText(line, Qt::ElideRight, int(space)));
 
     const QString pill = kindShort(e.kind);
-    f.setPointSizeF(9);
+    f.setPointSizeF(8.5);
     f.setWeight(QFont::DemiBold);
     p.setFont(f);
     const double w = p.fontMetrics().horizontalAdvance(pill) + 30;
@@ -224,9 +224,9 @@ void PassageList::paintRow(QPainter &p, const AccessEntry &e, const QRectF &row,
     }
     p.drawText(box.adjusted(21, 0, 0, 0), Qt::AlignVCenter, pill);
     f.setWeight(QFont::Normal);
-    f.setPointSizeF(9);
+    f.setPointSizeF(8.5);
     p.setFont(f);
-    p.setPen(QColor("#a39e94"));
+    p.setPen(QColor("#77746e"));
     p.drawText(QRectF(right - 170, row.top() + 31, 170, 18), Qt::AlignRight | Qt::AlignVCenter, e.at.toString("HH:mm:ss") + QStringLiteral(" · ") + ago(e.at));
     p.restore();
 }
@@ -243,7 +243,7 @@ void PassageList::paintDetails(QPainter &p, const QRectF &box, double alpha) con
         p.drawText(r, align | Qt::AlignVCenter, t);
     };
     if (!m_day.login.isValid()) {
-        text(box, QStringLiteral("Aucune journée enregistrée."), "#bdb8ad", 9, QFont::Normal);
+        text(box, QStringLiteral("Aucune journée enregistrée."), "#9a968d", 9, QFont::Normal);
         return;
     }
     const auto hm = [](int s) { return QStringLiteral("%1 h %2").arg(s / 3600).arg(s / 60 % 60, 2, 10, QChar('0')); };
@@ -253,7 +253,7 @@ void PassageList::paintDetails(QPainter &p, const QRectF &box, double alpha) con
     const QStringList values = {m_day.login.toString("HH:mm"), m_day.ended() ? m_day.logout.toString("HH:mm") : QDateTime::currentDateTime().addSecs(left + std::max(0, WorkRules::Pause - m_day.pause)).toString("HH:mm"), hm(left), state};
     const double w = box.width() / 4;
     for (int i = 0; i < 4; ++i) {
-        text(QRectF(box.left() + i * w, box.top() + 2, w, 16), titles[i], "#b3aea3", 8, QFont::Normal);
+        text(QRectF(box.left() + i * w, box.top() + 2, w, 16), titles[i], "#8f8c86", 8, QFont::Normal);
         text(QRectF(box.left() + i * w, box.top() + 17, w, 20), values[i], "#f7f4ee", 10, QFont::DemiBold);
     }
     const auto bar = [&](double y, const QString &title, const QString &value, double ratio, const QColor &a, const QColor &b) {

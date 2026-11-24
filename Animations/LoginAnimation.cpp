@@ -129,7 +129,7 @@ void LoginScene::paintEvent(QPaintEvent *)
     }
 
     const double text = ease((m_t - 1.4) / 0.9);
-    QFont small("Segoe UI", 10);
+    QFont small("Inter", 10);
     p.setFont(small);
     p.setPen(QColor(201, 196, 184, int(255 * text)));
     p.drawText(QRectF(0, base + 22, width(), 24), Qt::AlignCenter, QStringLiteral("Atelier haute couture"));

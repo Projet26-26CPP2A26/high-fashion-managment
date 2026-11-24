@@ -114,7 +114,7 @@ void MorphOverlay::warmUp()
     QImage surface(64, 64, QImage::Format_ARGB32_Premultiplied);
     QPainter p(&surface);
     for (const double size : {10.0, 13.0, 19.0, 30.0}) {
-        QFont f("Segoe UI");
+        QFont f("Inter");
         f.setPointSizeF(size);
         f.setWeight(size > 15 ? QFont::Bold : QFont::Normal);
         p.setFont(f);
@@ -260,7 +260,7 @@ void MorphOverlay::paintEvent(QPaintEvent *)
 
     if (m_messageAt < 0) return;
     const double t = now - m_messageAt, out = 1 - outCubic(land / 0.35);
-    QFont big_("Segoe UI");
+    QFont big_("Inter");
     big_.setPointSizeF(std::clamp(m_target.width() / 46, 16.0, 30.0));
     big_.setWeight(QFont::Bold);
     const QFontMetricsF fm(big_);
@@ -284,7 +284,7 @@ void MorphOverlay::paintEvent(QPaintEvent *)
     p.setOpacity(a * out);
     p.setPen(QColor("#fff9ea"));
     p.drawText(QPointF(x, y + 8 * (1 - a)), m_title);
-    QFont small("Segoe UI");
+    QFont small("Inter");
     small.setPointSizeF(std::clamp(m_target.width() / 110, 10.0, 13.0));
     p.setFont(small);
     p.setPen(QColor("#cdbd92"));
@@ -350,13 +350,13 @@ void MorphOverlay::paintClosing(QPainter &p)
         p.translate(home.x() + (c.x() - home.x()) * drawn, home.y() + (c.y() - home.y()) * drawn + 8 * (1 - in));
         p.scale(std::max(0.01, scale), std::max(0.01, scale));
         p.setOpacity(in * (1 - clamp01((drawn - 0.6) / 0.4)));
-        QFont title("Segoe UI");
+        QFont title("Inter");
         title.setPointSizeF(21);
         title.setWeight(QFont::Bold);
         p.setFont(title);
         p.setPen(QColor("#fff9ea"));
         p.drawText(QRectF(-400, -22, 800, 36), Qt::AlignCenter, m_title);
-        QFont small("Segoe UI");
+        QFont small("Inter");
         small.setPointSizeF(10.5);
         p.setFont(small);
         p.setPen(QColor("#cdbd92"));

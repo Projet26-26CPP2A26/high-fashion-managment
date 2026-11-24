@@ -6,22 +6,23 @@
 #include "polish.h"
 #include "submitdialog.h"
 #include "taskcatalog.h"
+#include "timecard.h"
 #include "icons.h"
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QFile>
 #include <QFrame>
 #include <QGuiApplication>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QLabel>
+#include <QMouseEvent>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSessionManager>
 #include <QShortcut>
 #include <QStackedWidget>
-#include <QTableWidget>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
@@ -189,8 +190,17 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
     m_pauseButton = new QPushButton;
     m_pauseButton->setObjectName("pause");
     m_pauseButton->setProperty("primary", true);
+    m_clockInfo = label(QString(), "muted");
+    auto *clockBox = new QVBoxLayout;
+    clockBox->setSpacing(0);
+    clockBox->addWidget(m_clock);
+    clockBox->addWidget(m_clockInfo);
     chipRow->addWidget(m_state);
-    chipRow->addWidget(m_clock);
+    chipRow->addLayout(clockBox);
+    m_chip = chip;
+    chip->setCursor(Qt::PointingHandCursor);
+    chip->setToolTip(QStringLiteral("Cliquez pour basculer entre temps restant et temps passé"));
+    chip->installEventFilter(this);
     chipRow->addWidget(m_pauseButton);
     top->addWidget(chip);
     main->addLayout(top);
@@ -295,16 +305,14 @@ QWidget *EmployeeDesk::createDayPage()
 
     auto *stats = new QHBoxLayout;
     stats->setSpacing(14);
-    m_work = statCard(stats, QStringLiteral("Travail aujourd'hui"));
-    m_left = statCard(stats, QStringLiteral("Travail restant"), &m_overtime);
-    m_pauseLeft = statCard(stats, QStringLiteral("Pause restante"), &m_pauseInfo);
+    stats->addWidget(timeCard(), 3);
     m_idle = statCard(stats, QStringLiteral("Inactivité"));
     m_done = statCard(stats, QStringLiteral("Tâches validées"), &m_quality);
     box->addLayout(stats);
     auto *timeline = new QVBoxLayout;
-    m_timeline = new DayTimeline;
+    m_timelines << new DayTimeline;
     timeline->addWidget(label(QStringLiteral("Ma session en un coup d'œil"), "section"));
-    timeline->addWidget(m_timeline);
+    timeline->addWidget(m_timelines.last());
     box->addWidget(card(timeline));
 
     connect(m_finishButton, &QPushButton::clicked, this, &EmployeeDesk::openSubmit);
@@ -365,16 +373,50 @@ QWidget *EmployeeDesk::createTasksPage()
 
 QWidget *EmployeeDesk::createLogPage()
 {
-    m_log = new QTableWidget(0, 2);
-    m_log->setHorizontalHeaderLabels({QStringLiteral("Heure"), QStringLiteral("Événement (visible par le responsable RH)")});
-    m_log->horizontalHeader()->setStretchLastSection(true);
-    m_log->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    m_log->verticalHeader()->hide();
-    m_log->verticalHeader()->setDefaultSectionSize(38);
-    m_log->setShowGrid(false);
-    m_log->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_log->setSelectionMode(QAbstractItemView::NoSelection);
-    return m_log;
+    auto *page = new QWidget;
+    auto *box = new QVBoxLayout(page);
+    box->setContentsMargins(0, 0, 0, 0);
+    box->setSpacing(14);
+    auto *stats = new QHBoxLayout;
+    stats->setSpacing(14);
+    stats->addWidget(timeCard(), 3);
+    m_idleToday = statCard(stats, QStringLiteral("Inactivité"));
+    box->addLayout(stats);
+
+    auto *timeline = new QVBoxLayout;
+    m_timelines << new DayTimeline;
+    timeline->addWidget(label(QStringLiteral("Ma session en un coup d'œil"), "section"));
+    timeline->addWidget(m_timelines.last());
+    box->addWidget(card(timeline));
+
+    auto *journal = new QVBoxLayout;
+    journal->setSpacing(10);
+    auto *head = new QHBoxLayout;
+    head->setSpacing(8);
+    head->addWidget(label(QStringLiteral("Journal"), "section"));
+    head->addStretch();
+    m_log = new ActivityLog;
+    auto *group = new QButtonGroup(this);
+    for (int i = 0; i < 5; ++i) {
+        auto *b = m_filters[i] = new QPushButton;
+        b->setCheckable(true);
+        b->setChecked(i == 0);
+        b->setCursor(Qt::PointingHandCursor);
+        b->setStyleSheet("QPushButton{padding:5px 12px;} QPushButton:checked{background:#3a3427;border:1px solid #c9b27c;color:#f1e1b4;}");
+        group->addButton(b);
+        head->addWidget(b);
+        connect(b, &QPushButton::clicked, this, [this, i] { m_log->setFilter(i - 1); });
+    }
+    journal->addLayout(head);
+    auto *scroll = new QScrollArea;
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scroll->setWidget(m_log);
+    scroll->setStyleSheet("QScrollArea,QScrollArea>QWidget>QWidget{background:transparent;}");
+    journal->addWidget(scroll, 1);
+    box->addWidget(card(journal), 1);
+    return page;
 }
 
 void EmployeeDesk::showPage(int index)
@@ -566,13 +608,13 @@ void EmployeeDesk::tick(const QDateTime &now, int idleSeconds)
     m_last = m_last.addSecs(delta);
     if (delta > kSleepGap) {
         m_session.off += delta;
-        m_timeline->add(QStringLiteral("PC hors ligne"), delta);
+        track(QStringLiteral("PC hors ligne"), delta);
         const QString text = QStringLiteral("PC en veille ou suspendu pendant ") + clockText(delta);
         addLog(text);
         m_store.log(m_session, text);
     } else if (m_paused) {
         m_session.pause += delta;
-        m_timeline->add(kPause, delta);
+        track(kPause, delta);
         if (!m_pauseWarned && m_basePause + m_session.pause > WorkRules::Pause) {
             m_pauseWarned = true;
             addLog(QStringLiteral("Pause dépassée"));
@@ -584,7 +626,7 @@ void EmployeeDesk::tick(const QDateTime &now, int idleSeconds)
         if (idle && m_session.state == kWork) setState(kIdle, QStringLiteral("Inactif (aucune activité clavier/souris)"));
         else if (!idle && m_session.state == kIdle) setState(kWork, QStringLiteral("Retour d'activité"));
         (idle ? m_session.idle : m_session.work) += delta;
-        m_timeline->add(idle ? kIdle : kWork, delta);
+        track(idle ? kIdle : kWork, delta);
         if (!idle && m_current.id) m_current.spent += delta;
     }
     if ((m_sinceSave += delta) >= 3) {
@@ -606,15 +648,19 @@ void EmployeeDesk::setState(const QString &state, const QString &event)
 
 void EmployeeDesk::addLog(const QString &text)
 {
-    m_log->insertRow(0);
-    m_log->setItem(0, 0, new QTableWidgetItem(QTime::currentTime().toString("HH:mm:ss")));
-    m_log->setItem(0, 1, new QTableWidgetItem(text));
+    m_log->add(QDateTime::currentDateTime(), text);
+    static const QStringList names = {QStringLiteral("Tout"), QStringLiteral("Présence"), QStringLiteral("Pauses"), QStringLiteral("Tâches"), QStringLiteral("Inactivité")};
+    for (int i = 0; i < 5; ++i) m_filters[i]->setText(names[i] + QStringLiteral(" · %1").arg(m_log->count(i - 1)));
 }
 
 void EmployeeDesk::refresh()
 {
     const int work = m_baseWork + m_session.work, pause = m_basePause + m_session.pause;
-    m_clock->setText(clockText(work));
+    const int workLeft = WorkRules::Day - work, pauseLeft = WorkRules::Pause - pause;
+    for (TimeCard *t : std::as_const(m_times)) t->setTimes(work, pause, m_paused, m_session.state == kWork);
+    m_clock->setText(m_elapsed ? clockText(work) : clockText(std::abs(workLeft)));
+    m_clockInfo->setText((m_elapsed ? QStringLiteral("travaillé · pause ") : workLeft < 0 ? QStringLiteral("heures sup. · pause ") : QStringLiteral("restant · pause "))
+                         + (m_elapsed ? QStringLiteral("%1 min prises").arg(pause / 60) : pauseLeft < 0 ? QStringLiteral("dépassée") : minutesText(pauseLeft)));
     m_state->setText(QStringLiteral("●  ") + m_session.state);
     m_state->setStyleSheet("color:" + statusColor(m_session.state).name());
     m_pauseButton->setText(m_paused ? QStringLiteral("Reprendre") : QStringLiteral("Pause"));
@@ -643,16 +689,37 @@ void EmployeeDesk::refresh()
     m_next->setText(next ? next->title : QStringLiteral("Plus de tâche prévue"));
     m_nextInfo->setText(next ? QStringLiteral("Durée prévue : ") + minutesText(next->planned) : QStringLiteral("Tout est déposé ou validé."));
     m_nextButton->setText(next ? QStringLiteral("Passer à cette tâche  ›") : QStringLiteral("Demander une tâche"));
-    m_work->setText(clockText(work));
-    m_left->setText(clockText(WorkRules::Day - work));
-    m_overtime->setText(work > WorkRules::Day ? QStringLiteral("Heures sup. : ") + clockText(work - WorkRules::Day) : QString());
-    m_pauseLeft->setText(clockText(WorkRules::Pause - pause));
-    m_pauseInfo->setText(m_paused ? QStringLiteral("Pause en cours") : pause == 0 ? QStringLiteral("Pas encore prise") : QStringLiteral("Prise : ") + minutesText(pause));
-    m_pauseInfo->setStyleSheet(pause > WorkRules::Pause ? "color:#e08f8f" : "");
     m_idle->setText(clockText(m_session.idle));
+    m_idleToday->setText(clockText(m_session.idle));
     m_done->setText(QStringLiteral("%1 / %2").arg(done).arg(m_tasks.size()));
     if (m_current.id)
         if (auto *bar = findChild<QProgressBar *>(QStringLiteral("task%1").arg(m_current.id))) bar->setValue(std::min(m_current.spent, m_current.planned));
+}
+
+TimeCard *EmployeeDesk::timeCard()
+{
+    auto *t = new TimeCard;
+    t->clicked = [this] { flipTimes(); };
+    m_times << t;
+    return t;
+}
+
+void EmployeeDesk::flipTimes()
+{
+    m_elapsed = !m_elapsed;
+    for (TimeCard *t : std::as_const(m_times)) t->setBack(m_elapsed);
+    refresh();
+}
+
+void EmployeeDesk::track(const QString &state, int seconds)
+{
+    for (DayTimeline *t : std::as_const(m_timelines)) t->add(state, seconds);
+}
+
+bool EmployeeDesk::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == m_chip && event->type() == QEvent::MouseButtonRelease && static_cast<QMouseEvent *>(event)->button() == Qt::LeftButton) flipTimes();
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void EmployeeDesk::finish(const QString &reason)

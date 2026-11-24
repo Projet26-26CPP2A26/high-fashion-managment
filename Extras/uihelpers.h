@@ -75,7 +75,7 @@ private:
 inline QPixmap barsImage(const QVector<BarRow> &rows,double maxValue,int width,int labelWidth,qreal ratio) {
     const int rowHeight=30,height=std::max(70,int(rows.size())*rowHeight+6);
     QPixmap pixmap(int(width*ratio),int(height*ratio)); pixmap.setDevicePixelRatio(ratio); pixmap.fill(Qt::transparent);
-    QPainter p(&pixmap); p.setRenderHint(QPainter::Antialiasing); p.setRenderHint(QPainter::TextAntialiasing); p.setFont(QFont(QStringLiteral("Segoe UI"),9));
+    QPainter p(&pixmap); p.setRenderHint(QPainter::Antialiasing); p.setRenderHint(QPainter::TextAntialiasing); p.setFont(QFont(QStringLiteral("Inter"),9));
     const int barX=labelWidth+10,textWidth=46,barWidth=std::max(40,width-barX-textWidth-8); const QFontMetrics metrics(p.font()); int y=0;
     for(const auto &r:rows) {
         p.setPen(QColor("#d9d5cb")); p.drawText(QRect(0,y,labelWidth,rowHeight),Qt::AlignLeft|Qt::AlignVCenter,metrics.elidedText(r.label(),Qt::ElideRight,labelWidth));
@@ -89,22 +89,22 @@ inline QPixmap barsImage(const QVector<BarRow> &rows,double maxValue,int width,i
         p.setPen(QColor(r.high()?"#e8a3a3":"#e2cf9f")); p.drawText(QRect(barX+barWidth+8,y,textWidth,rowHeight),Qt::AlignLeft|Qt::AlignVCenter,r.text());
         y+=rowHeight;
     }
-    if(rows.isEmpty()) {p.setPen(QColor("#b3aea3")); p.drawText(QRect(0,0,width,height),Qt::AlignCenter,QStringLiteral("Aucun employé enregistré"));}
+    if(rows.isEmpty()) {p.setPen(QColor("#8f8c86")); p.drawText(QRect(0,0,width,height),Qt::AlignCenter,QStringLiteral("Aucun employé enregistré"));}
     return pixmap;
 }
 
 inline QPixmap hoursChartImage(const QVector<double> &values,const QStringList &labels,int width,int height,qreal ratio) {
     QPixmap pixmap(int(width*ratio),int(height*ratio)); pixmap.setDevicePixelRatio(ratio); pixmap.fill(Qt::transparent);
-    QPainter p(&pixmap); p.setRenderHint(QPainter::Antialiasing); p.setRenderHint(QPainter::TextAntialiasing); p.setFont(QFont(QStringLiteral("Segoe UI"),8));
+    QPainter p(&pixmap); p.setRenderHint(QPainter::Antialiasing); p.setRenderHint(QPainter::TextAntialiasing); p.setFont(QFont(QStringLiteral("Inter"),8));
     double top=1; for(double v:values) top=std::max(top,v); top=std::ceil(top/2.0)*2.0; if(top<4) top=4;
     const QRectF plot(46,10,width-62,height-44); const int n=values.size();
     for(int i=0;i<=4;++i) {
         const double y=plot.bottom()-plot.height()*i/4.0;
         p.setPen(QPen(QColor("#323236"),1)); p.drawLine(QPointF(plot.left(),y),QPointF(plot.right(),y));
-        p.setPen(QColor("#b3aea3")); p.drawText(QRectF(0,y-9,plot.left()-8,18),Qt::AlignRight|Qt::AlignVCenter,QStringLiteral("%1 h").arg(top*i/4.0,0,'f',top*i/4.0==int(top*i/4.0)?0:1));
+        p.setPen(QColor("#8f8c86")); p.drawText(QRectF(0,y-9,plot.left()-8,18),Qt::AlignRight|Qt::AlignVCenter,QStringLiteral("%1 h").arg(top*i/4.0,0,'f',top*i/4.0==int(top*i/4.0)?0:1));
     }
     QVector<QPointF> pts; for(int i=0;i<n;++i) pts.append(QPointF(plot.left()+plot.width()*i/std::max(1,n-1),plot.bottom()-plot.height()*values[i]/top));
-    for(int i=0;i<n;++i) {p.setPen(QColor("#b3aea3")); p.drawText(QRectF(pts[i].x()-30,plot.bottom()+8,60,18),Qt::AlignCenter,labels[i]);}
+    for(int i=0;i<n;++i) {p.setPen(QColor("#8f8c86")); p.drawText(QRectF(pts[i].x()-30,plot.bottom()+8,60,18),Qt::AlignCenter,labels[i]);}
     if(n<2) return pixmap;
     QPainterPath line; line.moveTo(pts[0]);
     for(int i=0;i<n-1;++i) {
@@ -124,7 +124,7 @@ inline bool confirm(QWidget *parent,const QString &text) {
     return DialogSkin::ask(parent,"Confirmation",text,"Confirmer","Annuler");
 }
 inline QString document(const QString &title,const QString &body) {
-    return QStringLiteral("<html><body style='font-family:Segoe UI;font-size:9pt;color:#222'><h1>AUREA — %1</h1><p>Atelier de couture · %2</p>%3</body></html>")
+    return QStringLiteral("<html><body style='font-family:Inter,Segoe UI;font-size:9pt;color:#222'><h1>AUREA — %1</h1><p>Atelier de couture · %2</p>%3</body></html>")
         .arg(title.toHtmlEscaped(),QDate::currentDate().toString("dd/MM/yyyy"),body);
 }
 inline QString headers(const QStringList &values) {QString out="<tr bgcolor='#e5d5a1'>"; for(const auto &v:values) out+="<th align='left'>"+v.toHtmlEscaped()+"</th>"; return out+"</tr>";}

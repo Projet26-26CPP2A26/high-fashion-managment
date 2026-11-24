@@ -29,6 +29,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     Suivi/passagefeed.cpp
     Suivi/reviewboard.cpp
     Suivi/submitdialog.cpp
+    Suivi/timecard.cpp
     Arduino/badgelink.cpp
     Arduino/badgepage.cpp
     Arduino/badgeservice.cpp

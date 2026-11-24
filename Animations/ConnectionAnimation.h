@@ -55,9 +55,9 @@ protected:
     }
 
 private:
-    QColor color() const { return QColor(m_state == On ? "#7fc08a" : m_state == Waiting ? "#e2cf9f" : m_state == Error ? "#e08f8f" : "#a39e94"); }
+    QColor color() const { return QColor(m_state == On ? "#7fc08a" : m_state == Waiting ? "#e2cf9f" : m_state == Error ? "#e08f8f" : "#77746e"); }
     State m_state = Off;
-    QColor m_before = QColor("#a39e94");
+    QColor m_before = QColor("#77746e");
     Motion::Tween m_change;
     QElapsedTimer m_clock;
 };

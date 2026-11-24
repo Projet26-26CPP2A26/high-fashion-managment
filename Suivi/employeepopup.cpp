@@ -38,7 +38,7 @@ protected:
         const double limit = plot.bottom() - plot.height() * WorkRules::Day / top;
         p.setPen(QPen(QColor("#5a5548"), 1, Qt::DashLine));
         p.drawLine(QPointF(plot.left(), limit), QPointF(plot.right(), limit));
-        p.setPen(QColor("#b3aea3"));
+        p.setPen(QColor("#8f8c86"));
         p.drawText(QPointF(plot.left(), limit - 5), QStringLiteral("8 h"));
         const int n = int(m_days.size());
         const double slot = plot.width() / n, bar = std::min(46.0, slot * 0.5);
