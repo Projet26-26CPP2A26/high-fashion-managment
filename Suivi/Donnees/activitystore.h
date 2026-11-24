@@ -6,7 +6,8 @@
 
 class QSqlQuery;
 
-struct WorkSession {
+class WorkSession {
+public:
     int id = 0;
     QString name;
     QString position, task, state, endReason, via;
@@ -27,7 +28,8 @@ namespace WorkRules {
 const int Day = 8 * 3600, Pause = 3600;
 }
 
-struct WorkTask {
+class WorkTask {
+public:
     enum State { Todo, Current, Done, Submitted, Rework };
     int id = 0, planned = 0, spent = 0, state = Todo, stepsDone = 0, rating = 0;
     QString who, title, specialty, details, note, file, feedback;
@@ -35,26 +37,30 @@ struct WorkTask {
     bool ready() const { return stepsDone == (1 << steps.size()) - 1; }
 };
 
-struct StoredAttendance {
+class StoredAttendance {
+public:
     int employeeId;
     QDate day;
     QTime arrival, departure;
     int pause;
 };
 
-struct ReviewStats {
+class ReviewStats {
+public:
     int accepted = 0;
     double rating = 0;
 };
 
-struct ActivityEvent {
+class ActivityEvent {
+public:
     QDateTime at;
     QString who, text;
 };
 
 enum class EntryFilter { All, Passages, Refusals };
 
-struct AccessEntry {
+class AccessEntry {
+public:
     int id = 0;
     QDateTime at;
     QString who, label, via, kind, detail;

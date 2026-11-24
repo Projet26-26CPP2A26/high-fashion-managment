@@ -24,7 +24,8 @@ public:
     void start();
     void arriveFrom(MorphOverlay *overlay);
     void reject() override;
-    struct BadgeResult {
+    class BadgeResult {
+    public:
         Role role = None;
         int employeeId = 0;
         QString name, reply;

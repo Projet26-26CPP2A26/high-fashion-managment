@@ -20,16 +20,16 @@ add_executable(AureaEmployes WIN32 main.cpp
     Metier/pdfexport.cpp
     Metier/pointage.cpp
     Metier/statistiques_pdf.cpp
-    Suivi/activityboard.cpp
-    Suivi/activitystore.cpp
-    Suivi/companylink.cpp
-    Suivi/employeedesk.cpp
-    Suivi/employeepopup.cpp
-    Suivi/employeetile.cpp
-    Suivi/passagefeed.cpp
-    Suivi/reviewboard.cpp
-    Suivi/submitdialog.cpp
-    Suivi/timecard.cpp
+    Suivi/Responsable/activityboard.cpp
+    Suivi/Donnees/activitystore.cpp
+    Suivi/Donnees/companylink.cpp
+    Suivi/Employe/employeedesk.cpp
+    Suivi/Responsable/employeepopup.cpp
+    Suivi/Responsable/employeetile.cpp
+    Suivi/Responsable/passagefeed.cpp
+    Suivi/Responsable/reviewboard.cpp
+    Suivi/Employe/submitdialog.cpp
+    Suivi/Employe/timecard.cpp
     Arduino/badgelink.cpp
     Arduino/badgepage.cpp
     Arduino/badgeservice.cpp
@@ -40,28 +40,29 @@ add_executable(AureaEmployes WIN32 main.cpp
     Animations/LoginAnimation.cpp
     Animations/LogoAnimation.cpp
     Animations/TransitionAnimation.cpp
-    Extras/companysimulator.cpp
-    Extras/dialogskin.cpp
-    Extras/logindialog.cpp
-    Extras/oraclecheck.cpp
-    Extras/oraclemodulecheck.cpp
-    Extras/polish.cpp
+    Extras/Outils/companysimulator.cpp
+    Extras/Interface/dialogskin.cpp
+    Extras/Interface/logindialog.cpp
+    Extras/Outils/oraclecheck.cpp
+    Extras/Outils/oraclemodulecheck.cpp
+    Extras/Interface/polish.cpp
     Crud/employee.h
     Crud/employeemodule.h
     Crud/employeerepository.h
     Crud/employeewindow.h
     Crud/oracleconnection.h
     Metier/pdfexport.h
-    Suivi/activityboard.h
-    Suivi/activitystore.h
-    Suivi/companylink.h
-    Suivi/employeedesk.h
-    Suivi/employeepopup.h
-    Suivi/employeetile.h
-    Suivi/passagefeed.h
-    Suivi/reviewboard.h
-    Suivi/submitdialog.h
-    Suivi/taskcatalog.h
+    Suivi/Responsable/activityboard.h
+    Suivi/Donnees/activitystore.h
+    Suivi/Donnees/companylink.h
+    Suivi/Employe/employeedesk.h
+    Suivi/Responsable/employeepopup.h
+    Suivi/Responsable/employeetile.h
+    Suivi/Responsable/passagefeed.h
+    Suivi/Responsable/reviewboard.h
+    Suivi/Employe/submitdialog.h
+    Suivi/Donnees/taskcatalog.h
+    Suivi/Employe/timecard.h
     Arduino/badgelink.h
     Arduino/badgepage.h
     Arduino/badgeservice.h
@@ -75,20 +76,20 @@ add_executable(AureaEmployes WIN32 main.cpp
     Animations/LogoAnimation.h
     Animations/TransitionAnimation.h
     Animations/UiAnimations.h
-    Extras/companysimulator.h
-    Extras/dialogskin.h
-    Extras/greeting.h
-    Extras/icons.h
-    Extras/logindialog.h
-    Extras/oraclecheck.h
-    Extras/oraclemodulecheck.h
-    Extras/polish.h
-    Extras/sound.h
-    Extras/uihelpers.h
+    Extras/Outils/companysimulator.h
+    Extras/Interface/dialogskin.h
+    Extras/Interface/greeting.h
+    Extras/Interface/icons.h
+    Extras/Interface/logindialog.h
+    Extras/Outils/oraclecheck.h
+    Extras/Outils/oraclemodulecheck.h
+    Extras/Interface/polish.h
+    Extras/Interface/sound.h
+    Extras/Interface/uihelpers.h
     Crud/employees.ui
     Crud/employeewindow.ui
     Resources/assets.qrc)
-target_include_directories(AureaEmployes PRIVATE Crud Metier Suivi Arduino Animations Extras)
+target_include_directories(AureaEmployes PRIVATE Crud Metier Arduino Animations Suivi/Donnees Suivi/Employe Suivi/Responsable Extras/Interface Extras/Outils)
 target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network Qt6::OpenGL)
 if(WIN32)
     target_link_libraries(AureaEmployes PRIVATE user32 dwmapi winmm)

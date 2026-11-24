@@ -14,8 +14,16 @@ public:
     void step(const QDateTime &now);
     void badge(int employeeId, bool arrival);
 
-    struct Part { QString state; int seconds; };
-    struct Plan { QDateTime arrival; QVector<Part> parts; };
+    class Part {
+    public:
+        QString state;
+        int seconds;
+    };
+    class Plan {
+    public:
+        QDateTime arrival;
+        QVector<Part> parts;
+    };
     static Plan plan(const Employee &employee, const QDate &day);
     static WorkSession at(const Plan &plan, const QDateTime &now);
 

@@ -20,7 +20,8 @@ const unsigned long DUREE_MESSAGE = 3000;
 const int PORTE_FERMEE = 0;
 const int PORTE_OUVERTE = 90;
 
-struct Note {
+class Note {
+public:
   unsigned int frequence;
   unsigned int duree;
   unsigned int suivante;

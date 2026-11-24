@@ -4,7 +4,8 @@
 #include <QStringList>
 #include <QVector>
 
-struct TaskModel {
+class TaskModel {
+public:
     QString title, details;
     QStringList steps;
     int minutes;

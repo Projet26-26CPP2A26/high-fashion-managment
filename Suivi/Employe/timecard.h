@@ -23,7 +23,8 @@ protected:
     void leaveEvent(QEvent *event) override;
 
 private:
-    struct Half {
+    class Half {
+    public:
         QString title, value, note;
         double ratio;
         bool alert;
@@ -50,7 +51,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    struct Row {
+    class Row {
+    public:
         QDateTime at;
         QString text;
         Kind kind;

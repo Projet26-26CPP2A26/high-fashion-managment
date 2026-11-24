@@ -6,7 +6,8 @@
 #include <QStringList>
 
 namespace {
-struct Log {
+class Log {
+public:
     QStringList lines;
     int failed = 0;
     bool check(bool ok, const QString &text, const QString &error = QString()) {

@@ -73,7 +73,10 @@ int main(int argc, char *argv[])
         return report.ok ? 0 : 2;
     }
 
-    struct OracleShutdown { ~OracleShutdown() { OracleConnection::instance().shutdown(); } } oracleShutdown;
+    class OracleShutdown {
+    public:
+        ~OracleShutdown() { OracleConnection::instance().shutdown(); }
+    } oracleShutdown;
     app.setQuitOnLastWindowClosed(false);
 
     const bool demo = !parser.isSet("live");
@@ -110,7 +113,11 @@ int main(int argc, char *argv[])
     MorphOverlay::warmUp();
     std::unique_ptr<QThread> warm(QThread::create([] { OracleConnection::warmUp(); }));
     warm->start();
-    struct WarmEnd { QThread *thread; ~WarmEnd() { thread->wait(); } } warmEnd{warm.get()};
+    class WarmEnd {
+    public:
+        QThread *thread;
+        ~WarmEnd() { thread->wait(); }
+    } warmEnd{warm.get()};
     if (demo && store.setting("admin_badge").isEmpty()) store.saveSetting("admin_badge", "11223344");
     if (qEnvironmentVariableIsSet("AUREA_WOKWI")) BadgeLink::instance().startAuto();
     const auto scanLogin = [&store](const QString &text) {

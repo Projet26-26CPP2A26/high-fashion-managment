@@ -11,7 +11,8 @@
 #include <cmath>
 
 namespace {
-struct Log {
+class Log {
+public:
     QStringList lines;
     int failed = 0;
     void pass(const QString &text) { lines << QStringLiteral("[ OK ]    ") + text; }

@@ -13,7 +13,8 @@ public:
     OracleConnection(const OracleConnection &) = delete;
     OracleConnection &operator=(const OracleConnection &) = delete;
 
-    struct Settings {
+    class Settings {
+    public:
         QString dsn, user;
         bool hasPassword = false;
     };

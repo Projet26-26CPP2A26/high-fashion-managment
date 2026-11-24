@@ -3,7 +3,8 @@
 #include <QObject>
 #include <QVector>
 
-struct BadgeScan {
+class BadgeScan {
+public:
     QDateTime at;
     QString uid, name, kind;
 };

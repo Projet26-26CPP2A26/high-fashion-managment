@@ -9,7 +9,8 @@ class QPainter;
 class Spectacle {
 public:
     enum Mode { EmployeeIn, EmployeeOut, AdminIn, AdminOut, Closing };
-    struct Frame {
+    class Frame {
+    public:
         Mode mode;
         QPointF center;
         double logo, time, arrive, leave;
@@ -19,7 +20,10 @@ public:
     void paint(QPainter &painter, bool front) const;
 
 private:
-    struct Point { double x, y, z; };
+    class Point {
+    public:
+        double x, y, z;
+    };
     Point turn(Point p, double ax, double ay, double az) const;
     void segment(const Point &a, const Point &b, double alpha, int color);
     void orbit(double radius, double tilt, double roll, double start, double sweep, double alpha, int color);

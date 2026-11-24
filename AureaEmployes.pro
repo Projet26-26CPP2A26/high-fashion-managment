@@ -3,10 +3,11 @@ CONFIG += c++17
 TEMPLATE = app
 TARGET = AureaEmployes
 
-INCLUDEPATH += Crud Metier Suivi Arduino Animations Extras
+INCLUDEPATH += Crud Metier Arduino Animations Suivi/Donnees Suivi/Employe Suivi/Responsable Extras/Interface Extras/Outils
 win32: LIBS += -luser32 -ldwmapi -lwinmm
 
-SOURCES += main.cpp \
+SOURCES += \
+    main.cpp \
     Crud/crud_interface.cpp \
     Crud/employee.cpp \
     Crud/employeemodule.cpp \
@@ -18,16 +19,6 @@ SOURCES += main.cpp \
     Metier/pdfexport.cpp \
     Metier/pointage.cpp \
     Metier/statistiques_pdf.cpp \
-    Suivi/activityboard.cpp \
-    Suivi/activitystore.cpp \
-    Suivi/companylink.cpp \
-    Suivi/employeedesk.cpp \
-    Suivi/employeepopup.cpp \
-    Suivi/employeetile.cpp \
-    Suivi/passagefeed.cpp \
-    Suivi/reviewboard.cpp \
-    Suivi/submitdialog.cpp \
-    Suivi/timecard.cpp \
     Arduino/badgelink.cpp \
     Arduino/badgepage.cpp \
     Arduino/badgeservice.cpp \
@@ -38,30 +29,30 @@ SOURCES += main.cpp \
     Animations/LoginAnimation.cpp \
     Animations/LogoAnimation.cpp \
     Animations/TransitionAnimation.cpp \
-    Extras/companysimulator.cpp \
-    Extras/dialogskin.cpp \
-    Extras/logindialog.cpp \
-    Extras/oraclecheck.cpp \
-    Extras/oraclemodulecheck.cpp \
-    Extras/polish.cpp
+    Suivi/Donnees/activitystore.cpp \
+    Suivi/Donnees/companylink.cpp \
+    Suivi/Employe/employeedesk.cpp \
+    Suivi/Employe/submitdialog.cpp \
+    Suivi/Employe/timecard.cpp \
+    Suivi/Responsable/activityboard.cpp \
+    Suivi/Responsable/employeepopup.cpp \
+    Suivi/Responsable/employeetile.cpp \
+    Suivi/Responsable/passagefeed.cpp \
+    Suivi/Responsable/reviewboard.cpp \
+    Extras/Interface/dialogskin.cpp \
+    Extras/Interface/logindialog.cpp \
+    Extras/Interface/polish.cpp \
+    Extras/Outils/companysimulator.cpp \
+    Extras/Outils/oraclecheck.cpp \
+    Extras/Outils/oraclemodulecheck.cpp
 
-HEADERS += Crud/employee.h \
+HEADERS += \
+    Crud/employee.h \
     Crud/employeemodule.h \
     Crud/employeerepository.h \
     Crud/employeewindow.h \
     Crud/oracleconnection.h \
     Metier/pdfexport.h \
-    Suivi/activityboard.h \
-    Suivi/activitystore.h \
-    Suivi/companylink.h \
-    Suivi/employeedesk.h \
-    Suivi/employeepopup.h \
-    Suivi/employeetile.h \
-    Suivi/passagefeed.h \
-    Suivi/reviewboard.h \
-    Suivi/submitdialog.h \
-    Suivi/taskcatalog.h \
-    Suivi/timecard.h \
     Arduino/badgelink.h \
     Arduino/badgepage.h \
     Arduino/badgeservice.h \
@@ -75,18 +66,37 @@ HEADERS += Crud/employee.h \
     Animations/LogoAnimation.h \
     Animations/TransitionAnimation.h \
     Animations/UiAnimations.h \
-    Extras/companysimulator.h \
-    Extras/dialogskin.h \
-    Extras/greeting.h \
-    Extras/icons.h \
-    Extras/logindialog.h \
-    Extras/oraclecheck.h \
-    Extras/oraclemodulecheck.h \
-    Extras/polish.h \
-    Extras/sound.h \
-    Extras/uihelpers.h
+    Suivi/Donnees/activitystore.h \
+    Suivi/Donnees/companylink.h \
+    Suivi/Donnees/taskcatalog.h \
+    Suivi/Employe/employeedesk.h \
+    Suivi/Employe/submitdialog.h \
+    Suivi/Employe/timecard.h \
+    Suivi/Responsable/activityboard.h \
+    Suivi/Responsable/employeepopup.h \
+    Suivi/Responsable/employeetile.h \
+    Suivi/Responsable/passagefeed.h \
+    Suivi/Responsable/reviewboard.h \
+    Extras/Interface/dialogskin.h \
+    Extras/Interface/greeting.h \
+    Extras/Interface/icons.h \
+    Extras/Interface/logindialog.h \
+    Extras/Interface/polish.h \
+    Extras/Interface/sound.h \
+    Extras/Interface/uihelpers.h \
+    Extras/Outils/companysimulator.h \
+    Extras/Outils/oraclecheck.h \
+    Extras/Outils/oraclemodulecheck.h
 
-FORMS += Crud/employees.ui \
+FORMS += \
+    Crud/employees.ui \
     Crud/employeewindow.ui
 
 RESOURCES += Resources/assets.qrc
+
+DISTFILES += \
+    Arduino/pointage_badge/pointage_badge.ino \
+    oracle/01_schema.sql \
+    oracle/02_demo.sql \
+    oracle/03_badges.sql \
+    oracle/99_drop_all.sql

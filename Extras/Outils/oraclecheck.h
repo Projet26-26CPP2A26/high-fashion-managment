@@ -2,7 +2,8 @@
 #include <QString>
 
 namespace OracleCheck {
-struct Report {
+class Report {
+public:
     bool ok = false;
     QString text;
 };

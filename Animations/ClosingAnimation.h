@@ -13,7 +13,8 @@ class ClosingView : public QOpenGLWindow, protected QOpenGLFunctions {
 public:
     static constexpr double Length = 1.68;
 
-    struct Scene {
+    class Scene {
+    public:
         QRect area;
         QRectF window, logo;
         QImage shot, mark;
