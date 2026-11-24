@@ -33,7 +33,7 @@ LoginScene::LoginScene(QWidget *parent)
         update();
     });
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(Fx::ambientInterval(this));
+    timer->start(std::max(8, Fx::frameInterval(this)));
 }
 
 void LoginScene::setLogoVisible(bool visible)

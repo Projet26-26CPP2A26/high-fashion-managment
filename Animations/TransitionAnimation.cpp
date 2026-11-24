@@ -104,7 +104,7 @@ MorphOverlay::MorphOverlay(
         advance();
         update();
     });
-    timer->start(Fx::ambientInterval(this));
+    timer->start(Fx::frameInterval(this));
     current = this;
     Fx::steady(this);
     show();
@@ -237,7 +237,7 @@ void MorphOverlay::wait(const std::function<bool()> &done)
             loop.quit();
         }
     });
-    check.start(7);
+    check.start(4);
     loop.exec();
 }
 
@@ -285,7 +285,7 @@ void MorphOverlay::land(std::function<QRect()> logo, LogoSwitch logoVisible)
             QTimer::singleShot(50, this, &QWidget::close);
         }
     });
-    timer->start(7);
+    timer->start(4);
 }
 
 void MorphOverlay::paintEvent(QPaintEvent *)
