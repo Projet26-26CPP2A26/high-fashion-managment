@@ -17,7 +17,7 @@ namespace {
 const QLocale french(QLocale::French,QLocale::France);
 QString escape(const QString &s) { return s.toHtmlEscaped(); }
 QString shell(const QString &title,const QString &subtitle,const QString &body) {
-    return QStringLiteral("<html><head><meta charset='utf-8'><style>body{font-family:'Segoe UI';font-size:10pt;color:#202728;}h1{font-family:'Cormorant Garamond';font-weight:600;color:#8f753e;font-size:26pt;}h2{font-size:16pt;}p{line-height:140%;}th{background:#283033;color:#ffffff;padding:8px;text-align:left;}td{padding:7px;border-bottom:1px solid #dddddd;}table{border-collapse:collapse;width:100%;}.muted{color:#606b68;}.total{font-size:15pt;color:#8f753e;}</style></head><body><h1>AUREA</h1><p class='muted'>ATELIER HAUTE COUTURE · MATIÈRES PREMIÈRES</p><h2>%1</h2><p>%2</p>%3<p class='muted'>Édité le %4 · Prix unitaires en dinars tunisiens (DT)</p></body></html>")
+    return QStringLiteral("<html><head><meta charset='utf-8'><style>body{font-family:'Inter','Segoe UI';font-size:10pt;color:#202728;}h1{font-family:Georgia;color:#8f753e;font-size:26pt;}h2{font-size:16pt;}p{line-height:140%;}th{background:#283033;color:#ffffff;padding:8px;text-align:left;}td{padding:7px;border-bottom:1px solid #dddddd;}table{border-collapse:collapse;width:100%;}.muted{color:#606b68;}.total{font-size:15pt;color:#8f753e;}</style></head><body><h1>AUREA</h1><p class='muted'>ATELIER HAUTE COUTURE · MATIÈRES PREMIÈRES</p><h2>%1</h2><p>%2</p>%3<p class='muted'>Édité le %4 · Prix unitaires en dinars tunisiens (DT)</p></body></html>")
         .arg(escape(title),escape(subtitle),body,escape(french.toString(QDateTime::currentDateTime(),QStringLiteral("dd MMMM yyyy à HH:mm"))));
 }
 QString cells(const QStringList &values) {

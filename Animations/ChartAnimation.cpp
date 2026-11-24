@@ -62,7 +62,7 @@ void ChartAnimation::paintEvent(QPaintEvent *)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     p.fillRect(rect(), QColor("#232326"));
-    QFont font("Segoe UI");
+    QFont font("Inter");
     font.setPixelSize(13);
     p.setFont(font);
     if (m_data.isEmpty()) {
