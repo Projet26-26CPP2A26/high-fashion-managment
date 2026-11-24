@@ -50,7 +50,10 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont(QDir(qEnvironmentVariable("WINDIR", "C:/Windows")).filePath("Fonts/" + file));
     for (const QString &file : QStringList{"Inter.ttf", "CormorantGaramond.ttf", "CormorantGaramond-Italic.ttf"})
         QFontDatabase::addApplicationFont(":/assets/fonts/" + file);
-    app.setFont(QFont("Inter", 10));
+    QFont base("Inter", 10);
+    base.setHintingPreference(QFont::PreferNoHinting);
+    base.setStyleStrategy(QFont::PreferAntialias);
+    app.setFont(base);
     app.setStyleSheet("QToolTip { background: #eee2bf; color: #23292b; border: none; padding: 7px; }");
 
     QCommandLineParser parser;
@@ -262,7 +265,6 @@ int main(int argc, char *argv[])
                 continue;
             }
             store.logAt(adminName, adminEvent, QDateTime::currentDateTime());
-            store.addEntry(adminName, QStringLiteral("Responsable RH"), via, QStringLiteral("ARRIVEE"));
             space = window.get();
             QObject::connect(window.get(), &EmployeeWindow::closed, &loop, [&](bool again) {
                 leave(again, QStringLiteral("À bientôt"), QStringLiteral("Vos données sont enregistrées."));

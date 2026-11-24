@@ -19,7 +19,6 @@ add_executable(AureaEmployes WIN32 main.cpp
     Metier/affectation_interface.cpp
     Metier/pdfexport.cpp
     Metier/pointage.cpp
-    Metier/pointage_interface.cpp
     Metier/statistiques_pdf.cpp
     Suivi/activityboard.cpp
     Suivi/activitystore.cpp

@@ -1,5 +1,6 @@
 #include "employeemodule.h"
 #include "ui_employees.h"
+#include <QDateEdit>
 #include "icons.h"
 #include "uihelpers.h"
 

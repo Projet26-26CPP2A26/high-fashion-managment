@@ -15,7 +15,7 @@
 namespace {
 QColor pillColor(const QString &t)
 {
-    if (t == QStringLiteral("Arrivée") || t == QStringLiteral("Disponible") || t == QStringLiteral("Suffisante") || t == QStringLiteral("Terminée") || t == QStringLiteral("Terminé")) return QColor("#7fc08a");
+    if (t == QStringLiteral("Arrivée") || t == QStringLiteral("Présent") || t == QStringLiteral("Disponible") || t == QStringLiteral("Suffisante") || t == QStringLiteral("Terminée") || t == QStringLiteral("Terminé")) return QColor("#7fc08a");
     if (t == QStringLiteral("Refusé") || t == QStringLiteral("Indisponible") || t == QStringLiteral("Insuffisante") || t == QStringLiteral("À corriger")) return QColor("#e08f8f");
     if (t == QStringLiteral("En cours") || t == QStringLiteral("Départ")) return QColor("#e6c27a");
     return statusColor(t);

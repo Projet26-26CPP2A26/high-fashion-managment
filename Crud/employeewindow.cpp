@@ -3,6 +3,7 @@
 #include "employeemodule.h"
 #include "activityboard.h"
 #include "badgepage.h"
+#include "passagefeed.h"
 #include "companylink.h"
 #include "companysimulator.h"
 #include "polish.h"
@@ -45,6 +46,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
     badges=new BadgePage(employeeModule->repository(),store,this); pages->addWidget(badges);
     badgeButton=new QPushButton(QStringLiteral("  Badges"),this); badgeButton->setProperty("nav",true); badgeButton->setCheckable(true); badgeButton->setIcon(Icons::nav(Icons::Badge)); badgeButton->setIconSize(QSize(20,20)); badgeButton->setMinimumHeight(44); badgeButton->setCursor(Qt::PointingHandCursor);
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navAttendance)+1,badgeButton); connect(badgeButton,&QPushButton::clicked,this,&EmployeeWindow::showBadges);
+    employeeModule->findChild<QWidget*>("attendancePage")->layout()->addWidget(new PassageFeed(store));
     connect(badges,&BadgePage::attendanceChanged,employeeModule,&EmployeeModule::refresh);
     if(employeeModule->ready()) {
         auto *simulator=new CompanySimulator(store,employeeModule->repository().loadEmployees(),this,QString(),demo,badges->holders());
@@ -98,7 +100,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
         DialogSkin::info(this,"Guide AUREA",QStringLiteral(
             "Employés : ajouter, modifier, supprimer, rechercher, filtrer, trier et exporter en PDF.\n\n"
             "Affectation : modèle de tâche, spécialité, durée, classement puis confirmation. Une surcharge est refusée. Terminer une tâche libère sa charge.\n\n"
-            "Pointage : arrivée / départ ou horaires manuels. Déduisez la pause réelle. Au-delà de 8 h nettes : heures supplémentaires.\n\n"
+            "Pointage : tous les passages en direct, au bureau et en ligne. Cliquez sur un passage pour voir la journée.\n\nBadges : carte Arduino, association des badges et accès refusés.\n\n"
             "Statistiques : bouton « Statistiques » de la page Employés ; « Retour » pour en sortir.\n\n"
             "Ctrl+1 à Ctrl+4 : changer de page. F11 : plein écran. Double-clic sur une fiche pour modifier.\n\nBase active : ")+QSqlDatabase::database().databaseName());
     });
@@ -122,11 +124,11 @@ void EmployeeWindow::showReviews() {
     ui->pageTitle->setText(QStringLiteral("Revues")); ui->subtitle->setText(QStringLiteral("Dépôts des employés : validez, notez ou demandez une correction.")); reviewButton->setChecked(true); Fx::switchPage(pages,2); reviews->enter();
 }
 void EmployeeWindow::showBadges() {
-    ui->pageTitle->setText(QStringLiteral("Badges")); ui->subtitle->setText(QStringLiteral("Pointage par badge RFID : carte Arduino et base Oracle.")); badgeButton->setChecked(true); refusals=0; badges->enter(); Fx::switchPage(pages,3);
+    ui->pageTitle->setText(QStringLiteral("Badges")); ui->subtitle->setText(QStringLiteral("Carte Arduino, titulaires des badges et accès refusés.")); badgeButton->setChecked(true); refusals=0; badges->enter(); Fx::switchPage(pages,3);
 }
 void EmployeeWindow::setPage(int index) {
     static const QStringList titles={"Tableau de bord","Employés","Affectation intelligente","Pointage","Statistiques"};
-    static const QStringList subtitles={"Activité, temps de travail et pauses de l'équipe, en direct.","Fiches, disponibilité et charge de travail.","Spécialité, disponibilité et capacité : un choix expliqué.","Présence, pauses et heures supplémentaires.","Comprendre la répartition de votre effectif."};
+    static const QStringList subtitles={"Activité, temps de travail et pauses de l'équipe, en direct.","Fiches, disponibilité et charge de travail.","Spécialité, disponibilité et capacité : un choix expliqué.","Tous les passages, au bureau et en ligne, en direct.","Comprendre la répartition de votre effectif."};
     if(index<0||index>=titles.size()) return;
     employeeModule->setSection(index); Fx::switchPage(pages,index==0?0:1); ui->pageTitle->setText(titles[index]); ui->subtitle->setText(subtitles[index]);
     const QList<QPushButton*> buttons={ui->navDashboard,ui->navEmployees,ui->navAssignment,ui->navAttendance}; buttons[index==4?1:index]->setChecked(true);

@@ -26,7 +26,6 @@ private:
     QVector<Assignment> tasks;
     QVector<EmployeeCandidate> candidates;
     void refreshEmployees();
-    void refreshAttendance();
     void refreshCandidates();
     void updateStatistics();
     void updateDashboard();
@@ -36,10 +35,6 @@ private:
     void deleteEmployee();
     void assignTask();
     void completeTask();
-    void saveAttendance();
-    void loadAttendance(int row);
-    void deleteAttendance();
-    void calculation();
     void exportPdf(bool statistics);
     void report(bool success,const QString &message);
     int selectedId(QTableWidget *table) const;

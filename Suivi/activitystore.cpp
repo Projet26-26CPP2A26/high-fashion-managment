@@ -458,11 +458,12 @@ AccessEntry readEntry(const QSqlQuery &q)
 }
 }
 
-QVector<AccessEntry> ActivityStore::entries(int limit, const QString &via)
+QVector<AccessEntry> ActivityStore::entries(int limit, const QString &via, EntryFilter filter)
 {
     QVector<AccessEntry> list;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare("SELECT id,at,who,label,via,kind,detail FROM entries WHERE (?='' OR via=?) ORDER BY at DESC, id DESC LIMIT ?");
+    const QString kinds = filter == EntryFilter::Passages ? "AND kind<>'REFUSE' AND who<>'ADMIN' AND label<>'Responsable RH' " : filter == EntryFilter::Refusals ? "AND kind='REFUSE' " : "";
+    q.prepare("SELECT id,at,who,label,via,kind,detail FROM entries WHERE (?='' OR via=?) " + kinds + "ORDER BY at DESC, id DESC LIMIT ?");
     q.addBindValue(via.isNull() ? QString("") : via);
     q.addBindValue(via.isNull() ? QString("") : via);
     q.addBindValue(limit);

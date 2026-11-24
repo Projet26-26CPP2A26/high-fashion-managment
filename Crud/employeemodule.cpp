@@ -10,7 +10,7 @@ EmployeeModule::EmployeeModule(QWidget *parent):QWidget(parent),ui(new Ui::Emplo
     ui->setupUi(this); repo.loadEmployees(); initialized=repo.error().isEmpty();
 
     for(QLayout *layout:QList<QLayout*>{ui->employeeRoot,ui->employeeListPageLayout,ui->assignmentPageLayout,ui->attendancePageLayout,ui->employeeStatsPageLayout,
-        ui->employeeFilters,ui->employeeActions,ui->assignmentForm,ui->assignmentActions,ui->instantAttendance,ui->attendanceForm,ui->attendanceFilters}) layout->setContentsMargins(0,0,0,0);
+        ui->employeeFilters,ui->employeeActions,ui->assignmentForm,ui->assignmentActions}) layout->setContentsMargins(0,0,0,0);
     ui->employeeRoot->setSpacing(10);
     ui->kpiEmployeesIcon->setPixmap(Icons::pixmap(Icons::People,QColor("#e2cf9f"),18)); ui->kpiAvailableIcon->setPixmap(Icons::pixmap(Icons::Check,QColor("#e2cf9f"),18));
     ui->kpiPresentIcon->setPixmap(Icons::pixmap(Icons::Assign,QColor("#e2cf9f"),18)); ui->kpiHoursIcon->setPixmap(Icons::pixmap(Icons::Clock,QColor("#e2cf9f"),18));
@@ -22,12 +22,9 @@ EmployeeModule::EmployeeModule(QWidget *parent):QWidget(parent),ui(new Ui::Emplo
     ui->employeeChart->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Preferred); ui->loadChart->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Preferred);
     if(!initialized) {ui->employeeStatus->setText("Erreur de base : "+repo.error()); setEnabled(false); return;}
     setupTable(ui->employeesTable,{80,145,180,130,160,95,115,80});
-    setupTable(ui->attendanceTable,{95,180,75,75,75,115,115,100});
     setupTable(ui->todayTable,{190,90,90,85,120,120}); setupTable(ui->recentTable,{145,180,280,110});
     setupTable(ui->candidatesTable,{155,160,65,95,95,95,95,130}); setupTable(ui->assignmentsTable,{135,150,240,155,70,90});
     setupTable(ui->employeeStatsTable,{180,330,110});
-    ui->attendanceDate->setDate(QDate::currentDate()); ui->attendanceDate->setMaximumDate(QDate::currentDate());
-    ui->attendanceArrival->setTime(QTime(8,0)); ui->attendanceDeparture->setTime(QTime(17,0));
     connect(ui->alertButton,&QPushButton::clicked,this,[this]{ui->availabilityFilter->setCurrentIndex(0); ui->positionFilter->setCurrentIndex(0); ui->employeeSearch->clear(); ui->employeeSort->setCurrentIndex(7); setSection(1);});
     connect(ui->employeeSearch,&QLineEdit::textChanged,this,[this]{refreshEmployees();});
     for(auto *c:{ui->availabilityFilter,ui->positionFilter,ui->employeeSort}) connect(c,&QComboBox::currentIndexChanged,this,[this]{refreshEmployees();});
@@ -65,21 +62,10 @@ EmployeeModule::EmployeeModule(QWidget *parent):QWidget(parent),ui(new Ui::Emplo
     connect(ui->assignmentsTable,&QTableWidget::itemSelectionChanged,this,[this]{
         const int id=selectedId(ui->assignmentsTable); bool enabled=false; for(const auto &a:tasks) if(a.id()==id) enabled=!a.completed(); ui->completeTaskButton->setEnabled(enabled);
     });
-    connect(ui->clockInButton,&QPushButton::clicked,this,[this]{report(repo.clockIn(ui->attendanceEmployee->currentData().toInt()),"Arrivée enregistrée (pause initiale : 0 min).");});
-    connect(ui->clockOutButton,&QPushButton::clicked,this,[this]{report(repo.clockOut(ui->attendanceEmployee->currentData().toInt()),"Départ enregistré. Corrigez la pause si nécessaire.");});
-    connect(ui->saveAttendanceButton,&QPushButton::clicked,this,&EmployeeModule::saveAttendance);
-    connect(ui->deleteAttendanceButton,&QPushButton::clicked,this,&EmployeeModule::deleteAttendance);
-    connect(ui->attendanceTable,&QTableWidget::cellDoubleClicked,this,[this](int row,int){loadAttendance(row);});
-    connect(ui->attendanceTable,&QTableWidget::itemSelectionChanged,this,[this]{ui->deleteAttendanceButton->setEnabled(selectedId(ui->attendanceTable)>0);});
-    connect(ui->attendanceSearch,&QLineEdit::textChanged,this,[this]{refreshAttendance();});
-    connect(ui->attendanceDayFilter,&QComboBox::currentIndexChanged,this,[this]{refreshAttendance();});
-    connect(ui->attendanceArrival,&QTimeEdit::timeChanged,this,[this]{calculation();});
-    connect(ui->attendanceDeparture,&QTimeEdit::timeChanged,this,[this]{calculation();});
-    connect(ui->attendancePause,&QSpinBox::valueChanged,this,[this]{calculation();});
     connect(ui->employeeTabs,&QTabWidget::currentChanged,this,[this](int index){if(index==4) QTimer::singleShot(0,this,[this]{updateStatistics();}); if(index==0) QTimer::singleShot(0,this,[this]{updateHoursChart();});});
     auto *timer=new QTimer(this); timer->setInterval(60000);
-    connect(timer,&QTimer::timeout,this,[this]{ui->attendanceDate->setMaximumDate(QDate::currentDate()); refresh();}); timer->start();
-    refresh(); calculation();
+    connect(timer,&QTimer::timeout,this,[this]{refresh();}); timer->start();
+    refresh();
 }
 EmployeeModule::~EmployeeModule() {delete ui;}
 void EmployeeModule::setSection(int index) {if(index>=0&&index<5) Fx::switchPage(ui->employeeTabs,index);}
@@ -93,19 +79,17 @@ void EmployeeModule::refresh() {
     employees=repo.loadEmployees(); if(!repo.error().isEmpty()) {ui->employeeStatus->setText(repo.error()); return;}
     pointages=repo.attendance(); if(!repo.error().isEmpty()) {ui->employeeStatus->setText(repo.error()); return;}
     tasks=repo.assignments(); if(!repo.error().isEmpty()) {ui->employeeStatus->setText(repo.error()); return;}
-    const QString position=ui->positionFilter->currentText(),specialty=ui->taskSpecialty->currentText(); const int employeeId=ui->attendanceEmployee->currentData().toInt();
+    const QString position=ui->positionFilter->currentText(),specialty=ui->taskSpecialty->currentText();
     QSet<QString> positions,specialties; for(const auto &s:EmployeeRepository::specialties()) specialties.insert(s);
     int available=0; for(const auto &e:employees) {positions.insert(e.position()); specialties.insert(e.specialty()); available+=e.available();}
     {
-        QSignalBlocker a(ui->positionFilter),b(ui->taskSpecialty),c(ui->attendanceEmployee);
+        QSignalBlocker a(ui->positionFilter),b(ui->taskSpecialty);
         QStringList positionsList=positions.values(),specialtiesList=specialties.values(); positionsList.sort(); specialtiesList.sort();
         ui->positionFilter->clear(); ui->positionFilter->addItem("Tous les postes"); ui->positionFilter->addItems(positionsList);
         const int p=ui->positionFilter->findText(position); ui->positionFilter->setCurrentIndex(std::max(0,p));
         ui->taskSpecialty->clear(); ui->taskSpecialty->addItems(specialtiesList); const int s=ui->taskSpecialty->findText(specialty); ui->taskSpecialty->setCurrentIndex(std::max(0,s));
-        ui->attendanceEmployee->clear(); for(const auto &e:employees) ui->attendanceEmployee->addItem(e.name()+" · "+e.reference(),e.id());
-        ui->attendanceEmployee->setCurrentIndex(std::max(0,ui->attendanceEmployee->findData(employeeId)));
     }
-    refreshEmployees(); refreshAttendance(); refreshCandidates(); ui->assignmentsTable->setRowCount(0);
+    refreshEmployees(); refreshCandidates(); ui->assignmentsTable->setRowCount(0);
     ui->recentTable->setRowCount(0); ui->todayTable->setRowCount(0); int minutes=0,overtime=0,present=0;
     for(const auto &a:tasks) {
         const QString date=QDateTime::fromString(a.created(),Qt::ISODate).toString("dd/MM/yyyy HH:mm"), state=a.completed()?QStringLiteral("Terminée"):QStringLiteral("En cours");
@@ -125,8 +109,7 @@ void EmployeeModule::refresh() {
         ui->alertButton->setText(high?QStringLiteral("Charge élevée : %1 employé%2   ›").arg(high).arg(high>1?QStringLiteral("s"):QString()):QStringLiteral("Aucune surcharge   ›"));
     }
     updateDashboard();
-    ui->completeTaskButton->setEnabled(false); const bool haveEmployees=!employees.isEmpty();
-    for(auto *b:{ui->clockInButton,ui->clockOutButton,ui->saveAttendanceButton}) b->setEnabled(haveEmployees);
+    ui->completeTaskButton->setEnabled(false);
     ui->employeeStatus->setText("Gestion des employés · base Oracle");
     updateStatistics();
 }

@@ -126,7 +126,7 @@ void PassageList::paintEvent(QPaintEvent *event)
     p.setRenderHint(QPainter::Antialiasing);
     if (m_entries.isEmpty()) {
         p.setPen(QColor("#77746e"));
-        p.drawText(rect(), Qt::AlignCenter, QStringLiteral("Les passages apparaîtront ici en direct."));
+        p.drawText(rect(), Qt::AlignCenter, emptyText);
         return;
     }
     const double shift = m_shift.value(), grow = m_expand.value();
@@ -275,21 +275,21 @@ void PassageList::paintDetails(QPainter &p, const QRectF &box, double alpha) con
     bar(box.top() + 70, QStringLiteral("Pause"), QStringLiteral("%1 / 60 min").arg(m_day.pause / 60), m_day.pause / double(WorkRules::Pause), QColor(over ? "#c27575" : "#b08f4f"), QColor(over ? "#e8a3a3" : "#e6c27a"));
 }
 
-PassageFeed::PassageFeed(ActivityStore &store, QWidget *parent) : QWidget(parent), m_store(store)
+PassageFeed::PassageFeed(ActivityStore &store, EntryFilter filter, QWidget *parent) : QWidget(parent), m_store(store), m_filter(filter)
 {
     auto *root = new QVBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(10);
     auto *head = new QHBoxLayout;
     head->setSpacing(8);
-    m_title = new QLabel(QStringLiteral("Derniers passages"));
+    m_title = new QLabel(filter == EntryFilter::Refusals ? QStringLiteral("Accès refusés") : QStringLiteral("Derniers passages"));
     m_title->setProperty("section", true);
     head->addWidget(m_title);
     head->addStretch();
     auto *group = new QButtonGroup(this);
     const QStringList via = {QString(), QStringLiteral("BADGE"), QStringLiteral("LIGNE")};
     for (int i = 0; i < 3; ++i) {
-        auto *b = m_filters[i] = new QPushButton;
+        auto *b = m_filters[i] = new QPushButton(this);
         b->setCheckable(true);
         b->setChecked(i == 0);
         b->setCursor(Qt::PointingHandCursor);
@@ -299,7 +299,8 @@ PassageFeed::PassageFeed(ActivityStore &store, QWidget *parent) : QWidget(parent
             b->setIconSize(QSize(16, 16));
         }
         group->addButton(b);
-        head->addWidget(b);
+        if (filter == EntryFilter::Refusals) b->hide();
+        else head->addWidget(b);
         connect(b, &QPushButton::clicked, this, [this, via, i] {
             m_via = via[i];
             m_last = -1;
@@ -312,6 +313,7 @@ PassageFeed::PassageFeed(ActivityStore &store, QWidget *parent) : QWidget(parent
     auto *box = new QVBoxLayout(frame);
     box->setContentsMargins(8, 10, 4, 10);
     m_list = new PassageList;
+    if (filter == EntryFilter::Refusals) m_list->emptyText = QStringLiteral("Aucun accès refusé.");
     m_list->details = [this](const AccessEntry &e) {
         WorkSession day;
         for (const WorkSession &s : m_store.sessions(e.at.date())) {
@@ -343,12 +345,12 @@ PassageFeed::PassageFeed(ActivityStore &store, QWidget *parent) : QWidget(parent
 
 void PassageFeed::reload()
 {
-    const QVector<AccessEntry> list = m_store.entries(60, m_via);
+    const QVector<AccessEntry> list = m_store.entries(60, m_via, m_filter);
     const int newest = list.isEmpty() ? 0 : list.first().id;
     if (newest != m_last) m_list->setEntries(list, m_last > 0);
     else m_list->update();
     m_last = newest;
-    countPresent();
+    if (m_filter == EntryFilter::Passages) countPresent();
 }
 
 void PassageFeed::countPresent()

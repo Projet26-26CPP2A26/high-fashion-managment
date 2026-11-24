@@ -14,6 +14,7 @@ public:
     void setEntries(const QVector<AccessEntry> &entries, bool animate);
     std::function<WorkSession(const AccessEntry &)> details;
     void toggle(int index);
+    QString emptyText = QStringLiteral("Les passages apparaîtront ici en direct.");
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -36,7 +37,7 @@ private:
 
 class PassageFeed : public QWidget {
 public:
-    explicit PassageFeed(ActivityStore &store, QWidget *parent = nullptr);
+    explicit PassageFeed(ActivityStore &store, EntryFilter filter = EntryFilter::Passages, QWidget *parent = nullptr);
     void reload();
 
 private:
@@ -45,6 +46,7 @@ private:
     PassageList *m_list;
     QLabel *m_title;
     QPushButton *m_filters[3];
+    EntryFilter m_filter;
     QString m_via;
     int m_last = -1;
 };

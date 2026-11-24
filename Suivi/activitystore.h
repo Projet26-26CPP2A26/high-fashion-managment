@@ -52,6 +52,8 @@ struct ActivityEvent {
     QString who, text;
 };
 
+enum class EntryFilter { All, Passages, Refusals };
+
 struct AccessEntry {
     int id = 0;
     QDateTime at;
@@ -100,7 +102,7 @@ public:
     bool setTaskState(const QString &who, int id, int state);
     bool saveTaskTime(int id, int spent);
     int addEntry(const QString &who, const QString &label, const QString &via, const QString &kind, const QString &detail = QString(), const QDateTime &at = QDateTime());
-    QVector<AccessEntry> entries(int limit, const QString &via = QString());
+    QVector<AccessEntry> entries(int limit, const QString &via = QString(), EntryFilter filter = EntryFilter::All);
     QVector<AccessEntry> entriesAfter(int id);
     bool clearDay(const QString &who, const QDate &day);
     QString setting(const QString &key);

@@ -4,6 +4,7 @@
 #include "activitystore.h"
 #include "badgelink.h"
 #include "passagefeed.h"
+#include "uihelpers.h"
 #include "virtualboard.h"
 #include <QComboBox>
 #include <QFrame>
@@ -12,6 +13,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSerialPortInfo>
+#include <QTableWidget>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
@@ -101,8 +103,42 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     left->addStretch();
     root->addLayout(left, 2);
 
-    m_feed = new PassageFeed(m_store);
-    root->addWidget(m_feed, 3);
+    auto *right = new QVBoxLayout;
+    right->setSpacing(14);
+    auto *counts = new QHBoxLayout;
+    counts->setSpacing(14);
+    const QStringList titles = {QStringLiteral("Badges actifs"), QStringLiteral("Au bureau"), QStringLiteral("Sans badge")};
+    for (int i = 0; i < 3; ++i) {
+        auto *box = new QVBoxLayout;
+        box->setSpacing(2);
+        box->addWidget(label(titles[i], "muted"));
+        m_counts[i] = new QLabel(QStringLiteral("0"));
+        m_counts[i]->setStyleSheet("font-size:22px;font-weight:600;color:#f1e1b4;");
+        box->addWidget(m_counts[i]);
+        m_cards << card(box);
+        counts->addWidget(m_cards.last());
+    }
+    right->addLayout(counts);
+    auto *holdersBox = new QVBoxLayout;
+    holdersBox->setSpacing(9);
+    holdersBox->addWidget(label(QStringLiteral("Titulaires"), "section"));
+    m_table = new QTableWidget(0, 3);
+    m_table->setHorizontalHeaderLabels({QStringLiteral("Employé"), QStringLiteral("Badge"), QStringLiteral("Statut")});
+    m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_table->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    UiHelpers::setupTable(m_table, {200, 130, 110});
+    holdersBox->addWidget(m_table);
+    m_cards << card(holdersBox);
+    right->addWidget(m_cards.last(), 3);
+    m_refusals = new PassageFeed(m_store, EntryFilter::Refusals);
+    right->addWidget(m_refusals, 2);
+    root->addLayout(right, 3);
+
+    connect(m_table, &QTableWidget::cellClicked, this, [this](int row) {
+        const int id = m_table->item(row, 0)->data(Qt::UserRole).toInt();
+        m_people->setCurrentIndex(std::max(0, m_people->findData(id)));
+    });
 
     connect(reload, &QPushButton::clicked, this, &BadgePage::refreshPorts);
     connect(m_connect, &QPushButton::clicked, this, &BadgePage::toggleSerial);
@@ -117,11 +153,7 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     });
     connect(&m_service, &BadgeService::refused, this, [this](const QString &uid) {
         m_store.addEntry(QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
-        m_feed->reload();
-    });
-    connect(&m_service, &BadgeService::adminScanned, this, [this] {
-        m_store.addEntry(QStringLiteral("ADMIN"), QStringLiteral("Responsable RH"), QStringLiteral("BADGE"), QStringLiteral("ARRIVEE"));
-        m_feed->reload();
+        m_refusals->reload();
     });
     connect(&m_service, &BadgeService::changed, this, &BadgePage::refresh);
     m_board->scan = [this](const QString &uid) { QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, uid] { virtualScan(uid); }); };
@@ -271,5 +303,25 @@ void BadgePage::refresh()
     QVector<QPair<QString, QString>> badges = m_service.badges();
     if (m_service.adminUid.size() > 3) badges.prepend(qMakePair(m_service.adminUid, QStringLiteral("Responsable RH")));
     m_board->setBadges(badges);
-    m_feed->reload();
+    m_refusals->reload();
+
+    QHash<int, QString> uids;
+    const QVector<Employee> people = m_repository.loadEmployees();
+    for (const auto &b : std::as_const(badges)) {
+        const int id = m_service.employeeOf(b.first);
+        if (id) uids.insert(id, b.first);
+    }
+    int active = 0, present = 0;
+    m_table->setRowCount(0);
+    for (bool with : {true, false})
+        for (const Employee &e : people) {
+            if (uids.contains(e.id()) != with) continue;
+            const bool here = with && m_service.inside(e.id());
+            active += with;
+            present += here;
+            UiHelpers::addRow(m_table, {e.name(), with ? uids.value(e.id()) : QStringLiteral("—"), !with ? QStringLiteral("Sans badge") : here ? QStringLiteral("Présent") : QStringLiteral("Absent")}, e.id());
+        }
+    m_counts[0]->setText(QString::number(active));
+    m_counts[1]->setText(QString::number(present));
+    m_counts[2]->setText(QString::number(people.size() - active));
 }

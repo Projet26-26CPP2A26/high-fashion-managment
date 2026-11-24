@@ -10,6 +10,7 @@ class QLineEdit;
 class QPushButton;
 class ActivityStore;
 class PassageFeed;
+class QTableWidget;
 class LinkLight;
 class VirtualBoard;
 
@@ -45,6 +46,8 @@ private:
     QComboBox *m_ports, *m_people;
     QLineEdit *m_uid;
     QPushButton *m_connect;
-    PassageFeed *m_feed;
+    PassageFeed *m_refusals;
+    QTableWidget *m_table;
+    QLabel *m_counts[3];
     VirtualBoard *m_board;
 };
