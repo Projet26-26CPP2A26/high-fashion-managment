@@ -3,83 +3,83 @@ CONFIG += c++17
 TEMPLATE = app
 TARGET = AureaEmployes
 
-INCLUDEPATH += connexion crud metiers suivi arduino extras
+INCLUDEPATH += Crud Metier Suivi Arduino Animations Extras
 win32: LIBS += -luser32 -ldwmapi -lwinmm
 
 SOURCES += main.cpp \
-    connexion/logindialog.cpp \
-    connexion/oracleconnection.cpp \
-    crud/crud_interface.cpp \
-    crud/employee.cpp \
-    crud/employeemodule.cpp \
-    crud/employeerepository.cpp \
-    crud/employeewindow.cpp \
-    metiers/affectation.cpp \
-    metiers/affectation_interface.cpp \
-    metiers/pdfexport.cpp \
-    metiers/pointage.cpp \
-    metiers/pointage_interface.cpp \
-    metiers/statistiques_pdf.cpp \
-    suivi/activityboard.cpp \
-    suivi/activitystore.cpp \
-    suivi/companylink.cpp \
-    suivi/employeedesk.cpp \
-    suivi/employeepopup.cpp \
-    suivi/reviewboard.cpp \
-    suivi/submitdialog.cpp \
-    arduino/badgepage.cpp \
-    arduino/badgeservice.cpp \
-    arduino/virtualboard.cpp \
-    extras/closingview.cpp \
-    extras/companysimulator.cpp \
-    extras/dialogskin.cpp \
-    extras/employeetile.cpp \
-    extras/living.cpp \
-    extras/loginscene.cpp \
-    extras/morphoverlay.cpp \
-    extras/oraclecheck.cpp \
-    extras/oraclemodulecheck.cpp \
-    extras/polish.cpp \
-    extras/spectacle.cpp
+    Crud/crud_interface.cpp \
+    Crud/employee.cpp \
+    Crud/employeemodule.cpp \
+    Crud/employeerepository.cpp \
+    Crud/employeewindow.cpp \
+    Crud/oracleconnection.cpp \
+    Metier/affectation.cpp \
+    Metier/affectation_interface.cpp \
+    Metier/pdfexport.cpp \
+    Metier/pointage.cpp \
+    Metier/pointage_interface.cpp \
+    Metier/statistiques_pdf.cpp \
+    Suivi/activityboard.cpp \
+    Suivi/activitystore.cpp \
+    Suivi/companylink.cpp \
+    Suivi/employeedesk.cpp \
+    Suivi/employeepopup.cpp \
+    Suivi/employeetile.cpp \
+    Suivi/reviewboard.cpp \
+    Suivi/submitdialog.cpp \
+    Arduino/badgepage.cpp \
+    Arduino/badgeservice.cpp \
+    Arduino/virtualboard.cpp \
+    Animations/ClosingAnimation.cpp \
+    Animations/LinesAnimation.cpp \
+    Animations/LoginAnimation.cpp \
+    Animations/LogoAnimation.cpp \
+    Animations/TransitionAnimation.cpp \
+    Extras/companysimulator.cpp \
+    Extras/dialogskin.cpp \
+    Extras/logindialog.cpp \
+    Extras/oraclecheck.cpp \
+    Extras/oraclemodulecheck.cpp \
+    Extras/polish.cpp
 
-HEADERS += connexion/logindialog.h \
-    connexion/oracleconnection.h \
-    crud/employee.h \
-    crud/employeemodule.h \
-    crud/employeerepository.h \
-    crud/employeewindow.h \
-    metiers/pdfexport.h \
-    suivi/activityboard.h \
-    suivi/activitystore.h \
-    suivi/companylink.h \
-    suivi/employeedesk.h \
-    suivi/employeepopup.h \
-    suivi/reviewboard.h \
-    suivi/submitdialog.h \
-    suivi/taskcatalog.h \
-    arduino/badgepage.h \
-    arduino/badgeservice.h \
-    arduino/linklight.h \
-    arduino/virtualboard.h \
-    extras/closingview.h \
-    extras/companysimulator.h \
-    extras/dialogskin.h \
-    extras/employeetile.h \
-    extras/fx.h \
-    extras/greeting.h \
-    extras/icons.h \
-    extras/living.h \
-    extras/loginscene.h \
-    extras/morphoverlay.h \
-    extras/motion.h \
-    extras/oraclecheck.h \
-    extras/oraclemodulecheck.h \
-    extras/polish.h \
-    extras/sound.h \
-    extras/spectacle.h \
-    extras/uihelpers.h
+HEADERS += Crud/employee.h \
+    Crud/employeemodule.h \
+    Crud/employeerepository.h \
+    Crud/employeewindow.h \
+    Crud/oracleconnection.h \
+    Metier/pdfexport.h \
+    Suivi/activityboard.h \
+    Suivi/activitystore.h \
+    Suivi/companylink.h \
+    Suivi/employeedesk.h \
+    Suivi/employeepopup.h \
+    Suivi/employeetile.h \
+    Suivi/reviewboard.h \
+    Suivi/submitdialog.h \
+    Suivi/taskcatalog.h \
+    Arduino/badgepage.h \
+    Arduino/badgeservice.h \
+    Arduino/virtualboard.h \
+    Animations/AnimationSpeed.h \
+    Animations/ClosingAnimation.h \
+    Animations/ConnectionAnimation.h \
+    Animations/LinesAnimation.h \
+    Animations/LoginAnimation.h \
+    Animations/LogoAnimation.h \
+    Animations/TransitionAnimation.h \
+    Animations/UiAnimations.h \
+    Extras/companysimulator.h \
+    Extras/dialogskin.h \
+    Extras/greeting.h \
+    Extras/icons.h \
+    Extras/logindialog.h \
+    Extras/oraclecheck.h \
+    Extras/oraclemodulecheck.h \
+    Extras/polish.h \
+    Extras/sound.h \
+    Extras/uihelpers.h
 
-FORMS += crud/employees.ui \
-    crud/employeewindow.ui
+FORMS += Crud/employees.ui \
+    Crud/employeewindow.ui
 
-RESOURCES += extras/assets.qrc
+RESOURCES += Resources/assets.qrc
