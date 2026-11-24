@@ -1,38 +1,47 @@
 # AUREA — Gestion des matières
 
-Module « Gestion des matières » extrait du projet AUREA Atelier (Qt 6 Widgets, C++17) :
-inventaire, alertes de réapprovisionnement, lots & QR codes, statistiques, exports PDF.
+Application **C++17 / Qt 6** : matières premières, ajout/modification, réapprovisionnement, lots & QR codes, statistiques, export PDF.
+Base de données : **Oracle** (ODBC, pilote Qt `QODBC`) — même code que l'intégration finale *AUREA Atelier*.
 
-## Base de données
+## Lancer
 
-| Mode | Lancement | Stockage |
-|---|---|---|
-| Oracle (ODBC, défaut) | `AureaMatieres` | table `materials` du schéma `IYED`, créées par `oracle/01_schema.sql` |
-| SQLite (hors ligne) | `AureaMatieres --sqlite` | `stock.sqlite` dans le dossier de données (`--data-dir`), schéma créé automatiquement |
-
-Oracle (atelier 2 — Connexion QT/Oracle, Oracle XE 21c) :
-- utilisateur `Iyed` / `Esprit18`, créé dans la base enfichable `XEPDB1` (`grant connect, resource, dba`) ;
-- source ODBC 64 bits `Source_Projet2A`, pilote `Oracle in OraDB21Home1`, TNS Service Name `XEPDB1` ;
-- SQL Developer : nouvelle connexion `Iyed` / `Esprit18`, hôte `localhost`, port `1521`, nom de service `XEPDB1`.
-
-Valeurs surchargées si besoin par `AUREA_ORACLE_DSN`, `AUREA_ORACLE_USER`, `AUREA_ORACLE_PASSWORD`.
-`oracle/02_views.sql` crée 3 vues (une par page) visibles dans SQL Developer sous « Vues » :
-`v_matieres`, `v_alertes`, `v_statistiques`.
-`AureaMatieres --oracle-test` vérifie la connexion. `oracle/99_drop_all.sql` supprime la table (irréversible).
+Double-cliquer sur `Run.bat` (`Run.bat -SansWokwi` pour ne pas ouvrir le simulateur).
 
 ## Compiler
 
-CMake : `find_package(Qt6 Widgets Sql PrintSupport)` — cible `AureaMatieres` (+ `material_tests` avec `-DBUILD_TESTING=ON`).
-Qt Creator / qmake : ouvrir `AureaMatieres.pro` (kit Qt 6 MinGW **64 bits**). Le pilote `QODBC` doit être présent.
+- **Qt Creator** : ouvrir `CMakeLists.txt` (Qt 6.x, kit MinGW 64 bits) → cible `AureaMatieres`. Alternative : `AureaMatieres.pro` (qmake).
+- Modules Qt requis : Widgets, Sql, PrintSupport (+ Test pour `ctest`).
+- Ligne de commande : `cmake -S . -B build && cmake --build build`
 
-## Options
+## Configurer Oracle
 
-`--data-dir <dossier>`, `--demo`, `--sqlite`, `--oracle-test`.
+1. Dans SQL Developer, exécuter `oracle/01_schema.sql` **une seule fois** (si la table `materials` n'existe pas encore).
+2. Créer une source ODBC 64 bits (DSN par défaut : `Source_Projet2A`).
+3. Qt Creator → Projets → Exécuter → Environnement :
 
-## QR codes
+| Variable | Rôle |
+|---|---|
+| `AUREA_ORACLE_PASSWORD` | mot de passe Oracle (**obligatoire**) |
+| `AUREA_ORACLE_DSN` | source ODBC (défaut : `Source_Projet2A`) |
+| `AUREA_ORACLE_USER` | utilisateur (défaut : `Iyed`) |
 
-Le QR d'un lot contient un lien `https://itty.bitty.site/#Lot-<lot>/<page>` : ce site gratuit (sans compte)
-affiche la petite page HTML écrite dans le lien (compressée avec `qCompress`, en base64). Rien à héberger.
-L'application relit le lot dans le titre `Lot-<lot>`.
-Les images QR sont créées par l'API gratuite `api.qrserver.com` et lues par `zxing.org` : **internet est nécessaire** sur le PC
-(module Qt Network, aucune clé). Dans l'application, on peut aussi taper le lot (`SOI-2601` ou `AUREA:LOT:SOI-2601`).
+## Base de données
+
+Table : `materials`. Schéma : `oracle/01_schema.sql` ; `oracle/99_drop_all.sql` pour la supprimer (base de test uniquement).
+
+## Organisation
+
+| Dossier | Contenu |
+|---|---|
+| `Run.bat` | Lance tout : Oracle, compilation Qt, simulateur Wokwi, AUREA |
+| `Crud/` | Fenêtre, classe `Material`, dépôt `InventoryRepository`, connexion Oracle |
+| `Metier/` | Réapprovisionnement, QR code par lot, statistiques et PDF |
+| `arduino/` | Classe `Arduino`, page de la borne, programme `.ino`, projet Wokwi |
+| `Animations/` | Ouverture et fermeture cousues, QR animé, effets d'interface |
+| `Extras/` | Icônes, sons, aides d'interface, script de lancement |
+| `Resources/` | Thème, polices, logo, sons |
+| `oracle/` | Scripts SQL |
+| `tests/` | Tests automatisés (`ctest`, sans base de données) |
+| `third_party/` | `qrcodegen` (création des QR) et `quirc` (lecture) |
+
+Raccourcis : **Ctrl+N** nouvelle matière, **Ctrl+F** rechercher, **Ctrl+S** enregistrer le formulaire.
