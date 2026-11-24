@@ -1,5 +1,6 @@
 #include "morphoverlay.h"
 #include "fx.h"
+#include "closingview.h"
 #include <QEventLoop>
 #include <QApplication>
 #include <QImage>
@@ -38,11 +39,24 @@ MorphOverlay::MorphOverlay(QWidget *from, const QRect &logo, const QRect &target
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose);
-    const QScreen *screen = from->screen() ? from->screen() : QGuiApplication::primaryScreen();
-    setGeometry(screen->geometry());
+    setGeometry(areaFor(from));
     const QPoint origin = geometry().topLeft();
     logoVisible(false);
     m_shot = from->grab();
+    if (mode == Spectacle::Closing) logoVisible(true);
+    if (mode == Spectacle::Closing && ClosingView::available()) {
+        ClosingView::Scene scene;
+        scene.area = geometry();
+        scene.window = QRectF(QRect(from->mapToGlobal(QPoint(0, 0)), from->size()));
+        scene.logo = QRectF(logo);
+        scene.shot = m_shot.toImage();
+        scene.mark = logos().last().toImage();
+        if (from->property("ringTime").isValid()) scene.ringTime = from->property("ringTime").toDouble();
+        m_view.reset(new ClosingView(scene));
+        if (m_view->begin()) return;
+        m_view.reset();
+    }
+    if (mode == Spectacle::Closing) logoVisible(false);
     if (mode == Spectacle::Closing) {
         m_dim = m_shot;
         QPainter shade(&m_dim);
@@ -80,6 +94,8 @@ MorphOverlay::MorphOverlay(QWidget *from, const QRect &logo, const QRect &target
     m_clock.start();
     repaint();
 }
+
+MorphOverlay::~MorphOverlay() = default;
 
 const QVector<QPixmap> &MorphOverlay::logos()
 {
@@ -123,12 +139,19 @@ void MorphOverlay::breathe()
 
 void MorphOverlay::waitClosed()
 {
+    if (m_view) {
+        wait([this] { return m_view->over(); });
+        m_view->hide();
+        close();
+        return;
+    }
     wait([this] { return m_skip || seconds() >= Close; });
     close();
 }
 
 void MorphOverlay::setMessage(const QString &title, const QString &subtitle, double duration)
 {
+    if (m_view) m_view->setMessage(title, subtitle);
     m_duration = duration;
     m_title = title;
     m_subtitle = subtitle;

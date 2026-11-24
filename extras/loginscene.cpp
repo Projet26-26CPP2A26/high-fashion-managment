@@ -33,7 +33,8 @@ LoginScene::LoginScene(QWidget *parent) : QWidget(parent)
 void LoginScene::setLogoVisible(bool visible)
 {
     m_logoVisible = visible;
-    repaint();
+    if (visible) repaint();
+    else update();
 }
 
 QRect LoginScene::logoRect() const
@@ -91,7 +92,7 @@ void LoginScene::paintEvent(QPaintEvent *)
         p.drawEllipse(tail, 3.2, 2.2);
     }
 
-    const double ring = ease((m_t - 0.15) / 1.3);
+    const double ring = m_ringsVisible ? ease((m_t - 0.15) / 1.3) : 0;
     p.setPen(QPen(QColor(226, 207, 159, 150), 1.4, Qt::SolidLine, Qt::RoundCap));
     p.setBrush(Qt::NoBrush);
     p.drawArc(QRectF(center.x() - 82, center.y() - 82, 164, 164), int((90 + m_t * 12) * 16), -int(300 * 16 * ring));

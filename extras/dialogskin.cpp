@@ -1,4 +1,5 @@
 #include "dialogskin.h"
+#include "motion.h"
 #include "living.h"
 #include <QAbstractButton>
 #include <QApplication>
@@ -24,7 +25,7 @@ public:
         setGeometry(window->rect());
         show();
         raise();
-        go(0, 1, 220);
+        go(0, 1, Motion::Base);
     }
     QVariantAnimation *go(qreal from, qreal to, int duration)
     {
@@ -40,7 +41,7 @@ public:
     void leave()
     {
         setAttribute(Qt::WA_TransparentForMouseEvents);
-        connect(go(m_level, 0, 180), &QAbstractAnimation::finished, this, &QObject::deleteLater);
+        connect(go(m_level, 0, Motion::Base), &QAbstractAnimation::finished, this, &QObject::deleteLater);
     }
 
 protected:
@@ -63,7 +64,7 @@ public:
     QVariantAnimation *play(bool opening)
     {
         auto *a = new QVariantAnimation(this);
-        a->setDuration(opening ? 220 : 160);
+        a->setDuration(opening ? Motion::Base : Motion::Quick);
         a->setStartValue(0.0);
         a->setEndValue(1.0);
         connect(a, &QVariantAnimation::valueChanged, this, [this, opening](const QVariant &v) {

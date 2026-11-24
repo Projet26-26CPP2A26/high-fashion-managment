@@ -6,8 +6,10 @@
 #include <QVector>
 #include <QWidget>
 #include <functional>
+#include <memory>
 
 class QPainter;
+class ClosingView;
 
 class MorphOverlay : public QWidget {
     Q_OBJECT
@@ -17,6 +19,7 @@ public:
 
     using LogoSwitch = std::function<void(bool)>;
     MorphOverlay(QWidget *from, const QRect &logo, const QRect &target, Spectacle::Mode mode, const LogoSwitch &logoVisible);
+    ~MorphOverlay() override;
     void setMessage(const QString &title, const QString &subtitle, double duration = Message);
     void land(std::function<QRect()> logo, LogoSwitch logoVisible);
     void waitExpanded();
@@ -39,6 +42,7 @@ private:
     bool messageOver() const;
     void paintClosing(QPainter &p);
     void drawLogo(class QPainter &p, const QRectF &rect) const;
+    std::unique_ptr<ClosingView> m_view;
     Spectacle m_show;
     Spectacle::Mode m_mode;
     QPixmap m_shot, m_dim;

@@ -14,6 +14,8 @@ class TablePolish : public QObject {
 public:
     static void apply(QWidget *root);
     qreal appear(int row) const;
+    static void flash(QTableWidget *table, int row);
+    qreal glow(int row) const;
     int hovered() const { return m_hovered; }
 
 protected:
@@ -29,6 +31,7 @@ private:
     QPointer<QLabel> m_empty;
     QWidget *m_emptyIcon = nullptr;
     QVector<int> m_base;
-    QVariantAnimation m_animation;
+    QVariantAnimation m_animation, m_glow;
+    int m_glowRow = -1;
     int m_hovered = -1;
 };

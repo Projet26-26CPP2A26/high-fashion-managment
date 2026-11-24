@@ -1,6 +1,7 @@
 #include "polish.h"
 #include "employeetile.h"
 #include "living.h"
+#include "motion.h"
 #include <QEvent>
 #include <QHeaderView>
 #include <QLabel>
@@ -26,12 +27,14 @@ public:
 
     void paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        const qreal t = m_polish->appear(index.row());
+        const qreal shine = m_polish->glow(index.row());
+        const qreal t = std::min(m_polish->appear(index.row()), shine > 0 ? qreal(Motion::ease((1 - shine) * Motion::Glow / Motion::Slow)) : 1.0);
         p->save();
         p->setRenderHint(QPainter::Antialiasing);
         if (option.state & QStyle::State_Selected) p->fillRect(option.rect, QColor("#3c3727"));
         else if (m_polish->hovered() == index.row()) p->fillRect(option.rect, QColor("#2e2d2a"));
         if ((option.state & QStyle::State_Selected) && index.column() == 0) p->fillRect(QRect(option.rect.left(), option.rect.top(), 3, option.rect.height()), QColor("#e2cf9f"));
+        if (shine > 0) p->fillRect(option.rect, QColor(226, 207, 159, int(60 * shine)));
         p->setPen(QColor("#2c2c30"));
         p->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
         p->setOpacity(t);
@@ -151,7 +154,11 @@ TablePolish::TablePolish(QTableWidget *table) : QObject(table), m_table(table)
     connect(table->model(), &QAbstractItemModel::rowsInserted, this, &TablePolish::updateEmpty);
     connect(table->model(), &QAbstractItemModel::rowsRemoved, this, &TablePolish::updateEmpty);
     connect(table->model(), &QAbstractItemModel::modelReset, this, &TablePolish::updateEmpty);
-    m_animation.setDuration(380);
+    m_glow.setDuration(Motion::Glow);
+    m_glow.setStartValue(1.0);
+    m_glow.setEndValue(0.0);
+    connect(&m_glow, &QVariantAnimation::valueChanged, this, [this] { if (alive()) m_table->viewport()->update(); });
+    m_animation.setDuration(Motion::Slow);
     m_animation.setStartValue(0.0);
     m_animation.setEndValue(1.0);
     connect(&m_animation, &QVariantAnimation::valueChanged, this, [this] { if (alive()) m_table->viewport()->update(); });
@@ -165,6 +172,20 @@ qreal TablePolish::appear(int row) const
     const int top = std::max(0, m_table->rowAt(0));
     const qreal t = std::clamp((m_animation.currentValue().toReal() - 0.045 * std::min(12, std::max(0, row - top))) / 0.46, 0.0, 1.0);
     return 1 - (1 - t) * (1 - t) * (1 - t);
+}
+
+void TablePolish::flash(QTableWidget *table, int row)
+{
+    auto *polish = table->findChild<TablePolish *>(QString(), Qt::FindDirectChildrenOnly);
+    if (!polish || row < 0 || row >= table->rowCount()) return;
+    polish->m_glow.stop();
+    polish->m_glowRow = row;
+    polish->m_glow.start();
+}
+
+qreal TablePolish::glow(int row) const
+{
+    return row == m_glowRow && m_glow.state() == QAbstractAnimation::Running ? m_glow.currentValue().toReal() : 0;
 }
 
 void TablePolish::fit()

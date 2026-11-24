@@ -145,7 +145,11 @@ void LoginDialog::reject()
     if (m_leaving) return;
     m_leaving = true;
     m_role = None;
-    m_overlay = new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this), Spectacle::Closing, [this](bool on) { m_scene->setLogoVisible(on); });
+    m_overlay = new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this), Spectacle::Closing, [this](bool on) {
+        setProperty("ringTime", m_scene->time());
+        m_scene->setRingsVisible(on);
+        m_scene->setLogoVisible(on);
+    });
     QTimer::singleShot(90, this, [this] { QDialog::reject(); });
 }
 
@@ -155,10 +159,10 @@ void LoginDialog::start()
     int delay = 120;
     for (QWidget *w : std::as_const(m_lines)) {
         Fx::reveal(w, delay);
-        delay += 35;
+        delay += Motion::Step;
     }
     auto *slide = new QVariantAnimation(this);
-    slide->setDuration(600);
+    slide->setDuration(Motion::Slow);
     slide->setStartValue(76);
     slide->setEndValue(62);
     slide->setEasingCurve(QEasingCurve::OutCubic);

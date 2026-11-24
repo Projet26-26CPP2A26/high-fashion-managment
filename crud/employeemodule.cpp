@@ -1,4 +1,5 @@
 #include "employeemodule.h"
+#include "fx.h"
 #include "ui_employees.h"
 #include "icons.h"
 #include "uihelpers.h"
@@ -81,7 +82,7 @@ EmployeeModule::EmployeeModule(QWidget *parent):QWidget(parent),ui(new Ui::Emplo
     refresh(); calculation();
 }
 EmployeeModule::~EmployeeModule() {delete ui;}
-void EmployeeModule::setSection(int index) {if(index>=0&&index<5) ui->employeeTabs->setCurrentIndex(index);}
+void EmployeeModule::setSection(int index) {if(index>=0&&index<5) Fx::switchPage(ui->employeeTabs,index);}
 int EmployeeModule::selectedId(QTableWidget *t) const {return !t->selectedItems().isEmpty()&&t->currentRow()>=0&&t->item(t->currentRow(),0)?t->item(t->currentRow(),0)->data(Qt::UserRole).toInt():0;}
 void EmployeeModule::report(bool success,const QString &message) {
     if(!success) {DialogSkin::warn(this,"AUREA — Employés",repo.error()); return;}

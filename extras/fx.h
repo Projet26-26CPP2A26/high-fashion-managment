@@ -1,4 +1,5 @@
 #pragma once
+#include "motion.h"
 
 #include <QApplication>
 #include <QEvent>
@@ -54,9 +55,10 @@ inline void openWindow(QWidget *w)
 {
     w->setWindowOpacity(0);
     auto *a = new QPropertyAnimation(w, "windowOpacity", w);
-    a->setDuration(320);
+    a->setDuration(Motion::Base);
     a->setStartValue(0.0);
     a->setEndValue(1.0);
+    a->setEasingCurve(QEasingCurve::OutCubic);
     QTimer::singleShot(0, a, [a] { a->start(QAbstractAnimation::DeleteWhenStopped); });
 }
 
@@ -66,20 +68,21 @@ inline void shake(QWidget *w)
     w->setProperty("shaking", true);
     const QPoint home = w->pos();
     auto *a = new QPropertyAnimation(w, "pos", w);
-    a->setDuration(360);
+    a->setDuration(Motion::Slow);
     for (int i = 0; i <= 6; ++i) a->setKeyValueAt(i / 6.0, home + QPoint(i == 0 || i == 6 ? 0 : (i % 2 ? 6 : -6), 0));
     QObject::connect(a, &QAbstractAnimation::finished, w, [w] { w->setProperty("shaking", false); });
     a->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-inline void switchPage(QStackedWidget *stack, int index)
+template <class Pages>
+void switchPage(Pages *stack, int index)
 {
     if (stack->currentIndex() == index) return;
 
     const int way = index > stack->currentIndex() ? -1 : 1;
     if (!stack->isVisible()) { stack->setCurrentIndex(index); return; }
     auto *ghost = new QLabel(stack);
-    ghost->setPixmap(stack->grab());
+    ghost->setPixmap(stack->window()->grab(QRect(stack->mapTo(stack->window(), QPoint()), stack->size())));
     ghost->setGeometry(stack->rect());
     stack->setCurrentIndex(index);
     ghost->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -88,7 +91,7 @@ inline void switchPage(QStackedWidget *stack, int index)
     auto *effect = new QGraphicsOpacityEffect(ghost);
     ghost->setGraphicsEffect(effect);
     auto *a = new QVariantAnimation(ghost);
-    a->setDuration(200);
+    a->setDuration(Motion::Base);
     a->setStartValue(0.0);
     a->setEndValue(1.0);
     a->setEasingCurve(QEasingCurve::OutCubic);
@@ -106,7 +109,7 @@ inline void countTo(QLabel *label, int value)
     if (from == value) return;
     label->setProperty("count", value);
     auto *a = new QVariantAnimation(label);
-    a->setDuration(450);
+    a->setDuration(Motion::Slow);
     a->setStartValue(from);
     a->setEndValue(value);
     a->setEasingCurve(QEasingCurve::OutCubic);
@@ -129,12 +132,24 @@ inline void toast(QWidget *window, const QString &text)
     t->move(end + QPoint(0, 16));
     t->show();
     t->raise();
-    auto *a = new QPropertyAnimation(t, "pos", t);
-    a->setDuration(320);
-    a->setEndValue(end);
-    a->setEasingCurve(QEasingCurve::OutCubic);
-    a->start(QAbstractAnimation::DeleteWhenStopped);
-    QTimer::singleShot(3800, t, &QObject::deleteLater);
+    auto *effect = new QGraphicsOpacityEffect(t);
+    effect->setOpacity(0);
+    t->setGraphicsEffect(effect);
+    const auto play = [t, effect, end](double from, double to) {
+        auto *a = new QVariantAnimation(t);
+        a->setDuration(Motion::Base);
+        a->setStartValue(from);
+        a->setEndValue(to);
+        a->setEasingCurve(QEasingCurve::OutCubic);
+        QObject::connect(a, &QVariantAnimation::valueChanged, t, [t, effect, end](const QVariant &v) {
+            effect->setOpacity(v.toReal());
+            t->move(end + QPoint(0, int(16 * (1 - v.toReal()))));
+        });
+        a->start(QAbstractAnimation::DeleteWhenStopped);
+        return a;
+    };
+    play(0, 1);
+    QTimer::singleShot(3600, t, [t, play] { QObject::connect(play(1, 0), &QAbstractAnimation::finished, t, &QObject::deleteLater); });
 }
 
 inline void navIndicator(QWidget *sidebar, const QVector<QPushButton *> &buttons)
@@ -143,7 +158,7 @@ inline void navIndicator(QWidget *sidebar, const QVector<QPushButton *> &buttons
     pill->setAttribute(Qt::WA_TransparentForMouseEvents);
     pill->setStyleSheet("background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #bfa370,stop:0.5 #f1e1b4,stop:1 #c4a876);border-radius:9px;");
     auto *a = new QPropertyAnimation(pill, "geometry", pill);
-    a->setDuration(240);
+    a->setDuration(Motion::Base);
     a->setEasingCurve(QEasingCurve::OutCubic);
     for (QPushButton *b : buttons) {
         b->setStyleSheet("QPushButton:checked{background:transparent;}");
@@ -186,7 +201,8 @@ protected:
             }
             if (effect) {
                 auto *a = new QPropertyAnimation(effect, "blurRadius", effect);
-                a->setDuration(200);
+                a->setDuration(Motion::Quick);
+                a->setEasingCurve(QEasingCurve::OutCubic);
                 a->setEndValue(in ? 12.0 : 0.0);
                 a->start(QAbstractAnimation::DeleteWhenStopped);
             }
@@ -213,7 +229,7 @@ inline void fullScreenKey(QWidget *window)
     });
 }
 
-inline void reveal(QWidget *w, int delay, int duration = 520)
+inline void reveal(QWidget *w, int delay, int duration = Motion::Slow)
 {
     auto *effect = new QGraphicsOpacityEffect(w);
     effect->setOpacity(0);

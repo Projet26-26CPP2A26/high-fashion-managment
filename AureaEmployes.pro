@@ -1,10 +1,10 @@
-QT += widgets sql printsupport serialport network
+QT += widgets sql printsupport serialport network opengl
 CONFIG += c++17
 TEMPLATE = app
 TARGET = AureaEmployes
 
 INCLUDEPATH += connexion crud metiers suivi arduino extras
-win32: LIBS += -luser32 -ldwmapi
+win32: LIBS += -luser32 -ldwmapi -lwinmm
 
 SOURCES += main.cpp \
     connexion/logindialog.cpp \
@@ -30,6 +30,7 @@ SOURCES += main.cpp \
     arduino/badgepage.cpp \
     arduino/badgeservice.cpp \
     arduino/virtualboard.cpp \
+    extras/closingview.cpp \
     extras/companysimulator.cpp \
     extras/dialogskin.cpp \
     extras/employeetile.cpp \
@@ -58,7 +59,9 @@ HEADERS += connexion/logindialog.h \
     suivi/taskcatalog.h \
     arduino/badgepage.h \
     arduino/badgeservice.h \
+    arduino/linklight.h \
     arduino/virtualboard.h \
+    extras/closingview.h \
     extras/companysimulator.h \
     extras/dialogskin.h \
     extras/employeetile.h \
@@ -68,9 +71,11 @@ HEADERS += connexion/logindialog.h \
     extras/living.h \
     extras/loginscene.h \
     extras/morphoverlay.h \
+    extras/motion.h \
     extras/oraclecheck.h \
     extras/oraclemodulecheck.h \
     extras/polish.h \
+    extras/sound.h \
     extras/spectacle.h \
     extras/uihelpers.h
 

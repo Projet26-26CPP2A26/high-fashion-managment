@@ -1,4 +1,5 @@
 #include "employeepopup.h"
+#include "motion.h"
 #include "activityboard.h"
 #include "employeetile.h"
 #include "fx.h"
@@ -201,7 +202,7 @@ EmployeePopup::EmployeePopup(ActivityBoard &board, ActivityStore &store, QWidget
     connect(send, &QPushButton::clicked, this, &EmployeePopup::assign);
     connect(m_title, &QComboBox::activated, this, [this](int i) { if (m_title->itemData(i).isValid()) m_minutes->setValue(m_title->itemData(i).toInt()); });
     TablePolish::apply(this);
-    m_animation.setDuration(200);
+    m_animation.setDuration(Motion::Base);
     m_animation.setEasingCurve(QEasingCurve::OutCubic);
     connect(&m_animation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_open = v.toReal(); place(); update(); });
     connect(&m_animation, &QAbstractAnimation::finished, this, [this] { if (m_open < 0.01) hide(); });

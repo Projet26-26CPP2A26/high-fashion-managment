@@ -162,10 +162,10 @@ void ReviewBoard::show(int id)
     m_open->setVisible(!t.file.isEmpty());
     m_open->setText(QStringLiteral("Ouvrir : ") + QFileInfo(t.file).fileName().section('_', 2));
     m_stars->setValue(4);
-    int delay = 40;
+    int delay = Motion::Step;
     for (QWidget *w : QList<QWidget *>{m_title, m_info, m_steps, m_note}) {
-        Fx::reveal(w, delay, 320);
-        delay += 60;
+        Fx::reveal(w, delay);
+        delay += Motion::Step;
     }
     m_feedback->clear();
 }
@@ -191,11 +191,11 @@ void ReviewBoard::decide(bool accept)
 
 void ReviewBoard::enter()
 {
-    int delay = 60;
+    int delay = Motion::Step;
     for (QLabel *value : m_kpi) {
-        Fx::reveal(value->parentWidget(), delay, 320);
-        delay += 60;
+        Fx::reveal(value->parentWidget(), delay);
+        delay += Motion::Step;
     }
-    Fx::reveal(m_list, delay, 320);
+    Fx::reveal(m_list, delay);
     if (m_current.id) m_stars->setValue(m_stars->value());
 }

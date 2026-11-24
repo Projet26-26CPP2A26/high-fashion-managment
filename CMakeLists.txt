@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network OpenGL)
 
 add_executable(AureaEmployes WIN32 main.cpp
     connexion/logindialog.cpp
@@ -31,6 +31,7 @@ add_executable(AureaEmployes WIN32 main.cpp
     arduino/badgepage.cpp
     arduino/badgeservice.cpp
     arduino/virtualboard.cpp
+    extras/closingview.cpp
     extras/companysimulator.cpp
     extras/dialogskin.cpp
     extras/employeetile.cpp
@@ -58,7 +59,9 @@ add_executable(AureaEmployes WIN32 main.cpp
     suivi/taskcatalog.h
     arduino/badgepage.h
     arduino/badgeservice.h
+    arduino/linklight.h
     arduino/virtualboard.h
+    extras/closingview.h
     extras/companysimulator.h
     extras/dialogskin.h
     extras/employeetile.h
@@ -68,16 +71,18 @@ add_executable(AureaEmployes WIN32 main.cpp
     extras/living.h
     extras/loginscene.h
     extras/morphoverlay.h
+    extras/motion.h
     extras/oraclecheck.h
     extras/oraclemodulecheck.h
     extras/polish.h
+    extras/sound.h
     extras/spectacle.h
     extras/uihelpers.h
     crud/employees.ui
     crud/employeewindow.ui
     extras/assets.qrc)
 target_include_directories(AureaEmployes PRIVATE connexion crud metiers suivi arduino extras)
-target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network)
+target_link_libraries(AureaEmployes PRIVATE Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network Qt6::OpenGL)
 if(WIN32)
-    target_link_libraries(AureaEmployes PRIVATE user32 dwmapi)
+    target_link_libraries(AureaEmployes PRIVATE user32 dwmapi winmm)
 endif()

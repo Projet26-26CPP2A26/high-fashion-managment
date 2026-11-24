@@ -1,4 +1,5 @@
 #include "employeetile.h"
+#include "motion.h"
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -30,9 +31,10 @@ EmployeeTile::EmployeeTile(QWidget *parent) : QWidget(parent)
     setFixedHeight(212);
     setMinimumWidth(240);
     setCursor(Qt::PointingHandCursor);
-    m_hoverAnimation.setDuration(160);
+    m_hoverAnimation.setDuration(Motion::Quick);
+    m_hoverAnimation.setEasingCurve(QEasingCurve::OutCubic);
     QObject::connect(&m_hoverAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_hover = v.toReal(); update(); });
-    m_barAnimation.setDuration(700);
+    m_barAnimation.setDuration(Motion::Slow);
     m_barAnimation.setStartValue(0.0);
     m_barAnimation.setEndValue(1.0);
     m_barAnimation.setEasingCurve(QEasingCurve::OutCubic);
@@ -41,7 +43,7 @@ EmployeeTile::EmployeeTile(QWidget *parent) : QWidget(parent)
         m_day = m_fromDay + (m_toDay - m_fromDay) * v.toReal();
         update();
     });
-    m_flashAnimation.setDuration(1400);
+    m_flashAnimation.setDuration(Motion::Glow);
     m_flashAnimation.setStartValue(1.0);
     m_flashAnimation.setEndValue(0.0);
     QObject::connect(&m_flashAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_flash = v.toReal(); update(); });
@@ -51,7 +53,7 @@ void EmployeeTile::enter(int delay)
 {
     m_enter = 0;
     auto *a = new QVariantAnimation(this);
-    a->setDuration(300);
+    a->setDuration(Motion::Slow);
     a->setStartValue(0.0);
     a->setEndValue(1.0);
     a->setEasingCurve(QEasingCurve::OutCubic);
@@ -361,7 +363,7 @@ ProgressRing::ProgressRing(int size, QWidget *parent) : QWidget(parent)
 {
     setMinimumSize(size * 7 / 10, size * 7 / 10);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_animation.setDuration(600);
+    m_animation.setDuration(Motion::Slow);
     m_animation.setEasingCurve(QEasingCurve::OutCubic);
     QObject::connect(&m_animation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_value = v.toReal(); update(); });
 }

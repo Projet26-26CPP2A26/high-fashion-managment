@@ -11,6 +11,7 @@ class QLineEdit;
 class QPushButton;
 class QTableWidget;
 class QTimer;
+class LinkLight;
 class VirtualBoard;
 
 class BadgePage : public QWidget {
@@ -31,10 +32,10 @@ private:
     void readSerial();
     void readNetwork();
     void process(QIODevice &link);
-    void showDisconnected(const QString &text);
+    void showLink(int state, const QString &text);
     void refresh();
     void report(bool ok, const QString &text);
-    QString handle(const QString &line);
+    QString handle(const QString &line, bool mirror = false);
 
     EmployeeRepository &m_repository;
     BadgeService m_service;
@@ -42,6 +43,10 @@ private:
     QTcpSocket m_tcp;
     int m_telnet = 0;
     QTimer *m_auto = nullptr;
+    LinkLight *m_light;
+    QVector<QWidget *> m_cards;
+    QString m_newest;
+    bool m_filled = false;
     QByteArray m_buffer;
     bool m_ready = false;
     QLabel *m_state, *m_count, *m_hint;

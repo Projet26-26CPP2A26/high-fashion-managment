@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
             QPixmap image = logo->property("image").value<QPixmap>();
             if (!on) image.fill(Qt::transparent);
             logo->setPixmap(image);
-            logo->repaint();
+            if (on) logo->repaint();
         });
     };
     const auto loginArea = [](QWidget *window) {
