@@ -1,4 +1,4 @@
-#include "inventoryrepository.h"
+#include "materialrepository.h"
 #include "oracleconnection.h"
 #include <QSqlError>
 #include <QSqlQuery>
@@ -27,52 +27,22 @@ static Material readMaterial(const QSqlQuery &query)
     return m;
 }
 
-Material::Material()
-    : m_id(0), m_unit("m"), m_quantity(0), m_minimum(0), m_price(0)
+MaterialRepository::MaterialRepository()
 {
 }
 
-int Material::id() const { return m_id; }
-QString Material::name() const { return m_name; }
-QString Material::type() const { return m_type; }
-QString Material::color() const { return m_color; }
-QString Material::unit() const { return m_unit; }
-QString Material::supplier() const { return m_supplier; }
-QString Material::lot() const { return m_lot; }
-double Material::quantity() const { return m_quantity; }
-double Material::minimum() const { return m_minimum; }
-double Material::price() const { return m_price; }
-bool Material::low() const { return m_quantity < m_minimum; }
-// Remonter au double du seuil, pour ne pas repasser en alerte juste après la livraison.
-double Material::toOrder() const { return low() ? rounded(2 * m_minimum - m_quantity) : 0; }
-
-void Material::setId(int value) { m_id = value; }
-void Material::setName(const QString &value) { m_name = value; }
-void Material::setType(const QString &value) { m_type = value; }
-void Material::setColor(const QString &value) { m_color = value; }
-void Material::setUnit(const QString &value) { m_unit = value; }
-void Material::setSupplier(const QString &value) { m_supplier = value; }
-void Material::setLot(const QString &value) { m_lot = value; }
-void Material::setQuantity(double value) { m_quantity = value; }
-void Material::setMinimum(double value) { m_minimum = value; }
-void Material::setPrice(double value) { m_price = value; }
-
-InventoryRepository::InventoryRepository()
-{
-}
-
-QString InventoryRepository::error() const
+QString MaterialRepository::error() const
 {
     return m_error;
 }
 
-bool InventoryRepository::fail(const QString &message)
+bool MaterialRepository::fail(const QString &message)
 {
     m_error = message;
     return false;
 }
 
-QString InventoryRepository::validate(const Material &m)
+QString MaterialRepository::validate(const Material &m)
 {
     if (m.name().trimmed().isEmpty() || m.type().trimmed().isEmpty() || m.color().trimmed().isEmpty()
         || m.supplier().trimmed().isEmpty() || m.lot().trimmed().isEmpty())
@@ -99,7 +69,7 @@ QString InventoryRepository::validate(const Material &m)
     return QString();
 }
 
-bool InventoryRepository::lotUsed(const QString &lot, int exceptId)
+bool MaterialRepository::lotUsed(const QString &lot, int exceptId)
 {
     QSqlQuery query;
     query.prepare("SELECT COUNT(*) FROM materials WHERE UPPER(lot) = UPPER(?) AND id <> ?");
@@ -108,7 +78,7 @@ bool InventoryRepository::lotUsed(const QString &lot, int exceptId)
     return query.exec() && query.next() && query.value(0).toInt() > 0;
 }
 
-QVector<Material> InventoryRepository::loadMaterials()
+QVector<Material> MaterialRepository::loadMaterials()
 {
     m_error.clear();
     QVector<Material> list;
@@ -123,7 +93,7 @@ QVector<Material> InventoryRepository::loadMaterials()
     return list;
 }
 
-Material InventoryRepository::findMaterial(int id)
+Material MaterialRepository::findMaterial(int id)
 {
     m_error.clear();
     QSqlQuery query;
@@ -139,7 +109,7 @@ Material InventoryRepository::findMaterial(int id)
     return Material();
 }
 
-Material InventoryRepository::findLot(const QString &lot)
+Material MaterialRepository::findLot(const QString &lot)
 {
     m_error.clear();
     QSqlQuery query;
@@ -155,7 +125,7 @@ Material InventoryRepository::findLot(const QString &lot)
     return Material();
 }
 
-bool InventoryRepository::addMaterial(Material &material)
+bool MaterialRepository::addMaterial(Material &material)
 {
     m_error.clear();
     const QString problem = validate(material);
@@ -183,7 +153,7 @@ bool InventoryRepository::addMaterial(Material &material)
     return true;
 }
 
-bool InventoryRepository::updateMaterial(const Material &material)
+bool MaterialRepository::updateMaterial(const Material &material)
 {
     m_error.clear();
     const QString problem = validate(material);
@@ -215,7 +185,7 @@ bool InventoryRepository::updateMaterial(const Material &material)
     return true;
 }
 
-bool InventoryRepository::deleteMaterial(int id)
+bool MaterialRepository::deleteMaterial(int id)
 {
     m_error.clear();
     QSqlQuery query;
@@ -228,7 +198,7 @@ bool InventoryRepository::deleteMaterial(int id)
     return true;
 }
 
-bool InventoryRepository::changeQuantity(int id, double delta)
+bool MaterialRepository::changeQuantity(int id, double delta)
 {
     m_error.clear();
     if (!std::isfinite(delta) || std::abs(delta) < 0.005 || std::abs(delta) > 9999999.99)

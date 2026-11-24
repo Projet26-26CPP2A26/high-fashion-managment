@@ -37,11 +37,10 @@ Table : `materials`. Schéma : `oracle/01_schema.sql` ; `oracle/99_drop_all.sql`
 | `Crud/` | Fenêtre, classe `Material`, dépôt `InventoryRepository`, connexion Oracle |
 | `Metier/` | Réapprovisionnement, QR code par lot, statistiques et PDF |
 | `arduino/` | Classe `Arduino`, page de la borne, programme `.ino`, projet Wokwi |
-| `Animations/` | Ouverture et fermeture cousues, QR animé, effets d'interface |
-| `Extras/` | Icônes, sons, aides d'interface, script de lancement |
-| `Resources/` | Thème, polices, logo, sons |
+| `Animations/` | Ouverture, fermeture, fils de soie, logo, QR, tableaux, graphique, liaison |
+| `Extras/` | Messages animés, icônes, sons, script de lancement, bibliothèques QR (`libs/`) |
+| `Resources/Assets/` | Thème, polices, logo, icônes des matières, sons |
 | `oracle/` | Scripts SQL |
 | `tests/` | Tests automatisés (`ctest`, sans base de données) |
-| `third_party/` | `qrcodegen` (création des QR) et `quirc` (lecture) |
 
 Raccourcis : **Ctrl+N** nouvelle matière, **Ctrl+F** rechercher, **Ctrl+S** enregistrer le formulaire.

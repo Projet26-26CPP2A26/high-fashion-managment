@@ -1,6 +1,5 @@
 #include "bornepage.h"
-#include "LinkLight.h"
-#include "Motion.h"
+#include "ConnectionAnimation.h"
 #include "sound.h"
 #include "uihelpers.h"
 #include <QGridLayout>
@@ -22,7 +21,7 @@ void LcdScreen::display(const QString &top, const QString &bottom, int state)
     m_bottom = bottom.left(16);
     m_state = state;
     m_clock.start();
-    m_timer.start(Motion::Frame);
+    m_timer.start(Motion::frame(this));
     update();
 }
 
@@ -119,6 +118,8 @@ BornePage::BornePage(QWidget *parent) : QWidget(parent)
     line->addWidget(m_light);
     line->addWidget(m_link, 1);
     right->addLayout(line);
+    m_flow = new DataFlow;
+    right->addWidget(m_flow);
     right->addWidget(text(QStringLiteral("Derniers échanges"), "section"));
     m_feed = new QTableWidget(0, 4);
     m_feed->setHorizontalHeaderLabels({QStringLiteral("Heure"), QStringLiteral("Source"), QStringLiteral("Message"), QStringLiteral("Réponse")});
@@ -134,6 +135,7 @@ BornePage::BornePage(QWidget *parent) : QWidget(parent)
 void BornePage::setLink(bool on, const QString &value)
 {
     m_light->setOn(on);
+    m_flow->setOn(on);
     m_link->setText(value);
 }
 
@@ -185,6 +187,7 @@ void BornePage::exchange(const QString &source, const QString &request, const QB
     const QStringList parts = QString::fromLatin1(reply).trimmed().split('|');
     const int state = parts.value(2).toInt();
     m_lcd->display(parts.value(0), parts.value(1), state);
+    m_flow->send(state);
     Sound::play(state == 1 ? "alerte" : state == 2 ? "refus" : "valide");
     m_feed->insertRow(0);
     const QStringList values = {QTime::currentTime().toString("HH:mm:ss"), source, request, parts.value(0) + (parts.value(1).isEmpty() ? QString() : " · " + parts.value(1))};

@@ -3,44 +3,59 @@ CONFIG += c++17
 TEMPLATE = app
 TARGET = AureaMatieres
 
-INCLUDEPATH += Crud Metier arduino Animations Extras third_party/qrcodegen third_party/quirc
+INCLUDEPATH += Crud Metier arduino Animations Extras Extras/libs/qrcodegen Extras/libs/quirc
 win32: LIBS += -lwinmm
+RC_ICONS = Resources/Assets/aurea.ico
 
 SOURCES += main.cpp \
     Crud/crud_interface.cpp \
-    Crud/inventoryrepository.cpp \
+    Crud/material.cpp \
+    Crud/materialrepository.cpp \
     Crud/materialwindow.cpp \
     Crud/oracleconnection.cpp \
-    Metier/qr_interface.cpp \
-    Metier/qrservice.cpp \
-    Metier/reapprovisionnement.cpp \
-    Metier/reports.cpp \
+    Metier/pdfexport.cpp \
+    Metier/qrcode.cpp \
+    Metier/qrcode_interface.cpp \
+    Metier/reapprovisionnement_interface.cpp \
     Metier/statistiques_pdf.cpp \
     arduino/arduino.cpp \
     arduino/borne_interface.cpp \
     arduino/bornepage.cpp \
+    Animations/ChartAnimation.cpp \
+    Animations/ClosingAnimation.cpp \
+    Animations/LinesAnimation.cpp \
+    Animations/LogoAnimation.cpp \
     Animations/QrAnimation.cpp \
-    Animations/StitchAnimation.cpp \
-    third_party/qrcodegen/qrcodegen.cpp \
-    third_party/quirc/quirc.c third_party/quirc/decode.c \
-    third_party/quirc/identify.c third_party/quirc/version_db.c
+    Animations/TableAnimation.cpp \
+    Animations/TransitionAnimation.cpp \
+    Extras/dialogskin.cpp \
+    Extras/libs/qrcodegen/qrcodegen.cpp \
+    Extras/libs/quirc/quirc.c Extras/libs/quirc/decode.c \
+    Extras/libs/quirc/identify.c Extras/libs/quirc/version_db.c
 
-HEADERS += Crud/inventoryrepository.h \
+HEADERS += Crud/material.h \
+    Crud/materialrepository.h \
     Crud/materialwindow.h \
     Crud/oracleconnection.h \
-    Metier/qrservice.h \
-    Metier/reports.h \
+    Metier/pdfexport.h \
+    Metier/qrcode.h \
     arduino/arduino.h \
     arduino/bornepage.h \
-    Animations/LinkLight.h \
-    Animations/Motion.h \
+    Animations/AnimationSpeed.h \
+    Animations/ConnectionAnimation.h \
+    Animations/UiAnimations.h \
+    Animations/ChartAnimation.h \
+    Animations/ClosingAnimation.h \
+    Animations/LinesAnimation.h \
+    Animations/LogoAnimation.h \
     Animations/QrAnimation.h \
-    Animations/StitchAnimation.h \
-    Animations/UiEffects.h \
+    Animations/TableAnimation.h \
+    Animations/TransitionAnimation.h \
+    Extras/dialogskin.h \
     Extras/icons.h \
     Extras/sound.h \
     Extras/uihelpers.h \
-    third_party/qrcodegen/qrcodegen.hpp third_party/quirc/quirc.h third_party/quirc/quirc_internal.h
+    Extras/libs/qrcodegen/qrcodegen.hpp Extras/libs/quirc/quirc.h Extras/libs/quirc/quirc_internal.h
 
 FORMS += Crud/materialwindow.ui
-RESOURCES += Resources/materials.qrc
+RESOURCES += Resources/assets.qrc

@@ -1,6 +1,6 @@
 #pragma once
 #include "arduino.h"
-#include "inventoryrepository.h"
+#include "materialrepository.h"
 #include <QMainWindow>
 #include <QImage>
 #include <QList>
@@ -8,6 +8,9 @@
 
 namespace Ui { class MaterialWindow; }
 class BornePage;
+class ChartAnimation;
+class LivingLogo;
+class SpoolAnimation;
 class LinkLight;
 class QLabel;
 class QPushButton;
@@ -29,7 +32,7 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 private:
     Ui::MaterialWindow *ui;
-    InventoryRepository repo;
+    MaterialRepository repo;
     QVector<Material> materials;
     QSet<int> lowIds;
     int editingId=0;
@@ -54,6 +57,9 @@ private:
     BornePage *borne;
     QPushButton *navBorne;
     QrAnimation *qrAnimation;
+    ChartAnimation *chart;
+    LivingLogo *livingLogo;
+    SpoolAnimation *spool;
     bool opening=false, leaving=false;
     QVector<Material> waitingAlerts;
     void setArduinoState(bool on,const QString &text);

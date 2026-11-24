@@ -1,6 +1,6 @@
-#include "qrservice.h"
-#include "inventoryrepository.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "materialrepository.h"
+#include "pdfexport.h"
 #include "qrcodegen.hpp"
 extern "C" {
 #include "quirc.h"

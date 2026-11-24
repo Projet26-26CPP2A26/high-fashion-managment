@@ -1,4 +1,4 @@
-#include "reports.h"
+#include "pdfexport.h"
 #include <QBuffer>
 #include <QDateTime>
 #include <QFileInfo>

@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <functional>
 
+class DataFlow;
 class LinkLight;
 class QLabel;
 class QTableWidget;
@@ -40,6 +41,7 @@ private:
 
     LcdScreen *m_lcd;
     LinkLight *m_light;
+    DataFlow *m_flow;
     QLabel *m_link;
     QTableWidget *m_feed;
     QString m_id, m_quantity;

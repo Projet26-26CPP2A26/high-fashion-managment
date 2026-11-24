@@ -1,5 +1,5 @@
 #pragma once
-#include "inventoryrepository.h"
+#include "materialrepository.h"
 #include <QImage>
 
 class TypeStat {

@@ -2,8 +2,8 @@
 #include <QSqlDatabase>
 #include "ui_materialwindow.h"
 #include "icons.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QButtonGroup>
 #include <QDate>
 #include <QDateTime>
@@ -30,10 +30,15 @@
 #include <algorithm>
 #include <cmath>
 #include "uihelpers.h"
-#include "LinkLight.h"
+#include "ChartAnimation.h"
+#include "ClosingAnimation.h"
+#include "ConnectionAnimation.h"
+#include "dialogskin.h"
+#include "LogoAnimation.h"
+#include "TableAnimation.h"
 #include "QrAnimation.h"
-#include "StitchAnimation.h"
-#include "UiEffects.h"
+#include "TransitionAnimation.h"
+#include "UiAnimations.h"
 #include "bornepage.h"
 #include "sound.h"
 #include <QCloseEvent>
@@ -41,30 +46,15 @@
 #include <QPainter>
 #include <QStyledItemDelegate>
 
-// Pastille colorée pour l'état du stock.
-class StatePill : public QStyledItemDelegate {
-public:
-    using QStyledItemDelegate::QStyledItemDelegate;
-    void paint(QPainter *p,const QStyleOptionViewItem &option,const QModelIndex &index) const override {
-        const QString text=index.data().toString();
-        const QColor color(text==QStringLiteral("Rupture")?"#e8a9b0":text==QStringLiteral("Disponible")?"#b7ccb3":"#e6ce89");
-        p->save(); p->setRenderHint(QPainter::Antialiasing);
-        if(option.state&QStyle::State_Selected) p->fillRect(option.rect,QColor("#3c3727"));
-        QColor back=color; back.setAlpha(36);
-        const QRect box(option.rect.left()+6,option.rect.center().y()-12,std::min(option.rect.width()-8,p->fontMetrics().horizontalAdvance(text)+34),25);
-        p->setPen(Qt::NoPen); p->setBrush(back); p->drawRoundedRect(box,12,12);
-        p->setBrush(color); p->drawEllipse(QPointF(box.left()+12,box.center().y()+0.5),3,3);
-        p->setPen(color); p->drawText(box.adjusted(21,0,-2,0),Qt::AlignVCenter,text); p->restore();
-    }
-};
 
 MaterialWindow::MaterialWindow(QWidget *parent)
     :QMainWindow(parent),ui(new Ui::MaterialWindow) {
     ui->setupUi(this);
-    QFile theme(QStringLiteral(":/materials/theme.qss"));
+    QFile theme(QStringLiteral(":/assets/theme.qss"));
     if(theme.open(QIODevice::ReadOnly)) setStyleSheet(QString::fromUtf8(theme.readAll()));
-    ui->logoMark->setPixmap(QPixmap(":/assets/logo_aurea.png").scaled(QSize(44,44)*devicePixelRatioF(),Qt::KeepAspectRatio,Qt::SmoothTransformation));
-    ui->logoMark->setScaledContents(true);
+    livingLogo=new LivingLogo(ui->logoMark);
+    spool=new SpoolAnimation; ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->sidebarNote),spool);
+    chart=new ChartAnimation(ui->chartLabel);
     navBorne=new QPushButton(QStringLiteral("Borne Arduino"));
     navBorne->setProperty("nav",true); navBorne->setCheckable(true);
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navStats)+1,navBorne);
@@ -83,7 +73,7 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     for(QLabel *label:{ui->referencesNote,ui->alertsNote,ui->valueNote,ui->suppliersNote}) label->setWordWrap(true);
     auto *nav=new QButtonGroup(this); nav->setExclusive(true);
     const QList<QPushButton*> buttons=navButtons();
-    new UiEffects::NavPill(ui->sidebar,buttons);
+    new UiAnimations::NavPill(ui->sidebar,buttons);
     for(int i=0;i<buttons.size();++i) {
         nav->addButton(buttons[i],i);
         connect(buttons[i],&QPushButton::clicked,this,[this,i] {if(i==1) edit(); else setPage(i);});
@@ -131,7 +121,7 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     connect(ui->printLabelButton,&QPushButton::clicked,this,&MaterialWindow::printLabel);
     connect(ui->statsPdfButton,&QPushButton::clicked,this,&MaterialWindow::exportStats);
     connect(ui->helpButton,&QPushButton::clicked,this,[this]{
-        QMessageBox::information(this,QStringLiteral("Aide — Gestion des matières"),QStringLiteral(
+        DialogSkin::info(this,QStringLiteral("Aide — Gestion des matières"),QStringLiteral(
             "• Matières premières : recherchez, filtrez et sélectionnez une ligne pour modifier, supprimer ou enregistrer une entrée / sortie.\n\n"
             "• Ajouter une matière : chaque référence appartient à un lot unique. L’unité reste fixe une fois le lot enregistré.\n\n"
             "• Réapprovisionnement : les matières sous le seuil sont repérées automatiquement. Une alerte s’affiche dès qu’une matière passe sous son seuil. « Tout commander » crée un bon par fournisseur. Le PDF prépare une commande ; il ne modifie pas le stock. Enregistrez la réception à l’arrivée des marchandises.\n\n"
@@ -152,8 +142,8 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     connect(A.getsimulator(),&QTcpSocket::disconnected,this,[this]{arduinoData.clear(); setArduinoState(false,QStringLiteral("Arduino non connecté"));});
     auto *arduinoTimer=new QTimer(this); connect(arduinoTimer,&QTimer::timeout,this,&MaterialWindow::connectArduino); arduinoTimer->start(3000);
     connectArduino();
-    UiEffects::HoverGlow::install(this);
-    ui->materialsTable->setItemDelegateForColumn(9,new StatePill(this)); ui->alertsTable->setItemDelegateForColumn(7,new StatePill(this));
+    UiAnimations::HoverGlow::install(this);
+    for(QTableWidget *table:findChildren<QTableWidget*>()) new TableAnimation(table);
     refresh(); setPage(0);
 }
 void MaterialWindow::setArduinoState(bool on,const QString &text) {
@@ -161,7 +151,11 @@ void MaterialWindow::setArduinoState(bool on,const QString &text) {
 }
 void MaterialWindow::playOpening() {
     opening=true;
-    connect(new StitchAnimation(StitchAnimation::Opening,this),&StitchAnimation::finished,this,[this]{
+    livingLogo->hide(); Sound::play("ouverture");
+    const int low=int(lowIds.size());
+    auto *intro=new TransitionAnimation(this,ui->logoMark,QStringLiteral("AUREA"),low?QStringLiteral("Bonjour · %1 matière(s) à commander").arg(low):QStringLiteral("Bonjour · votre stock est complet"));
+    connect(intro,&TransitionAnimation::finished,this,[this]{
+        livingLogo->show();
         opening=false;
         for(QLabel *label:{ui->referencesValue,ui->alertsValue,ui->suppliersValue,ui->valueValue}) label->setProperty("shown",0.0);
         refresh();
@@ -171,20 +165,22 @@ void MaterialWindow::playOpening() {
 void MaterialWindow::closeEvent(QCloseEvent *event) {
     if(leaving||!isVisible()||qApp->isSavingSession()) {event->accept(); return;}
     event->ignore();
-    if(findChild<StitchAnimation*>()) return;
-    connect(new StitchAnimation(StitchAnimation::Closing,this),&StitchAnimation::finished,this,[this]{leaving=true; close();});
+    if(findChild<ClosingAnimation*>()) return;
+    Sound::play("fermeture");
+    connect(new ClosingAnimation(this),&ClosingAnimation::finished,this,[this]{leaving=true; close();});
 }
 MaterialWindow::~MaterialWindow() {A.getserial()->disconnect(this); A.getsimulator()->disconnect(this); A.close_arduino(); delete ui;}
 void MaterialWindow::setSidebarVisible(bool visible) {ui->sidebar->setVisible(visible);}
 QList<QPushButton *> MaterialWindow::navButtons() const {return {ui->navInventory,ui->navEditor,ui->navAlerts,ui->navQr,ui->navStats,navBorne};}
 QPushButton *MaterialWindow::helpButton() const {return ui->helpButton;}
-void MaterialWindow::notify(const QString &message) {ui->statusbar->showMessage(message,12000); if(isVisible()) UiEffects::toast(this,message);}
-void MaterialWindow::failure(const QString &message) {QMessageBox::warning(this,QStringLiteral("AUREA"),message);}
+void MaterialWindow::notify(const QString &message) {ui->statusbar->showMessage(message,12000); if(isVisible()) UiAnimations::toast(this,message);}
+void MaterialWindow::failure(const QString &message) {DialogSkin::warn(this,QStringLiteral("AUREA"),message);}
 void MaterialWindow::setPage(int index) {
     static const QStringList titles={QStringLiteral("Matières premières"),QStringLiteral("Fiche matière"),QStringLiteral("Réapprovisionnement"),QStringLiteral("Lots & QR codes"),QStringLiteral("Statistiques du stock"),QStringLiteral("Borne Arduino")};
     static const QStringList subtitles={QStringLiteral("Tissus, fils et fournitures : une vue claire de votre atelier."),QStringLiteral("Chaque détail compte, du fournisseur au dernier mètre de tissu."),QStringLiteral("Anticipez les ruptures et préparez les prochains achats."),QStringLiteral("Identifiez vos lots et suivez leur utilisation en atelier."),QStringLiteral("Comprenez la valeur et les besoins de votre stock."),QStringLiteral("Consultez et mettez à jour le stock depuis la borne de l’atelier.")};
     if(index<0||index>=6) return;
-    UiEffects::changePage(ui->pages,index); ui->pageTitle->setText(titles[index]); ui->pageSubtitle->setText(subtitles[index]);
+    if(index!=ui->pages->currentIndex()) spool->hurry();
+    UiAnimations::changePage(ui->pages,index); ui->pageTitle->setText(titles[index]); ui->pageSubtitle->setText(subtitles[index]);
     ui->breadcrumb->setText(QStringLiteral("ATELIER / MATIÈRES"));
     ui->metricsRow->setVisible(index==0||index==2);
     const QList<QPushButton*> buttons=navButtons(); buttons[index]->setChecked(true);
@@ -196,8 +192,8 @@ void MaterialWindow::refresh() {
     int low=0; double value=0; QSet<QString> suppliers;
     for(const auto &m:materials) {low+=m.low(); value+=m.quantity()*m.price(); suppliers.insert(m.supplier().toCaseFolded());}
     const auto whole=[](double v){return QString::number(std::lround(v));};
-    UiEffects::count(ui->referencesValue,materials.size(),whole); UiEffects::count(ui->alertsValue,low,whole);
-    UiEffects::count(ui->valueValue,value,[](double v){return StockReports::money(v);}); UiEffects::count(ui->suppliersValue,suppliers.size(),whole);
+    UiAnimations::count(ui->referencesValue,materials.size(),whole); UiAnimations::count(ui->alertsValue,low,whole);
+    UiAnimations::count(ui->valueValue,value,[](double v){return StockReports::money(v);}); UiAnimations::count(ui->suppliersValue,suppliers.size(),whole);
     updateInventory();
     QVector<Material> lowList,newLow; QSet<int> ids;
     for(const auto &m:materials) if(m.low()) {lowList.append(m); ids.insert(m.id()); if(!lowIds.contains(m.id())) newLow.append(m);}

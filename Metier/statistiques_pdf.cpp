@@ -3,8 +3,8 @@
 #include <QSqlDatabase>
 #include "ui_materialwindow.h"
 #include "icons.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QButtonGroup>
 #include <QDate>
 #include <QDateTime>
@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cmath>
 #include "uihelpers.h"
+#include "ChartAnimation.h"
 
 QString MaterialWindow::pdfPath(const QString &suggestion) {
     QString path=QFileDialog::getSaveFileName(this,QStringLiteral("Enregistrer le document PDF"),suggestion,QStringLiteral("Document PDF (*.pdf)"));
@@ -51,8 +52,9 @@ void MaterialWindow::updateStats() {
     for(auto it=stats.cbegin();it!=stats.cend();++it,++r) {
         ui->statsTable->setItem(r,0,cell(it.key())); ui->statsTable->setItem(r,1,number(it->count())); ui->statsTable->setItem(r,2,number(it->low())); ui->statsTable->setItem(r,3,cell(StockReports::money(it->value())));
     }
-    QSize target=ui->chartLabel->size(); if(target.width()<400) target=QSize(950,270);
-    ui->chartLabel->setPixmap(QPixmap::fromImage(StockReports::chart(materials,target)));
+    QVector<QPair<QString,double>> values;
+    for(auto it=stats.cbegin();it!=stats.cend();++it) values.append({it.key(),it->value()});
+    chart->setData(values);
 }
 void MaterialWindow::exportStats() {
     const QString path=pdfPath(QStringLiteral("AUREA-statistiques.pdf")); if(path.isEmpty()) return;

@@ -9,22 +9,25 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/Crud)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network)
 
 add_library(quirc STATIC
-    third_party/quirc/quirc.c third_party/quirc/decode.c
-    third_party/quirc/identify.c third_party/quirc/version_db.c)
-target_include_directories(quirc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quirc)
+    Extras/libs/quirc/quirc.c Extras/libs/quirc/decode.c
+    Extras/libs/quirc/identify.c Extras/libs/quirc/version_db.c)
+target_include_directories(quirc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Extras/libs/quirc)
 
 set(APP_SOURCES
-    Crud/crud_interface.cpp Crud/materialwindow.cpp Crud/materialwindow.h Crud/materialwindow.ui
-    Crud/inventoryrepository.cpp Crud/inventoryrepository.h Crud/oracleconnection.cpp Crud/oracleconnection.h
-    Metier/qr_interface.cpp Metier/qrservice.cpp Metier/qrservice.h Metier/reapprovisionnement.cpp
-    Metier/reports.cpp Metier/reports.h Metier/statistiques_pdf.cpp
-    arduino/arduino.cpp arduino/arduino.h arduino/borne_interface.cpp arduino/bornepage.cpp arduino/bornepage.h
-    Animations/QrAnimation.cpp Animations/QrAnimation.h Animations/StitchAnimation.cpp Animations/StitchAnimation.h
-    Animations/LinkLight.h Animations/Motion.h Animations/UiEffects.h
-    Extras/icons.h Extras/sound.h Extras/uihelpers.h
-    third_party/qrcodegen/qrcodegen.cpp Resources/materials.qrc)
+    Crud/crud_interface.cpp Crud/material.cpp Crud/materialrepository.cpp Crud/materialwindow.cpp Crud/materialwindow.h
+    Crud/materialwindow.ui Crud/oracleconnection.cpp
+    Metier/pdfexport.cpp Metier/qrcode.cpp Metier/qrcode_interface.cpp Metier/reapprovisionnement_interface.cpp Metier/statistiques_pdf.cpp
+    arduino/arduino.cpp arduino/borne_interface.cpp arduino/bornepage.cpp
+    Animations/ChartAnimation.cpp Animations/ChartAnimation.h
+    Animations/ClosingAnimation.cpp Animations/ClosingAnimation.h
+    Animations/LinesAnimation.cpp Animations/LinesAnimation.h
+    Animations/LogoAnimation.cpp Animations/LogoAnimation.h
+    Animations/QrAnimation.cpp Animations/QrAnimation.h
+    Animations/TableAnimation.cpp Animations/TableAnimation.h
+    Animations/TransitionAnimation.cpp Animations/TransitionAnimation.h
+    Extras/dialogskin.cpp Extras/libs/qrcodegen/qrcodegen.cpp Resources/assets.qrc)
 
-set(APP_INCLUDES Crud Metier arduino Animations Extras third_party/qrcodegen)
+set(APP_INCLUDES Crud Metier arduino Animations Extras Extras/libs/qrcodegen)
 set(APP_LIBRARIES quirc Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network winmm)
 
 add_executable(AureaMatieres WIN32 main.cpp ${APP_SOURCES})

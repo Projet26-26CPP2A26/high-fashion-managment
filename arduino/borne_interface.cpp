@@ -3,8 +3,8 @@
 #include <QSqlDatabase>
 #include "ui_materialwindow.h"
 #include "icons.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QButtonGroup>
 #include <QDate>
 #include <QDateTime>

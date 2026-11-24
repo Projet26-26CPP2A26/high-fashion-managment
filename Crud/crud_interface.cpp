@@ -3,8 +3,8 @@
 #include <QSqlDatabase>
 #include "ui_materialwindow.h"
 #include "icons.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QButtonGroup>
 #include <QDate>
 #include <QDateTime>
@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <cmath>
 #include "uihelpers.h"
-#include "UiEffects.h"
+#include "UiAnimations.h"
 
 int MaterialWindow::selectedId(QTableWidget *table) const {
     const int row=table->currentRow(); return row>=0&&table->item(row,0)?table->item(row,0)->data(Qt::UserRole).toInt():0;
@@ -87,7 +87,7 @@ void MaterialWindow::save() {
     m.setSupplier(ui->supplierEdit->text()); m.setLot(ui->lotEdit->text()); m.setQuantity(ui->quantityEdit->value());
     m.setMinimum(ui->minimumEdit->value()); m.setPrice(ui->priceEdit->value()); m.setUnit(ui->unitEdit->currentText());
     const bool saved=editingId?repo.updateMaterial(m):repo.addMaterial(m);
-    if(!saved) {ui->validationLabel->setText(repo.error()); UiEffects::shake(ui->saveButton); return;}
+    if(!saved) {ui->validationLabel->setText(repo.error()); UiAnimations::shake(ui->saveButton); return;}
     editingId=0; refresh(); setPage(0);
     for(int r=0;r<ui->materialsTable->rowCount();++r) if(ui->materialsTable->item(r,0)->data(Qt::UserRole).toInt()==m.id()) {ui->materialsTable->selectRow(r); break;}
     notify(QStringLiteral("%1 a été enregistrée.").arg(m.name()));

@@ -3,8 +3,8 @@
 #include <QSqlDatabase>
 #include "ui_materialwindow.h"
 #include "icons.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QButtonGroup>
 #include <QDate>
 #include <QDateTime>
@@ -51,9 +51,8 @@ void MaterialWindow::showAlert(const QVector<Material> &list) {
     QStringList lines;
     for(const auto &m:list.mid(0,8)) lines.append(QStringLiteral("• %1 : %2 / %3 %4 (%5)").arg(m.name(),StockReports::quantity(m.quantity()),StockReports::quantity(m.minimum()),m.unit(),state(m)));
     if(list.size()>8) lines.append(QStringLiteral("… et %1 autre(s)").arg(list.size()-8));
-    auto *box=new QMessageBox(QMessageBox::Warning,QStringLiteral("Alerte de stock"),QStringLiteral("%1 matière(s) sous le seuil minimal :\n\n").arg(list.size())+lines.join('\n'),QMessageBox::NoButton,this);
-    box->setAttribute(Qt::WA_DeleteOnClose); box->setTextFormat(Qt::PlainText);
-    auto *order=box->addButton(QStringLiteral("Commander"),QMessageBox::AcceptRole); box->addButton(QStringLiteral("Plus tard"),QMessageBox::RejectRole);
-    connect(order,&QPushButton::clicked,this,[this]{setPage(2);});
+    auto *box=new DialogSkin(this,LivingIcon::Alert,QStringLiteral("Alerte de stock"),QStringLiteral("%1 matière(s) sous le seuil minimal :\n\n").arg(list.size())+lines.join('\n'),QStringLiteral("Commander"),QStringLiteral("Plus tard"));
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    connect(box,&QDialog::accepted,this,[this]{setPage(2);});
     box->open();
 }

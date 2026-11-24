@@ -1,5 +1,6 @@
 #pragma once
-#include "inventoryrepository.h"
+#include "dialogskin.h"
+#include "materialrepository.h"
 #include <QAbstractItemView>
 #include <QHeaderView>
 #include <QList>
@@ -23,10 +24,7 @@ inline void configure(QTableWidget *table,const QList<int> &widths) {
     table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 inline bool confirm(QWidget *parent,const QString &title,const QString &text) {
-    QMessageBox box(QMessageBox::Question,title,text,QMessageBox::NoButton,parent);
-    auto *yes=box.addButton(QStringLiteral("Confirmer"),QMessageBox::AcceptRole);
-    auto *no=box.addButton(QStringLiteral("Annuler"),QMessageBox::RejectRole);
-    box.setDefaultButton(no); box.exec(); return box.clickedButton()==yes;
+    return DialogSkin::ask(parent,title,text);
 }
 inline QString state(const Material &m) {
     return m.quantity()==0?QStringLiteral("Rupture"):m.low()?QStringLiteral("À commander"):QStringLiteral("Disponible");

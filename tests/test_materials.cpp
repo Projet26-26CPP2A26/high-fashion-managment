@@ -1,7 +1,7 @@
 #include <QtTest>
-#include "inventoryrepository.h"
-#include "qrservice.h"
-#include "reports.h"
+#include "materialrepository.h"
+#include "qrcode.h"
+#include "pdfexport.h"
 #include <QFile>
 #include <QTemporaryDir>
 
@@ -27,19 +27,19 @@ private slots:
     void materialValidation()
     {
         Material m = sampleMaterial();
-        QVERIFY(InventoryRepository::validate(m).isEmpty());
+        QVERIFY(MaterialRepository::validate(m).isEmpty());
         m.setLot("SOI TEST");
-        QVERIFY(!InventoryRepository::validate(m).isEmpty());
+        QVERIFY(!MaterialRepository::validate(m).isEmpty());
         m = sampleMaterial();
         m.setQuantity(-1);
-        QVERIFY(!InventoryRepository::validate(m).isEmpty());
+        QVERIFY(!MaterialRepository::validate(m).isEmpty());
         m = sampleMaterial();
         m.setUnit("pièce");
         m.setQuantity(2.5);
-        QVERIFY(!InventoryRepository::validate(m).isEmpty());
+        QVERIFY(!MaterialRepository::validate(m).isEmpty());
         m = sampleMaterial();
         m.setUnit("litre");
-        QVERIFY(!InventoryRepository::validate(m).isEmpty());
+        QVERIFY(!MaterialRepository::validate(m).isEmpty());
     }
 
     void lowStock()
