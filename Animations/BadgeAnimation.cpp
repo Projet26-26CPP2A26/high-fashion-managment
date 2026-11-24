@@ -6,7 +6,8 @@
 #include <algorithm>
 #include <cmath>
 
-BadgeAnimation::BadgeAnimation(QWidget *parent) : QWidget(parent)
+BadgeAnimation::BadgeAnimation(QWidget *parent)
+    : QWidget(parent)
 {
     setFixedHeight(210);
     m_life.start();
@@ -16,7 +17,9 @@ BadgeAnimation::BadgeAnimation(QWidget *parent) : QWidget(parent)
             m_mode = Idle;
             m_tone.go(0, Motion::Base);
         }
-        if (isVisible()) update();
+        if (isVisible()) {
+            update();
+        }
     });
     timer->start(Fx::frameInterval(this));
 }
@@ -33,18 +36,23 @@ void BadgeAnimation::answer(bool granted)
 {
     m_mode = granted ? Granted : Denied;
     m_clock.start();
-    if (!granted) m_card.go(0, Motion::Slow);
+    if (!granted) {
+        m_card.go(0, Motion::Slow);
+    }
 }
 
 void BadgeAnimation::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    const double life = m_life.elapsed() / 1000.0, ms = m_clock.isValid() ? m_clock.elapsed() : 0, level = m_tone.value(), card = m_card.value();
+    const double life = m_life.elapsed() / 1000.0, ms = m_clock.isValid() ? m_clock.elapsed() : 0,
+                 level = m_tone.value(), card = m_card.value();
     const QColor gold("#e2cf9f"), tone(m_mode == Granted ? "#7fc08a" : m_mode == Denied ? "#e08f8f" : "#e2cf9f");
     const bool answered = m_mode == Granted || m_mode == Denied;
     QPointF c(width() / 2.0, 92);
-    if (m_mode == Denied && ms < Motion::Slow) c.rx() += std::sin(ms / Motion::Slow * 18) * 6 * (1 - ms / Motion::Slow);
+    if (m_mode == Denied && ms < Motion::Slow) {
+        c.rx() += std::sin(ms / Motion::Slow * 18) * 6 * (1 - ms / Motion::Slow);
+    }
 
     QRadialGradient glow(c, 120);
     QColor light = tone;
@@ -57,13 +65,16 @@ void BadgeAnimation::paintEvent(QPaintEvent *)
     if (answered) {
         for (int i = 0; i < 2; ++i) {
             const double t = (ms - i * 130) / (Motion::Slow * 1.7);
-            if (t <= 0 || t >= 1) continue;
+            if (t <= 0 || t >= 1) {
+                continue;
+            }
             QColor ring = tone;
             ring.setAlphaF(0.5 * (1 - t));
             const double grow = 26 * Motion::ease(t);
             p.setPen(QPen(ring, 1.6));
             p.setBrush(Qt::NoBrush);
-            p.drawRoundedRect(QRectF(c.x() - 58 - grow, c.y() - 58 - grow, 116 + 2 * grow, 116 + 2 * grow), 26 + grow, 26 + grow);
+            p.drawRoundedRect(
+                QRectF(c.x() - 58 - grow, c.y() - 58 - grow, 116 + 2 * grow, 116 + 2 * grow), 26 + grow, 26 + grow);
         }
     }
     p.setPen(QPen(m_mode == Idle ? QColor("#6b5f43") : tone, 1.6));
@@ -104,7 +115,9 @@ void BadgeAnimation::paintEvent(QPaintEvent *)
     }
 
     const double hide = m_mode == Granted ? std::max(0.0, 1 - ms / Motion::Slow) : 1;
-    if (hide <= 0.01) return;
+    if (hide <= 0.01) {
+        return;
+    }
     const QPointF from(c.x() + 96, 168 + 3 * std::sin(life * 1.7)), to(c.x() + 6, c.y() + 30);
     p.setOpacity(hide);
     p.translate(from + (to - from) * card - QPointF(0, std::sin(card * 3.1416) * 14));

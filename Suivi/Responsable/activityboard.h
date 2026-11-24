@@ -23,17 +23,29 @@ public:
     void setSearch(const QString &text);
     bool exportCsv(const QString &path) const;
 
-    QStringList order() const { return m_order; }
-    Employee employee(const QString &reference) const { return m_people.value(reference); }
+    QStringList order() const
+    {
+        return m_order;
+    }
+    Employee employee(const QString &reference) const
+    {
+        return m_people.value(reference);
+    }
     QString reference(int employeeId) const;
     QString displayName(const QString &reference) const;
     WorkSession session(const QString &reference) const;
     int connected();
     QVector<WorkSession> sessionsToday();
     void openEmployee(const QString &reference);
-    EmployeePopup *popup() const { return m_popup; }
+    EmployeePopup *popup() const
+    {
+        return m_popup;
+    }
 
-    ActivityStore &store() { return m_store; }
+    ActivityStore &store()
+    {
+        return m_store;
+    }
     QVector<WorkTask> reviews();
     bool review(const WorkTask &task, bool accept, int rating, const QString &feedback);
     std::function<QString(int, const QString &, int)> assignHandler;

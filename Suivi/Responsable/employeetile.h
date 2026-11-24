@@ -16,13 +16,23 @@ public:
     explicit EmployeeTile(QWidget *parent = nullptr);
     void setSession(const WorkSession &session, bool selected);
     void enter(int delay);
-    void setPulse(qreal phase) { m_pulse = phase; update(); }
+    void setPulse(qreal phase)
+    {
+        m_pulse = phase;
+        update();
+    }
     std::function<void()> clicked;
 
 protected:
     void paintEvent(QPaintEvent *) override;
-    void enterEvent(QEnterEvent *) override { animateHover(1); }
-    void leaveEvent(QEvent *) override { animateHover(0); }
+    void enterEvent(QEnterEvent *) override
+    {
+        animateHover(1);
+    }
+    void leaveEvent(QEvent *) override
+    {
+        animateHover(0);
+    }
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
@@ -39,7 +49,10 @@ private:
 class StarRating : public QWidget {
 public:
     explicit StarRating(QWidget *parent = nullptr);
-    int value() const { return m_value; }
+    int value() const
+    {
+        return m_value;
+    }
     void setValue(int v);
 
 protected:

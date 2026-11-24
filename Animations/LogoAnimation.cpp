@@ -18,14 +18,18 @@ QTimer *pulse(QWidget *w, int interval)
     auto *timer = new QTimer(w);
     timer->setTimerType(Qt::PreciseTimer);
     QObject::connect(timer, &QTimer::timeout, w, [w] {
-        if (w->isVisible()) w->update();
+        if (w->isVisible()) {
+            w->update();
+        }
     });
     timer->start(interval);
     return timer;
 }
 }
 
-LivingIcon::LivingIcon(Kind kind, int size, QWidget *parent) : QWidget(parent), m_kind(kind)
+LivingIcon::LivingIcon(Kind kind, int size, QWidget *parent)
+    : QWidget(parent)
+    , m_kind(kind)
 {
     setFixedSize(size, size);
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -55,7 +59,8 @@ void LivingIcon::paintEvent(QPaintEvent *)
         ring.setAlpha(i ? 90 : 170);
         p.setPen(QPen(ring, i ? 1.1 : 1.7, Qt::SolidLine, Qt::RoundCap));
         const double radius = 27 + i * 5;
-        p.drawArc(QRectF(-radius, -radius, radius * 2, radius * 2), int((t * (i ? -70 : 40) + i * 140) * 16), int((m_kind == Empty ? 250 : 120 + 40 * breath) * 16 * ease(t / 0.8)));
+        p.drawArc(QRectF(-radius, -radius, radius * 2, radius * 2), int((t * (i ? -70 : 40) + i * 140) * 16),
+            int((m_kind == Empty ? 250 : 120 + 40 * breath) * 16 * ease(t / 0.8)));
     }
     p.scale(grow, grow);
     if (m_kind != Empty) {
@@ -73,12 +78,16 @@ void LivingIcon::paintEvent(QPaintEvent *)
         path.lineTo(-2.5, 7.5);
         path.lineTo(10, -7);
         QPainterPath part(path.pointAtPercent(0));
-        for (double s = 0.02; s <= draw; s += 0.02) part.lineTo(path.pointAtPercent(s));
+        for (double s = 0.02; s <= draw; s += 0.02) {
+            part.lineTo(path.pointAtPercent(s));
+        }
         p.drawPath(part);
     } else if (m_kind == Empty) {
         p.setBrush(color);
         p.setPen(Qt::NoPen);
-        for (int i = 0; i < 3; ++i) p.drawEllipse(QPointF(-9 + 9 * i, -3.5 * std::max(0.0, std::sin(t * 3.4 - i * 0.7))), 2.4, 2.4);
+        for (int i = 0; i < 3; ++i) {
+            p.drawEllipse(QPointF(-9 + 9 * i, -3.5 * std::max(0.0, std::sin(t * 3.4 - i * 0.7))), 2.4, 2.4);
+        }
     } else {
         QFont f("Inter");
         f.setPixelSize(24);
@@ -93,10 +102,14 @@ void LivingIcon::paintEvent(QPaintEvent *)
 
 void LivingLogo::attach(QLabel *logo)
 {
-    if (logo && !logo->findChild<QWidget *>("livingLogo")) new LivingLogo(logo);
+    if (logo && !logo->findChild<QWidget *>("livingLogo")) {
+        new LivingLogo(logo);
+    }
 }
 
-LivingLogo::LivingLogo(QLabel *logo) : QWidget(logo), m_logo(logo)
+LivingLogo::LivingLogo(QLabel *logo)
+    : QWidget(logo)
+    , m_logo(logo)
 {
     setObjectName("livingLogo");
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -109,15 +122,21 @@ LivingLogo::LivingLogo(QLabel *logo) : QWidget(logo), m_logo(logo)
 
 bool LivingLogo::eventFilter(QObject *object, QEvent *event)
 {
-    if (object == parent() && event->type() == QEvent::Resize) setGeometry(static_cast<QWidget *>(object)->rect());
+    if (object == parent() && event->type() == QEvent::Resize) {
+        setGeometry(static_cast<QWidget *>(object)->rect());
+    }
     return QWidget::eventFilter(object, event);
 }
 
 void LivingLogo::paintEvent(QPaintEvent *)
 {
-    if (m_logo->property("logoHidden").toBool()) return;
+    if (m_logo->property("logoHidden").toBool()) {
+        return;
+    }
     const QPixmap image = m_logo->pixmap();
-    if (image.isNull()) return;
+    if (image.isNull()) {
+        return;
+    }
     const QSizeF size = QSizeF(image.size()) / image.devicePixelRatio();
     const double r = std::min(size.width(), size.height()) * 0.41, t = m_clock.elapsed() / 1000.0;
     QPainter p(this);

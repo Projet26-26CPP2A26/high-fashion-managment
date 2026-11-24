@@ -20,7 +20,8 @@
 namespace {
 class Backdrop : public QWidget {
 public:
-    explicit Backdrop(QWidget *window) : QWidget(window)
+    explicit Backdrop(QWidget *window)
+        : QWidget(window)
     {
         setGeometry(window->rect());
         show();
@@ -34,7 +35,10 @@ public:
         a->setStartValue(from);
         a->setEndValue(to);
         a->setEasingCurve(QEasingCurve::OutCubic);
-        connect(a, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_level = v.toReal(); update(); });
+        connect(a, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+            m_level = v.toReal();
+            update();
+        });
         a->start(QAbstractAnimation::DeleteWhenStopped);
         return a;
     }
@@ -45,8 +49,11 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *) override { QPainter(this).fillRect(rect(), QColor(10, 10, 11, int(165 * m_level))); }
-    void mousePressEvent(QMouseEvent *) override {}
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter(this).fillRect(rect(), QColor(10, 10, 11, int(165 * m_level)));
+    }
+    void mousePressEvent(QMouseEvent *) override { }
 
 private:
     qreal m_level = 0;
@@ -54,7 +61,10 @@ private:
 
 class Ghost : public QWidget {
 public:
-    Ghost(QWidget *window, const QPixmap &shot, const QRect &area) : QWidget(window), m_shot(shot), m_area(area)
+    Ghost(QWidget *window, const QPixmap &shot, const QRect &area)
+        : QWidget(window)
+        , m_shot(shot)
+        , m_area(area)
     {
         setAttribute(Qt::WA_TransparentForMouseEvents);
         setGeometry(area.adjusted(-60, -60, 60, 60));
@@ -97,7 +107,8 @@ private:
     double m_scale = 0.96, m_alpha = 0, m_shift = 10;
 };
 
-int message(QWidget *parent, LivingIcon::Kind kind, const QString &title, const QString &text, const QString &yes, const QString &no)
+int message(QWidget *parent, LivingIcon::Kind kind, const QString &title, const QString &text, const QString &yes,
+    const QString &no)
 {
     QDialog dialog(parent);
     dialog.setWindowTitle(title);
@@ -144,18 +155,28 @@ bool DialogSkin::ask(QWidget *parent, const QString &title, const QString &text,
     return message(parent, LivingIcon::Question, title, text, yes, no) == QDialog::Accepted;
 }
 
-void DialogSkin::info(QWidget *parent, const QString &title, const QString &text) { message(parent, LivingIcon::Info, title, text, QStringLiteral("Compris"), QString()); }
-void DialogSkin::warn(QWidget *parent, const QString &title, const QString &text) { message(parent, LivingIcon::Alert, title, text, QStringLiteral("Compris"), QString()); }
+void DialogSkin::info(QWidget *parent, const QString &title, const QString &text)
+{
+    message(parent, LivingIcon::Info, title, text, QStringLiteral("Compris"), QString());
+}
+void DialogSkin::warn(QWidget *parent, const QString &title, const QString &text)
+{
+    message(parent, LivingIcon::Alert, title, text, QStringLiteral("Compris"), QString());
+}
 
 int DialogSkin::run(QDialog &dialog)
 {
     QWidget *owner = dialog.parentWidget() ? dialog.parentWidget()->window() : nullptr;
-    if (owner && !owner->isVisible()) owner = nullptr;
+    if (owner && !owner->isVisible()) {
+        owner = nullptr;
+    }
     DialogSkin skin(&dialog, owner);
     return dialog.exec();
 }
 
-DialogSkin::DialogSkin(QDialog *dialog, QWidget *owner) : m_dialog(dialog), m_owner(owner)
+DialogSkin::DialogSkin(QDialog *dialog, QWidget *owner)
+    : m_dialog(dialog)
+    , m_owner(owner)
 {
     dialog->setObjectName("aureaDialog");
     if (auto *form = qobject_cast<QFormLayout *>(dialog->layout())) {
@@ -164,14 +185,20 @@ DialogSkin::DialogSkin(QDialog *dialog, QWidget *owner) : m_dialog(dialog), m_ow
         form->insertRow(0, title);
         form->setVerticalSpacing(13);
     }
-    if (auto *buttons = dialog->findChild<QDialogButtonBox *>())
+    if (auto *buttons = dialog->findChild<QDialogButtonBox *>()) {
         for (QAbstractButton *b : buttons->buttons()) {
             b->setProperty("primary", buttons->buttonRole(b) == QDialogButtonBox::AcceptRole);
             b->setIcon(QIcon());
         }
-    for (QAbstractButton *b : dialog->findChildren<QAbstractButton *>()) b->setCursor(Qt::PointingHandCursor);
-    if (owner) dialog->setParent(owner, Qt::Widget);
-    else dialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    }
+    for (QAbstractButton *b : dialog->findChildren<QAbstractButton *>()) {
+        b->setCursor(Qt::PointingHandCursor);
+    }
+    if (owner) {
+        dialog->setParent(owner, Qt::Widget);
+    } else {
+        dialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    }
     dialog->setStyleSheet(QStringLiteral(
         "QDialog#aureaDialog{background:%1;border:none;}"
         "QDialog#aureaDialog QLabel{background:transparent;color:#f3f0ea;font-family:'Inter';font-size:10.5pt;}"
@@ -182,34 +209,47 @@ DialogSkin::DialogSkin(QDialog *dialog, QWidget *owner) : m_dialog(dialog), m_ow
         "QDialog#aureaDialog QPushButton:hover{border-color:#e2cf9f;background:#36342e;}"
         "QDialog#aureaDialog QPushButton[primary=\"true\"]{color:#1c1c1e;border:none;background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #c4a876,stop:0.5 #ebdcae,stop:1 #c9ad7a);}"
         "QDialog#aureaDialog QPushButton[primary=\"true\"]:hover{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #d0b684,stop:0.5 #f4e7bc,stop:1 #d4b988);}")
-                              .arg(owner ? "transparent" : "#1f1e1a"));
-    if (dialog->layout()) dialog->layout()->setContentsMargins(34, 30, 34, 28);
+            .arg(owner ? "transparent" : "#1f1e1a"));
+    if (dialog->layout()) {
+        dialog->layout()->setContentsMargins(34, 30, 34, 28);
+    }
     dialog->installEventFilter(this);
-    if (owner) owner->installEventFilter(this);
-    if (owner)
-        for (QShortcut *shortcut : owner->findChildren<QShortcut *>())
+    if (owner) {
+        owner->installEventFilter(this);
+    }
+    if (owner) {
+        for (QShortcut *shortcut : owner->findChildren<QShortcut *>()) {
             if (shortcut->isEnabled()) {
                 shortcut->setEnabled(false);
                 m_shortcuts.append(shortcut);
             }
+        }
+    }
 }
 
 DialogSkin::~DialogSkin()
 {
-    for (const QPointer<QShortcut> &shortcut : std::as_const(m_shortcuts))
-        if (shortcut) shortcut->setEnabled(true);
+    for (const QPointer<QShortcut> &shortcut : std::as_const(m_shortcuts)) {
+        if (shortcut) {
+            shortcut->setEnabled(true);
+        }
+    }
 }
 
 void DialogSkin::place()
 {
-    if (!m_owner) return;
+    if (!m_owner) {
+        return;
+    }
     m_dialog->adjustSize();
     m_dialog->move(m_owner->rect().center() - QPoint(m_dialog->width() / 2, m_dialog->height() / 2));
 }
 
 void DialogSkin::appear()
 {
-    if (!m_owner) return;
+    if (!m_owner) {
+        return;
+    }
     m_backdrop = new Backdrop(m_owner);
     place();
     m_dialog->raise();
@@ -219,13 +259,19 @@ void DialogSkin::appear()
     m_dialog->setGraphicsEffect(effect);
     auto *ghost = new Ghost(m_owner, shot, m_dialog->geometry());
     QDialog *dialog = m_dialog;
-    connect(ghost->play(true), &QAbstractAnimation::finished, dialog, [dialog] { dialog->setGraphicsEffect(nullptr); });
+    connect(ghost->play(true), &QAbstractAnimation::finished, dialog, [dialog] {
+        dialog->setGraphicsEffect(nullptr);
+    });
 }
 
 void DialogSkin::disappear()
 {
-    if (!m_owner) return;
-    if (m_backdrop) static_cast<Backdrop *>(m_backdrop.data())->leave();
+    if (!m_owner) {
+        return;
+    }
+    if (m_backdrop) {
+        static_cast<Backdrop *>(m_backdrop.data())->leave();
+    }
     m_dialog->setGraphicsEffect(nullptr);
     auto *ghost = new Ghost(m_owner, m_dialog->grab(), m_dialog->geometry());
     ghost->play(false);
@@ -240,14 +286,20 @@ bool DialogSkin::eventFilter(QObject *object, QEvent *event)
         }
         if (event->type() == QEvent::Resize) {
             place();
-            if (m_backdrop) m_backdrop->setGeometry(m_owner->rect());
+            if (m_backdrop) {
+                m_backdrop->setGeometry(m_owner->rect());
+            }
         }
         return false;
     }
-    if (object != m_dialog) return false;
-    if (event->type() == QEvent::Show) appear();
-    else if (event->type() == QEvent::Hide) disappear();
-    else if (event->type() == QEvent::Paint && m_owner) {
+    if (object != m_dialog) {
+        return false;
+    }
+    if (event->type() == QEvent::Show) {
+        appear();
+    } else if (event->type() == QEvent::Hide) {
+        disappear();
+    } else if (event->type() == QEvent::Paint && m_owner) {
         QPainter p(m_dialog);
         p.setRenderHint(QPainter::Antialiasing);
         const QRectF r = QRectF(m_dialog->rect()).adjusted(1.5, 1.5, -1.5, -1.5);

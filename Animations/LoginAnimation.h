@@ -6,10 +6,19 @@
 class LoginScene : public QWidget {
 public:
     explicit LoginScene(QWidget *parent = nullptr);
-    void skipIntro() { m_offset = 2.2; }
+    void skipIntro()
+    {
+        m_offset = 2.2;
+    }
     void setLogoVisible(bool visible);
-    void setRingsVisible(bool visible) { m_ringsVisible = visible; }
-    double time() const { return m_t; }
+    void setRingsVisible(bool visible)
+    {
+        m_ringsVisible = visible;
+    }
+    double time() const
+    {
+        return m_t;
+    }
     QRect logoRect() const;
 
 protected:

@@ -10,7 +10,10 @@ class SubmitDialog : public QDialog {
 public:
     explicit SubmitDialog(const WorkTask &task, QWidget *parent = nullptr);
     QString note() const;
-    QString file() const { return m_file; }
+    QString file() const
+    {
+        return m_file;
+    }
     static bool allowed(const QString &path);
 
 private:

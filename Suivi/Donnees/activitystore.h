@@ -16,12 +16,22 @@ public:
     QString nextTask;
     int taskSpent = 0, taskPlanned = 0, tasksDone = 0, tasksTotal = 0;
 
-    bool ended() const { return logout.isValid(); }
+    bool ended() const
+    {
+        return logout.isValid();
+    }
 
-    bool lost() const { return !ended() && lastSeen.secsTo(QDateTime::currentDateTime()) > 20; }
+    bool lost() const
+    {
+        return !ended() && lastSeen.secsTo(QDateTime::currentDateTime()) > 20;
+    }
     QString status() const;
 
-    int activePercent() const { const int total = work + idle + off; return total > 0 ? int(work * 100LL / total) : 0; }
+    int activePercent() const
+    {
+        const int total = work + idle + off;
+        return total > 0 ? int(work * 100LL / total) : 0;
+    }
 };
 
 namespace WorkRules {
@@ -34,7 +44,10 @@ public:
     int id = 0, planned = 0, spent = 0, state = Todo, stepsDone = 0, rating = 0;
     QString who, title, specialty, details, note, file, feedback;
     QStringList steps;
-    bool ready() const { return stepsDone == (1 << steps.size()) - 1; }
+    bool ready() const
+    {
+        return stepsDone == (1 << steps.size()) - 1;
+    }
 };
 
 class StoredAttendance {
@@ -71,13 +84,19 @@ public:
     ActivityStore();
     ~ActivityStore();
     bool open(const QString &path = QString());
-    QString error() const { return m_error; }
+    QString error() const
+    {
+        return m_error;
+    }
 
     void begin();
     void commit();
     int insertSession(const WorkSession &session);
     int sessionOn(const QString &name, const QDate &day);
-    bool hasSessionOn(const QString &name, const QDate &day) { return sessionOn(name, day) > 0; }
+    bool hasSessionOn(const QString &name, const QDate &day)
+    {
+        return sessionOn(name, day) > 0;
+    }
     bool logAt(const QString &who, const QString &text, const QDateTime &at);
     int countEvents(const QString &who, const QString &text, const QDate &day);
     int countSessions(const QString &who, const QDate &day);
@@ -107,7 +126,8 @@ public:
     ReviewStats reviewStats(const QString &who);
     bool setTaskState(const QString &who, int id, int state);
     bool saveTaskTime(int id, int spent);
-    int addEntry(const QString &who, const QString &label, const QString &via, const QString &kind, const QString &detail = QString(), const QDateTime &at = QDateTime());
+    int addEntry(const QString &who, const QString &label, const QString &via, const QString &kind,
+        const QString &detail = QString(), const QDateTime &at = QDateTime());
     QVector<AccessEntry> entries(int limit, const QString &via = QString(), EntryFilter filter = EntryFilter::All);
     QVector<AccessEntry> entriesAfter(int id);
     bool clearDay(const QString &who, const QDate &day);

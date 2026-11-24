@@ -16,17 +16,30 @@ class QVBoxLayout;
 class EmployeeDesk : public QMainWindow {
     Q_OBJECT
 public:
-    EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via = QStringLiteral("LIGNE"), QWidget *parent = nullptr);
-    bool ready() const { return m_session.id > 0; }
-    const WorkSession &session() const { return m_session; }
+    EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via = QStringLiteral("LIGNE"),
+        QWidget *parent = nullptr);
+    bool ready() const
+    {
+        return m_session.id > 0;
+    }
+    const WorkSession &session() const
+    {
+        return m_session;
+    }
     void tick(const QDateTime &now, int idleSeconds);
     void finish(const QString &reason);
     void leaveByBadge();
     void showPage(int index);
     bool submitTask(const QString &note, const QString &file);
-    int workToday() const { return m_baseWork + m_session.work; }
+    int workToday() const
+    {
+        return m_baseWork + m_session.work;
+    }
     void setStep(int index, bool done);
-    QString specialty() const { return m_employee.specialty(); }
+    QString specialty() const
+    {
+        return m_employee.specialty();
+    }
 
 signals:
     void closed(bool logout);
@@ -60,7 +73,8 @@ private:
     QDateTime m_last;
     int m_baseWork = 0, m_basePause = 0;
     int m_sinceSave = 0, m_maxTask = -1;
-    bool m_paused = false, m_logout = false, m_leaving = false, m_finished = false, m_pauseWarned = false, m_elapsed = false;
+    bool m_paused = false, m_logout = false, m_leaving = false, m_finished = false, m_pauseWarned = false,
+         m_elapsed = false;
     QLabel *m_title, *m_subtitle, *m_clock, *m_clockInfo, *m_state, *m_notice;
     QLabel *m_taskName, *m_taskInfo, *m_next, *m_nextInfo, *m_idle, *m_idleToday, *m_done;
     QPushButton *m_pauseButton, *m_finishButton, *m_nextButton;

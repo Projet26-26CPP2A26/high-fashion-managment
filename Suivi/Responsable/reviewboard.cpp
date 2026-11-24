@@ -17,14 +17,17 @@
 #include <QUrl>
 #include <QVBoxLayout>
 
-ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent), m_board(board)
+ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent)
+    : QWidget(parent)
+    , m_board(board)
 {
     auto *page = new QVBoxLayout(this);
     page->setContentsMargins(0, 0, 0, 0);
     page->setSpacing(14);
     auto *kpis = new QHBoxLayout;
     kpis->setSpacing(14);
-    const QStringList titles = {QStringLiteral("En attente de revue"), QStringLiteral("Validées aujourd'hui"), QStringLiteral("Qualité moyenne")};
+    const QStringList titles = {QStringLiteral("En attente de revue"), QStringLiteral("Validées aujourd'hui"),
+        QStringLiteral("Qualité moyenne")};
     const QStringList tints = {"#e6c27a", "#7fc08a", "#ecdcae"};
     for (int i = 0; i < 3; ++i) {
         auto *frame = new QFrame;
@@ -48,15 +51,17 @@ ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent
     m_list->setFixedWidth(360);
     m_list->setSpacing(4);
     m_list->setFocusPolicy(Qt::NoFocus);
-    m_list->setStyleSheet("QListWidget{background:transparent;border:none;outline:none;}"
-                          "QListWidget::item{background:#232326;border:1px solid #323236;border-radius:12px;padding:14px;color:#f3f0ea;}"
-                          "QListWidget::item:hover{border-color:#e2cf9f;}"
-                          "QListWidget::item:selected{background:#2e2e32;border:1px solid #e2cf9f;color:white;}");
+    m_list->setStyleSheet(
+        "QListWidget{background:transparent;border:none;outline:none;}"
+        "QListWidget::item{background:#232326;border:1px solid #323236;border-radius:12px;padding:14px;color:#f3f0ea;}"
+        "QListWidget::item:hover{border-color:#e2cf9f;}"
+        "QListWidget::item:selected{background:#2e2e32;border:1px solid #e2cf9f;color:white;}");
     root->addWidget(m_list);
 
     auto *empty = new QWidget;
     auto *emptyBox = new QVBoxLayout(empty);
-    auto *emptyText = new QLabel(QStringLiteral("<div style='font-size:15pt;color:#f7f4ee'><b>Tout est à jour</b></div><div style='font-size:10pt;color:#8f8c86'>Les prochains dépôts des employés apparaîtront ici.</div>"));
+    auto *emptyText = new QLabel(QStringLiteral(
+        "<div style='font-size:15pt;color:#f7f4ee'><b>Tout est à jour</b></div><div style='font-size:10pt;color:#8f8c86'>Les prochains dépôts des employés apparaîtront ici.</div>"));
     emptyText->setAlignment(Qt::AlignCenter);
     emptyBox->addStretch();
     emptyBox->addWidget(new LivingIcon(LivingIcon::Check, 130), 0, Qt::AlignCenter);
@@ -74,7 +79,11 @@ ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent
     m_info->setProperty("muted", true);
     m_steps = new QLabel;
     m_note = new QLabel;
-    for (QLabel *l : {m_title, m_info, m_steps, m_note}) { l->setTextFormat(Qt::PlainText); l->setWordWrap(true); box->addWidget(l); }
+    for (QLabel *l : {m_title, m_info, m_steps, m_note}) {
+        l->setTextFormat(Qt::PlainText);
+        l->setWordWrap(true);
+        box->addWidget(l);
+    }
     m_open = new QPushButton;
     box->addWidget(m_open, 0, Qt::AlignLeft);
     box->addStretch();
@@ -82,7 +91,8 @@ ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent
     rate->setProperty("muted", true);
     m_stars = new StarRating;
     m_feedback = new QPlainTextEdit;
-    m_feedback->setPlaceholderText(QStringLiteral("Commentaire pour l'employé (obligatoire pour demander une correction)"));
+    m_feedback->setPlaceholderText(
+        QStringLiteral("Commentaire pour l'employé (obligatoire pour demander une correction)"));
     m_feedback->setFixedHeight(90);
     box->addWidget(rate);
     box->addWidget(m_stars);
@@ -101,12 +111,21 @@ ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent
     m_pages->addWidget(panel);
     root->addWidget(m_pages, 1);
 
-    connect(m_list, &QListWidget::currentItemChanged, this, [this](QListWidgetItem *item) { show(item ? item->data(Qt::UserRole).toInt() : 0); });
-    connect(accept, &QPushButton::clicked, this, [this] { decide(true); });
-    connect(reject, &QPushButton::clicked, this, [this] { decide(false); });
+    connect(m_list, &QListWidget::currentItemChanged, this, [this](QListWidgetItem *item) {
+        show(item ? item->data(Qt::UserRole).toInt() : 0);
+    });
+    connect(accept, &QPushButton::clicked, this, [this] {
+        decide(true);
+    });
+    connect(reject, &QPushButton::clicked, this, [this] {
+        decide(false);
+    });
     connect(m_open, &QPushButton::clicked, this, [this] {
-        if (SubmitDialog::allowed(m_current.file) && QFileInfo::exists(m_current.file)) QDesktopServices::openUrl(QUrl::fromLocalFile(m_current.file));
-        else Fx::toast(window(), QStringLiteral("Fichier introuvable"));
+        if (SubmitDialog::allowed(m_current.file) && QFileInfo::exists(m_current.file)) {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(m_current.file));
+        } else {
+            Fx::toast(window(), QStringLiteral("Fichier introuvable"));
+        }
     });
     auto *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &ReviewBoard::reload);
@@ -118,44 +137,65 @@ void ReviewBoard::reload()
 {
     const QVector<WorkTask> fresh = m_board.reviews();
     bool same = fresh.size() == m_tasks.size();
-    for (int i = 0; same && i < fresh.size(); ++i) same = fresh[i].id == m_tasks[i].id;
+    for (int i = 0; same && i < fresh.size(); ++i) {
+        same = fresh[i].id == m_tasks[i].id;
+    }
     m_tasks = fresh;
     Fx::countTo(m_kpi[0], int(fresh.size()));
     Fx::countTo(m_kpi[1], m_board.store().acceptedToday());
     const double quality = m_board.store().averageRating();
     m_kpi[2]->setText(quality > 0 ? QStringLiteral("%1 / 5 ★").arg(quality, 0, 'f', 1) : QStringLiteral("—"));
     m_list->setVisible(!fresh.isEmpty());
-    if (same) return;
+    if (same) {
+        return;
+    }
     const int keep = m_current.id;
     int row = -1;
     {
         const QSignalBlocker block(m_list);
         m_list->clear();
         for (const WorkTask &t : std::as_const(m_tasks)) {
-            auto *item = new QListWidgetItem(t.title + "\n" + m_board.displayName(t.who) + QStringLiteral(" · ") + clockText(t.spent), m_list);
+            auto *item = new QListWidgetItem(
+                t.title + "\n" + m_board.displayName(t.who) + QStringLiteral(" · ") + clockText(t.spent), m_list);
             item->setData(Qt::UserRole, t.id);
-            if (t.id == keep) row = m_list->count() - 1;
+            if (t.id == keep) {
+                row = m_list->count() - 1;
+            }
         }
-        if (row < 0 && m_list->count()) row = 0;
+        if (row < 0 && m_list->count()) {
+            row = 0;
+        }
         m_list->setCurrentRow(row);
     }
     const int id = row < 0 ? 0 : m_tasks[row].id;
-    if (id != keep) show(id);
+    if (id != keep) {
+        show(id);
+    }
 }
 
 void ReviewBoard::show(int id)
 {
     m_current = WorkTask();
-    for (const WorkTask &t : std::as_const(m_tasks)) if (t.id == id) m_current = t;
+    for (const WorkTask &t : std::as_const(m_tasks)) {
+        if (t.id == id) {
+            m_current = t;
+        }
+    }
     Fx::switchPage(m_pages, m_current.id ? 1 : 0);
-    if (!m_current.id) return;
+    if (!m_current.id) {
+        return;
+    }
     const WorkTask &t = m_current;
     m_title->setText(t.title);
     const int gap = t.spent - t.planned;
-    m_info->setText(m_board.displayName(t.who) + QStringLiteral(" · ") + t.details + QStringLiteral("\nTemps passé %1 · prévu %2 · %3")
-                        .arg(clockText(t.spent), clockText(t.planned), gap > 0 ? QStringLiteral("retard ") + clockText(gap) : QStringLiteral("dans les temps")));
+    m_info->setText(m_board.displayName(t.who) + QStringLiteral(" · ") + t.details
+        + QStringLiteral("\nTemps passé %1 · prévu %2 · %3")
+            .arg(clockText(t.spent), clockText(t.planned),
+                gap > 0 ? QStringLiteral("retard ") + clockText(gap) : QStringLiteral("dans les temps")));
     QStringList steps;
-    for (int i = 0; i < t.steps.size(); ++i) steps << (t.stepsDone & (1 << i) ? QStringLiteral("✓  ") : QStringLiteral("○  ")) + t.steps[i];
+    for (int i = 0; i < t.steps.size(); ++i) {
+        steps << (t.stepsDone & (1 << i) ? QStringLiteral("✓  ") : QStringLiteral("○  ")) + t.steps[i];
+    }
     m_steps->setText(steps.join('\n'));
     m_steps->setVisible(!steps.isEmpty());
     m_note->setText(t.note.isEmpty() ? QString() : QStringLiteral("« ") + t.note + QStringLiteral(" »"));
@@ -172,7 +212,9 @@ void ReviewBoard::show(int id)
 
 void ReviewBoard::decide(bool accept)
 {
-    if (!m_current.id) return;
+    if (!m_current.id) {
+        return;
+    }
     const QString feedback = m_feedback->toPlainText().trimmed().left(500);
     if (!accept && feedback.isEmpty()) {
         Fx::shake(m_feedback);
@@ -185,7 +227,8 @@ void ReviewBoard::decide(bool accept)
         reload();
         return;
     }
-    Fx::toast(window(), (accept ? QStringLiteral("Validé : ") : QStringLiteral("Renvoyé pour correction : ")) + task.title);
+    Fx::toast(
+        window(), (accept ? QStringLiteral("Validé : ") : QStringLiteral("Renvoyé pour correction : ")) + task.title);
     reload();
 }
 
@@ -197,5 +240,7 @@ void ReviewBoard::enter()
         delay += Motion::Step;
     }
     Fx::reveal(m_list, delay);
-    if (m_current.id) m_stars->setValue(m_stars->value());
+    if (m_current.id) {
+        m_stars->setValue(m_stars->value());
+    }
 }

@@ -23,7 +23,10 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    bool clickable(const AccessEntry &e) const { return !e.who.isEmpty() && e.who != "ADMIN" && e.kind != "REFUSE"; }
+    bool clickable(const AccessEntry &e) const
+    {
+        return !e.who.isEmpty() && e.who != "ADMIN" && e.kind != "REFUSE";
+    }
     int indexAt(int y) const;
     int openIndex() const;
     void fit();

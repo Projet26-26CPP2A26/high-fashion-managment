@@ -2,26 +2,36 @@
 #include "employeerepository.h"
 #include <QWidget>
 
-namespace Ui {class EmployeeModule;}
+namespace Ui {
+class EmployeeModule;
+}
 class QTableWidget;
-class EmployeeModule:public QWidget {
+class EmployeeModule : public QWidget {
     Q_OBJECT
 public:
-    explicit EmployeeModule(QWidget *parent=nullptr);
+    explicit EmployeeModule(QWidget *parent = nullptr);
     ~EmployeeModule() override;
-    bool ready() const {return initialized;}
-    EmployeeRepository &repository() {return repo;}
+    bool ready() const
+    {
+        return initialized;
+    }
+    EmployeeRepository &repository()
+    {
+        return repo;
+    }
     void refresh();
     void setSection(int index);
     QString employeesHtml() const;
     QString statisticsHtml() const;
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
+
 private:
     Ui::EmployeeModule *ui;
     EmployeeRepository repo;
-    bool initialized=false;
-    QVector<Employee> employees,filtered;
+    bool initialized = false;
+    QVector<Employee> employees, filtered;
     QVector<Attendance> pointages;
     QVector<Assignment> tasks;
     QVector<EmployeeCandidate> candidates;
@@ -31,11 +41,11 @@ private:
     void updateDashboard();
     void updateHoursChart();
     void updateTeamGrid();
-    void editEmployee(int id=0);
+    void editEmployee(int id = 0);
     void deleteEmployee();
     void assignTask();
     void completeTask();
     void exportPdf(bool statistics);
-    void report(bool success,const QString &message);
+    void report(bool success, const QString &message);
     int selectedId(QTableWidget *table) const;
 };

@@ -14,11 +14,11 @@ class ClosingView;
 class MorphOverlay : public QWidget {
     Q_OBJECT
 public:
-
     static constexpr double Expand = 0.60, Message = 0.85, Land = 0.55, Close = 1.96;
 
     using LogoSwitch = std::function<void(bool)>;
-    MorphOverlay(QWidget *from, const QRect &logo, const QRect &target, Spectacle::Mode mode, const LogoSwitch &logoVisible);
+    MorphOverlay(
+        QWidget *from, const QRect &logo, const QRect &target, Spectacle::Mode mode, const LogoSwitch &logoVisible);
     ~MorphOverlay() override;
     void setMessage(const QString &title, const QString &subtitle, double duration = Message);
     void land(std::function<QRect()> logo, LogoSwitch logoVisible);
@@ -31,12 +31,21 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *) override;
-    void mousePressEvent(QMouseEvent *) override { m_skip = true; }
-    void keyPressEvent(QKeyEvent *) override { m_skip = true; }
+    void mousePressEvent(QMouseEvent *) override
+    {
+        m_skip = true;
+    }
+    void keyPressEvent(QKeyEvent *) override
+    {
+        m_skip = true;
+    }
 
 private:
     void wait(const std::function<bool()> &done);
-    double seconds() const { return m_time; }
+    double seconds() const
+    {
+        return m_time;
+    }
     void advance();
     static const QVector<QPixmap> &logos();
     bool messageOver() const;

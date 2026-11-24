@@ -7,8 +7,14 @@ class OracleConnection {
 public:
     static OracleConnection &instance();
 
-    static OracleConnection &createInstance() { return instance(); }
-    bool createConnect() { return open(); }
+    static OracleConnection &createInstance()
+    {
+        return instance();
+    }
+    bool createConnect()
+    {
+        return open();
+    }
 
     OracleConnection(const OracleConnection &) = delete;
     OracleConnection &operator=(const OracleConnection &) = delete;
@@ -35,9 +41,15 @@ public:
 
     QSqlDatabase database() const;
 
-    QSqlError lastError() const { return m_error; }
+    QSqlError lastError() const
+    {
+        return m_error;
+    }
 
-    QString errorMessage() const { return m_message; }
+    QString errorMessage() const
+    {
+        return m_message;
+    }
 
     QString diagnostics() const;
 

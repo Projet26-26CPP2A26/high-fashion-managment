@@ -16,7 +16,10 @@ public:
     static QString normalize(const QString &uid);
     static QString plain(const QString &text, int length);
     bool ready();
-    QString error() const { return m_error; }
+    QString error() const
+    {
+        return m_error;
+    }
     QString receive(const QString &line);
     QString enter(const QString &uid);
     int employeeOf(const QString &uid);
@@ -27,7 +30,10 @@ public:
     QString badgeOf(int employeeId);
     QVector<QPair<QString, QString>> badges();
     QVector<BadgeScan> scans(int limit = 60);
-    QString lastUid() const { return m_lastUid; }
+    QString lastUid() const
+    {
+        return m_lastUid;
+    }
 
 signals:
     void scanned(int employeeId, bool arrival);

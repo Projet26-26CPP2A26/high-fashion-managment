@@ -15,8 +15,14 @@
 namespace {
 QPointer<MorphOverlay> current;
 
-double clamp01(double v) { return std::clamp(v, 0.0, 1.0); }
-double outCubic(double v) { return 1 - std::pow(1 - clamp01(v), 3); }
+double clamp01(double v)
+{
+    return std::clamp(v, 0.0, 1.0);
+}
+double outCubic(double v)
+{
+    return 1 - std::pow(1 - clamp01(v), 3);
+}
 double inOut(double v)
 {
     v = clamp01(v);
@@ -24,7 +30,8 @@ double inOut(double v)
 }
 QRectF mix(const QRectF &a, const QRectF &b, double t)
 {
-    return QRectF(a.x() + (b.x() - a.x()) * t, a.y() + (b.y() - a.y()) * t, a.width() + (b.width() - a.width()) * t, a.height() + (b.height() - a.height()) * t);
+    return QRectF(a.x() + (b.x() - a.x()) * t, a.y() + (b.y() - a.y()) * t, a.width() + (b.width() - a.width()) * t,
+        a.height() + (b.height() - a.height()) * t);
 }
 }
 
@@ -34,8 +41,10 @@ QRect MorphOverlay::areaFor(QWidget *window)
     return window && window->isFullScreen() ? screen->geometry() : screen->availableGeometry();
 }
 
-MorphOverlay::MorphOverlay(QWidget *from, const QRect &logo, const QRect &target, Spectacle::Mode mode, const LogoSwitch &logoVisible)
-    : QWidget(nullptr, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool), m_mode(mode)
+MorphOverlay::MorphOverlay(
+    QWidget *from, const QRect &logo, const QRect &target, Spectacle::Mode mode, const LogoSwitch &logoVisible)
+    : QWidget(nullptr, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool)
+    , m_mode(mode)
 {
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -43,7 +52,9 @@ MorphOverlay::MorphOverlay(QWidget *from, const QRect &logo, const QRect &target
     const QPoint origin = geometry().topLeft();
     logoVisible(false);
     m_shot = from->grab();
-    if (mode == Spectacle::Closing) logoVisible(true);
+    if (mode == Spectacle::Closing) {
+        logoVisible(true);
+    }
     if (mode == Spectacle::Closing && ClosingView::available()) {
         ClosingView::Scene scene;
         scene.area = geometry();
@@ -51,18 +62,26 @@ MorphOverlay::MorphOverlay(QWidget *from, const QRect &logo, const QRect &target
         scene.logo = QRectF(logo);
         scene.shot = m_shot.toImage();
         scene.mark = logos().last().toImage();
-        if (from->property("ringTime").isValid()) scene.ringTime = from->property("ringTime").toDouble();
+        if (from->property("ringTime").isValid()) {
+            scene.ringTime = from->property("ringTime").toDouble();
+        }
         m_view.reset(new ClosingView(scene));
-        if (m_view->begin()) return;
+        if (m_view->begin()) {
+            return;
+        }
         m_view.reset();
     }
-    if (mode == Spectacle::Closing) logoVisible(false);
+    if (mode == Spectacle::Closing) {
+        logoVisible(false);
+    }
     if (mode == Spectacle::Closing) {
         m_dim = m_shot;
         QPainter shade(&m_dim);
         shade.fillRect(QRectF(QPointF(0, 0), QSizeF(from->size())), QColor(15, 15, 16, 178));
         shade.end();
-        m_soft = m_dim.toImage().scaled((QSizeF(from->size()) / 3).toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32_Premultiplied);
+        m_soft = m_dim.toImage()
+                     .scaled((QSizeF(from->size()) / 3).toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+                     .convertToFormat(QImage::Format_ARGB32_Premultiplied);
         m_soft.setDevicePixelRatio(1);
         m_feather = m_soft;
         QPainter f(&m_feather);
@@ -103,7 +122,10 @@ const QVector<QPixmap> &MorphOverlay::logos()
     if (levels.isEmpty()) {
         const QImage source(":/assets/logo_aurea.png");
         const qreal ratio = qApp->devicePixelRatio();
-        for (const int size : {64, 70, 96, 124, 150, 180, 240}) levels.append(QPixmap::fromImage(source.scaled(QSize(size, size) * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+        for (const int size : {64, 70, 96, 124, 150, 180, 240}) {
+            levels.append(QPixmap::fromImage(
+                source.scaled(QSize(size, size) * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+        }
     }
     return levels;
 }
@@ -125,14 +147,20 @@ void MorphOverlay::warmUp()
 void MorphOverlay::advance()
 {
     const qint64 now = m_clock.nsecsElapsed();
-    if (m_lastFrame >= 0) m_time += std::min((now - m_lastFrame) / 1e9, 0.034);
+    if (m_lastFrame >= 0) {
+        m_time += std::min((now - m_lastFrame) / 1e9, 0.034);
+    }
     m_lastFrame = now;
 }
 
 void MorphOverlay::breathe()
 {
-    if (!current || !current->isVisible()) return;
-    if (current->m_clock.nsecsElapsed() - current->m_lastFrame < 12000000) return;
+    if (!current || !current->isVisible()) {
+        return;
+    }
+    if (current->m_clock.nsecsElapsed() - current->m_lastFrame < 12000000) {
+        return;
+    }
     current->advance();
     current->repaint();
 }
@@ -140,18 +168,24 @@ void MorphOverlay::breathe()
 void MorphOverlay::waitClosed()
 {
     if (m_view) {
-        wait([this] { return m_view->over(); });
+        wait([this] {
+            return m_view->over();
+        });
         m_view->hide();
         close();
         return;
     }
-    wait([this] { return m_skip || seconds() >= Close; });
+    wait([this] {
+        return m_skip || seconds() >= Close;
+    });
     close();
 }
 
 void MorphOverlay::setMessage(const QString &title, const QString &subtitle, double duration)
 {
-    if (m_view) m_view->setMessage(title, subtitle);
+    if (m_view) {
+        m_view->setMessage(title, subtitle);
+    }
     m_duration = duration;
     m_title = title;
     m_subtitle = subtitle;
@@ -159,27 +193,48 @@ void MorphOverlay::setMessage(const QString &title, const QString &subtitle, dou
     m_skip = false;
 }
 
-bool MorphOverlay::messageOver() const { return m_messageAt < 0 || m_skip || seconds() >= m_messageAt + m_duration; }
+bool MorphOverlay::messageOver() const
+{
+    return m_messageAt < 0 || m_skip || seconds() >= m_messageAt + m_duration;
+}
 
 void MorphOverlay::wait(const std::function<bool()> &done)
 {
-    if (done()) return;
+    if (done()) {
+        return;
+    }
     QEventLoop loop;
     QTimer check;
     check.setTimerType(Qt::PreciseTimer);
-    connect(&check, &QTimer::timeout, &loop, [&] { if (done()) loop.quit(); });
+    connect(&check, &QTimer::timeout, &loop, [&] {
+        if (done()) {
+            loop.quit();
+        }
+    });
     check.start(4);
     loop.exec();
 }
 
-void MorphOverlay::waitExpanded() { wait([this] { return seconds() >= Expand; }); }
-void MorphOverlay::waitMessage() { wait([this] { return messageOver(); }); }
+void MorphOverlay::waitExpanded()
+{
+    wait([this] {
+        return seconds() >= Expand;
+    });
+}
+void MorphOverlay::waitMessage()
+{
+    wait([this] {
+        return messageOver();
+    });
+}
 
 void MorphOverlay::drawLogo(QPainter &p, const QRectF &rect) const
 {
     const double need = rect.width() * devicePixelRatioF() - 0.6;
     for (const QPixmap &level : logos()) {
-        if (level.width() < need && &level != &logos().last()) continue;
+        if (level.width() < need && &level != &logos().last()) {
+            continue;
+        }
         p.drawPixmap(rect, level, QRectF(level.rect()));
         return;
     }
@@ -192,7 +247,9 @@ void MorphOverlay::land(std::function<QRect()> logo, LogoSwitch logoVisible)
     timer->setTimerType(Qt::PreciseTimer);
     connect(timer, &QTimer::timeout, this, [this, timer, logo, logoVisible] {
         if (m_landAt < 0) {
-            if (!messageOver()) return;
+            if (!messageOver()) {
+                return;
+            }
             m_logoEnd = QRectF(logo().translated(-geometry().topLeft()));
             m_landAt = seconds();
             raise();
@@ -217,7 +274,8 @@ void MorphOverlay::paintEvent(QPaintEvent *)
     const double land = m_landAt < 0 ? 0 : clamp01((now - m_landAt) / Land), leave = inOut(land);
 
     const QRectF shape = mix(m_start, m_target, grow);
-    const double corner = (m_target.width() > m_start.width() ? 10 * (1 - grow) : 8 * grow) + 10 * std::sin(M_PI * grow);
+    const double corner =
+        (m_target.width() > m_start.width() ? 10 * (1 - grow) : 8 * grow) + 10 * std::sin(M_PI * grow);
     QPainterPath clip;
     clip.addRoundedRect(shape, corner, corner);
     p.setOpacity(1 - outCubic((land - 0.15) / 0.85));
@@ -258,7 +316,9 @@ void MorphOverlay::paintEvent(QPaintEvent *)
     drawLogo(p, logo);
     m_show.paint(p, true);
 
-    if (m_messageAt < 0) return;
+    if (m_messageAt < 0) {
+        return;
+    }
     const double t = now - m_messageAt, out = 1 - outCubic(land / 0.35);
     QFont big_("Inter");
     big_.setPointSizeF(std::clamp(m_target.width() / 46, 16.0, 30.0));
@@ -294,7 +354,8 @@ void MorphOverlay::paintEvent(QPaintEvent *)
 void MorphOverlay::paintClosing(QPainter &p)
 {
     const double now = seconds();
-    const double gather = inOut(now / 0.45), pull = clamp01((now - 0.55) / 0.85), absorb = clamp01((now - 1.30) / 0.28), end = clamp01((now - 1.56) / 0.36);
+    const double gather = inOut(now / 0.45), pull = clamp01((now - 0.55) / 0.85), absorb = clamp01((now - 1.30) / 0.28),
+                 end = clamp01((now - 1.56) / 0.36);
     const QPointF c(m_start.center().x(), m_start.center().y() - 30);
     const double big = std::min({150.0, m_start.height() * 0.28, m_start.width() * 0.28});
 
@@ -306,7 +367,9 @@ void MorphOverlay::paintClosing(QPainter &p)
     } else if (pull < 1) {
         const double q = pull * pull * (1.55 - 0.55 * pull);
         const QSizeF half = m_start.size() / 3;
-        if (m_buffer.size() != half.toSize()) m_buffer = QImage(half.toSize(), QImage::Format_ARGB32_Premultiplied);
+        if (m_buffer.size() != half.toSize()) {
+            m_buffer = QImage(half.toSize(), QImage::Format_ARGB32_Premultiplied);
+        }
         m_buffer.fill(Qt::transparent);
         const QPointF eye = (c - m_start.topLeft()) / 3;
         QPainter b(&m_buffer);
@@ -315,7 +378,9 @@ void MorphOverlay::paintClosing(QPainter &p)
         for (int i = 2; i >= 0; --i) {
             const double scale = (1 - 0.86 * q) * (1 + blur * i * 0.55);
             b.setOpacity(i == 0 ? 1 - 0.35 * pull : 0.30);
-            b.drawImage(QRectF(eye.x() - eye.x() * scale, eye.y() - eye.y() * scale, half.width() * scale, half.height() * scale), m_feather);
+            b.drawImage(QRectF(eye.x() - eye.x() * scale, eye.y() - eye.y() * scale, half.width() * scale,
+                            half.height() * scale),
+                m_feather);
         }
         const double solid = 1 - clamp01(pull / 0.34);
         if (solid > 0.01) {
@@ -324,7 +389,8 @@ void MorphOverlay::paintClosing(QPainter &p)
         }
         b.setOpacity(1);
         b.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        const double extent = std::hypot(std::max(eye.x(), half.width() - eye.x()), std::max(eye.y(), half.height() - eye.y()));
+        const double extent =
+            std::hypot(std::max(eye.x(), half.width() - eye.x()), std::max(eye.y(), half.height() - eye.y()));
         const double radius = std::max(2.0, extent * 2.3 * std::pow(1 - pull, 1.25));
         QRadialGradient mask(eye, radius);
         mask.setColorAt(0, QColor(0, 0, 0, 255));
@@ -338,7 +404,8 @@ void MorphOverlay::paintClosing(QPainter &p)
         p.drawImage(m_start, m_buffer);
     }
 
-    m_show.build({Spectacle::Closing, c, big, now, clamp01((now - 0.45) / 0.60), clamp01((now - 0.90) / 0.52), QSizeF(size())});
+    m_show.build(
+        {Spectacle::Closing, c, big, now, clamp01((now - 0.45) / 0.60), clamp01((now - 0.90) / 0.52), QSizeF(size())});
     m_show.paint(p, false);
     m_show.paint(p, true);
 
@@ -369,7 +436,8 @@ void MorphOverlay::paintClosing(QPainter &p)
     QRectF logo = mix(m_logoStart, QRectF(c.x() - big / 2, c.y() - big / 2, big, big), gather);
     const QPointF l = logo.center();
     const double shrink = end <= 0 ? pulse : 1 - std::pow(end, 2.6);
-    logo = QRectF(l.x() - logo.width() / 2 * shrink, l.y() - logo.height() / 2 * shrink, logo.width() * shrink, logo.height() * shrink);
+    logo = QRectF(l.x() - logo.width() / 2 * shrink, l.y() - logo.height() / 2 * shrink, logo.width() * shrink,
+        logo.height() * shrink);
     if (halo > 0.01) {
         p.setOpacity(std::min(1.0, halo));
         QRadialGradient glow(l, big * 1.1);

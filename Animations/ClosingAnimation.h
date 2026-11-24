@@ -26,14 +26,23 @@ public:
     ~ClosingView() override;
     void setMessage(const QString &title, const QString &subtitle);
     bool begin();
-    bool over() const { return m_time >= Length; }
+    bool over() const
+    {
+        return m_time >= Length;
+    }
     QImage frameAt(double time);
 
 protected:
     void initializeGL() override;
     void paintGL() override;
-    void mousePressEvent(QMouseEvent *) override { m_rate = 2.5; }
-    void keyPressEvent(QKeyEvent *) override { m_rate = 2.5; }
+    void mousePressEvent(QMouseEvent *) override
+    {
+        m_rate = 2.5;
+    }
+    void keyPressEvent(QKeyEvent *) override
+    {
+        m_rate = 2.5;
+    }
 
 private:
     static QSurfaceFormat surface();

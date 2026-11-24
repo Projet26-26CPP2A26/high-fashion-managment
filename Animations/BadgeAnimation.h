@@ -10,7 +10,10 @@ public:
     explicit BadgeAnimation(QWidget *parent = nullptr);
     void present();
     void answer(bool granted);
-    Mode mode() const { return m_mode; }
+    Mode mode() const
+    {
+        return m_mode;
+    }
 
 protected:
     void paintEvent(QPaintEvent *) override;

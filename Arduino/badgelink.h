@@ -13,9 +13,18 @@ public:
 
     static BadgeLink &instance();
     std::function<QString(const QString &)> receiver;
-    State state() const { return m_state; }
-    QString text() const { return m_text; }
-    bool idle() const { return !m_serial.isOpen() && m_tcp.state() == QAbstractSocket::UnconnectedState; }
+    State state() const
+    {
+        return m_state;
+    }
+    QString text() const
+    {
+        return m_text;
+    }
+    bool idle() const
+    {
+        return !m_serial.isOpen() && m_tcp.state() == QAbstractSocket::UnconnectedState;
+    }
     bool connectSerial(const QString &port);
     void connectWokwi();
     void disconnectLink();

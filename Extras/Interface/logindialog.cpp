@@ -21,25 +21,34 @@
 
 LoginDialog::Role LoginDialog::authenticate(const QString &user, const QString &password)
 {
-    if (password != "123456") return None;
+    if (password != "123456") {
+        return None;
+    }
     const QString name = user.trimmed().toLower();
-    if (name == "admin") return Admin;
-    if (name == "employe" || name == QStringLiteral("employé")) return EmployeeRole;
+    if (name == "admin") {
+        return Admin;
+    }
+    if (name == "employe" || name == QStringLiteral("employé")) {
+        return EmployeeRole;
+    }
     return None;
 }
 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
+LoginDialog::LoginDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setWindowTitle(QStringLiteral("AUREA — Connexion"));
     setFixedSize(900, 560);
     QFile theme(":/theme.qss");
-    if (theme.open(QIODevice::ReadOnly)) setStyleSheet(QString::fromUtf8(theme.readAll()) + R"(
+    if (theme.open(QIODevice::ReadOnly)) {
+        setStyleSheet(QString::fromUtf8(theme.readAll()) + R"(
         LoginDialog { background:#1b1b1d; }
         QLabel#loginDate { color:#c9b27c; font-size:9pt; font-weight:600; }
         QLabel#welcome { font-size:21pt; font-weight:700; color:white; }
         QLabel#loginError { color:#f0b9bb; font-size:9pt; }
         QLineEdit { min-height:26px; font-size:11pt; }
         QPushButton[primary="true"] { min-height:26px; font-size:11pt; })");
+    }
 
     auto *root = new QHBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
@@ -61,7 +70,9 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     m_button->setCursor(Qt::PointingHandCursor);
     auto *date = new QLabel;
     date->setObjectName("loginDate");
-    const auto showDate = [date] { date->setText(QLocale().toString(QDateTime::currentDateTime(), "dddd d MMMM · HH:mm:ss")); };
+    const auto showDate = [date] {
+        date->setText(QLocale().toString(QDateTime::currentDateTime(), "dddd d MMMM · HH:mm:ss"));
+    };
     showDate();
     auto *clock = new QTimer(this);
     connect(clock, &QTimer::timeout, this, showDate);
@@ -83,7 +94,8 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     form->addWidget(welcome);
     form->addWidget(hint);
     form->addSpacing(18);
-    auto *userLabel = new QLabel(QStringLiteral("Identifiant")), *passwordLabel = new QLabel(QStringLiteral("Mot de passe"));
+    auto *userLabel = new QLabel(QStringLiteral("Identifiant")),
+         *passwordLabel = new QLabel(QStringLiteral("Mot de passe"));
     form->addWidget(userLabel);
     form->addWidget(m_user);
     form->addSpacing(6);
@@ -101,7 +113,9 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     badge->setAutoDefault(false);
     badge->setMinimumHeight(42);
     form->insertWidget(form->indexOf(m_button) + 1, badge);
-    connect(badge, &QPushButton::clicked, this, [this] { showBadge(true); });
+    connect(badge, &QPushButton::clicked, this, [this] {
+        showBadge(true);
+    });
     auto *account = new QWidget;
     account->setLayout(form);
     m_pages = new QStackedWidget;
@@ -117,22 +131,33 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     m_form = form;
 }
 
-QString LoginDialog::user() const { return m_user->text().trimmed().toLower(); }
+QString LoginDialog::user() const
+{
+    return m_user->text().trimmed().toLower();
+}
 
 void LoginDialog::submit()
 {
-    if (m_leaving || m_role != None) return;
+    if (m_leaving || m_role != None) {
+        return;
+    }
     m_role = authenticate(m_user->text(), m_password->text());
     if (m_role != None) {
-        for (QWidget *w : QList<QWidget *>{m_user, m_password, m_button}) w->setEnabled(false);
+        for (QWidget *w : QList<QWidget *>{m_user, m_password, m_button}) {
+            w->setEnabled(false);
+        }
         m_error->clear();
         auto *dots = new QTimer(this);
-        connect(dots, &QTimer::timeout, this, [this, n = 0]() mutable { m_button->setText(QStringLiteral("Connexion") + QString(++n % 4, '.')); });
+        connect(dots, &QTimer::timeout, this, [this, n = 0]() mutable {
+            m_button->setText(QStringLiteral("Connexion") + QString(++n % 4, '.'));
+        });
         dots->start(120);
         leave(260);
         return;
     }
-    if (refusedHandler) refusedHandler(user().left(24));
+    if (refusedHandler) {
+        refusedHandler(user().left(24));
+    }
     Fx::shake(this);
     m_password->clear();
     m_password->setFocus();
@@ -140,7 +165,10 @@ void LoginDialog::submit()
     if (++m_failures % 5 == 0) {
         m_button->setEnabled(false);
         m_error->setText(QStringLiteral("Trop d'essais : réessayez dans 30 secondes."));
-        QTimer::singleShot(30000, this, [this] { m_button->setEnabled(true); m_error->clear(); });
+        QTimer::singleShot(30000, this, [this] {
+            m_button->setEnabled(true);
+            m_error->clear();
+        });
     }
 }
 
@@ -149,9 +177,14 @@ LoginDialog::~LoginDialog() = default;
 void LoginDialog::leave(int delay)
 {
     QTimer::singleShot(delay, this, [this] {
-        if (m_leaving) return;
+        if (m_leaving) {
+            return;
+        }
         m_leaving = true;
-        m_overlay = new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this), m_role == Admin ? Spectacle::AdminIn : Spectacle::EmployeeIn, [this](bool on) { m_scene->setLogoVisible(on); });
+        m_overlay = new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this),
+            m_role == Admin ? Spectacle::AdminIn : Spectacle::EmployeeIn, [this](bool on) {
+                m_scene->setLogoVisible(on);
+            });
         QTimer::singleShot(90, this, &QDialog::accept);
     });
 }
@@ -196,8 +229,14 @@ QWidget *LoginDialog::createBadgePanel()
     box->addLayout(row);
     box->addWidget(back);
     box->addStretch();
-    connect(back, &QPushButton::clicked, this, [this] { if (m_role == None) showBadge(false); });
-    connect(m_scanButton, &QPushButton::clicked, this, [this] { scanBadge(QStringLiteral("BADGE:") + m_badges->currentData().toString()); });
+    connect(back, &QPushButton::clicked, this, [this] {
+        if (m_role == None) {
+            showBadge(false);
+        }
+    });
+    connect(m_scanButton, &QPushButton::clicked, this, [this] {
+        scanBadge(QStringLiteral("BADGE:") + m_badges->currentData().toString());
+    });
     return panel;
 }
 
@@ -205,7 +244,8 @@ void LoginDialog::showLink()
 {
     const BadgeLink &link = BadgeLink::instance();
     m_light->setState(LinkLight::State(link.state()));
-    m_linkText->setText(link.state() == BadgeLink::On ? QStringLiteral("Lecteur prêt") : QStringLiteral("Badge virtuel disponible"));
+    m_linkText->setText(
+        link.state() == BadgeLink::On ? QStringLiteral("Lecteur prêt") : QStringLiteral("Badge virtuel disponible"));
 }
 
 void LoginDialog::showBadge(bool on)
@@ -215,7 +255,9 @@ void LoginDialog::showBadge(bool on)
         m_badgeText->setText(QStringLiteral("Présentez votre badge au lecteur."));
         if (!m_listed && badgeList) {
             m_badges->clear();
-            for (const auto &b : badgeList()) m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+            for (const auto &b : badgeList()) {
+                m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+            }
             m_badges->addItem(QStringLiteral("Badge inconnu · 0BADBAD0"), QStringLiteral("0BADBAD0"));
             m_listed = true;
         }
@@ -225,8 +267,12 @@ void LoginDialog::showBadge(bool on)
 
 QString LoginDialog::scanBadge(const QString &line, bool board)
 {
-    if (m_leaving || m_role != None || !badgeHandler || m_badge->mode() == BadgeAnimation::Checking) return QStringLiteral("WAIT;AUREA");
-    if (m_pages->currentIndex() != 1) showBadge(true);
+    if (m_leaving || m_role != None || !badgeHandler || m_badge->mode() == BadgeAnimation::Checking) {
+        return QStringLiteral("WAIT;AUREA");
+    }
+    if (m_pages->currentIndex() != 1) {
+        showBadge(true);
+    }
     const BadgeResult result = badgeHandler(line.section(':', 1));
     m_badge->present();
     m_badgeText->setText(QStringLiteral("Vérification…"));
@@ -239,9 +285,13 @@ QString LoginDialog::scanBadge(const QString &line, bool board)
     QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, result, board] {
         const bool ok = result.role != None;
         m_badge->answer(ok);
-        if (!board) Sound::play(ok ? QStringLiteral("arrivee") : QStringLiteral("refus"));
+        if (!board) {
+            Sound::play(ok ? QStringLiteral("arrivee") : QStringLiteral("refus"));
+        }
         m_badgeTitle->setText(ok ? QStringLiteral("Accès autorisé") : QStringLiteral("Accès refusé"));
-        m_badgeText->setText(ok ? result.name : result.reply == "ERR" ? QStringLiteral("Base de données indisponible.") : QStringLiteral("Ce badge n'est pas reconnu."));
+        m_badgeText->setText(ok         ? result.name
+                : result.reply == "ERR" ? QStringLiteral("Base de données indisponible.")
+                                        : QStringLiteral("Ce badge n'est pas reconnu."));
         Fx::reveal(m_badgeTitle, 0, Motion::Base);
         Fx::reveal(m_badgeText, 0, Motion::Base);
         if (ok) {
@@ -250,7 +300,9 @@ QString LoginDialog::scanBadge(const QString &line, bool board)
         }
         QTimer::singleShot(2200, this, [this] {
             m_scanButton->setEnabled(true);
-            if (m_role != None) return;
+            if (m_role != None) {
+                return;
+            }
             m_badgeTitle->setText(QStringLiteral("Badge"));
             m_badgeText->setText(QStringLiteral("Présentez votre badge au lecteur."));
         });
@@ -267,7 +319,9 @@ MorphOverlay *LoginDialog::takeOverlay()
 
 void LoginDialog::listen()
 {
-    BadgeLink::instance().receiver = [this](const QString &line) { return scanBadge(line, true); };
+    BadgeLink::instance().receiver = [this](const QString &line) {
+        return scanBadge(line, true);
+    };
 }
 
 void LoginDialog::arriveFrom(MorphOverlay *overlay)
@@ -275,20 +329,33 @@ void LoginDialog::arriveFrom(MorphOverlay *overlay)
     listen();
     m_scene->skipIntro();
     m_scene->setLogoVisible(false);
-    QTimer::singleShot(0, this, [this, overlay] { overlay->land([this] { return m_scene->logoRect(); }, [this](bool on) { m_scene->setLogoVisible(on); }); });
+    QTimer::singleShot(0, this, [this, overlay] {
+        overlay->land(
+            [this] {
+                return m_scene->logoRect();
+            },
+            [this](bool on) {
+                m_scene->setLogoVisible(on);
+            });
+    });
 }
 
 void LoginDialog::reject()
 {
-    if (m_leaving) return;
+    if (m_leaving) {
+        return;
+    }
     m_leaving = true;
     m_role = None;
-    m_overlay = new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this), Spectacle::Closing, [this](bool on) {
-        setProperty("ringTime", m_scene->time());
-        m_scene->setRingsVisible(on);
-        m_scene->setLogoVisible(on);
+    m_overlay =
+        new MorphOverlay(this, m_scene->logoRect(), MorphOverlay::areaFor(this), Spectacle::Closing, [this](bool on) {
+            setProperty("ringTime", m_scene->time());
+            m_scene->setRingsVisible(on);
+            m_scene->setLogoVisible(on);
+        });
+    QTimer::singleShot(90, this, [this] {
+        QDialog::reject();
     });
-    QTimer::singleShot(90, this, [this] { QDialog::reject(); });
 }
 
 void LoginDialog::start()
@@ -305,6 +372,10 @@ void LoginDialog::start()
     slide->setStartValue(76);
     slide->setEndValue(62);
     slide->setEasingCurve(QEasingCurve::OutCubic);
-    connect(slide, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_form->setContentsMargins(v.toInt(), 40, 124 - v.toInt(), 40); });
-    QTimer::singleShot(100, slide, [slide] { slide->start(QAbstractAnimation::DeleteWhenStopped); });
+    connect(slide, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+        m_form->setContentsMargins(v.toInt(), 40, 124 - v.toInt(), 40);
+    });
+    QTimer::singleShot(100, slide, [slide] {
+        slide->start(QAbstractAnimation::DeleteWhenStopped);
+    });
 }

@@ -11,7 +11,10 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *) override;
-    void showEvent(QShowEvent *) override { m_clock.restart(); }
+    void showEvent(QShowEvent *) override
+    {
+        m_clock.restart();
+    }
 
 private:
     Kind m_kind;

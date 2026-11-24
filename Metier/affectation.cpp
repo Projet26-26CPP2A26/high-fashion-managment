@@ -5,12 +5,15 @@
 
 static bool betterCandidate(const EmployeeCandidate &a, const EmployeeCandidate &b)
 {
-    if (a.fits() != b.fits())
+    if (a.fits() != b.fits()) {
         return a.fits();
-    if (a.score() != b.score())
+    }
+    if (a.score() != b.score()) {
         return a.score() > b.score();
-    if (a.employee().load() != b.employee().load())
+    }
+    if (a.employee().load() != b.employee().load()) {
         return a.employee().load() < b.employee().load();
+    }
     return QString::localeAwareCompare(a.employee().name(), b.employee().name()) < 0;
 }
 
@@ -23,8 +26,9 @@ int EmployeeRepository::assignedLoad(int employeeId) const
 {
     int total = 0;
     for (const Assignment &a : assignmentList) {
-        if (a.employeeId() == employeeId && !a.completed())
+        if (a.employeeId() == employeeId && !a.completed()) {
             total += a.load();
+        }
     }
     return total;
 }
@@ -32,13 +36,15 @@ int EmployeeRepository::assignedLoad(int employeeId) const
 QVector<EmployeeCandidate> EmployeeRepository::rank(const QString &specialty, int hours)
 {
     QVector<EmployeeCandidate> list;
-    if (hours < 1 || hours > 80)
+    if (hours < 1 || hours > 80) {
         return list;
+    }
     const int extra = taskLoad(hours);
     const QVector<Employee> employees = loadEmployees();
     for (const Employee &e : employees) {
-        if (!e.available())
+        if (!e.available()) {
             continue;
+        }
         const int remaining = std::max(0, 100 - e.load());
         EmployeeCandidate c;
         c.setEmployee(e);
@@ -55,14 +61,17 @@ QVector<EmployeeCandidate> EmployeeRepository::rank(const QString &specialty, in
 bool EmployeeRepository::assign(int employeeId, const QString &title, const QString &specialty, int hours)
 {
     lastError.clear();
-    if (title.trimmed().isEmpty() || specialty.trimmed().isEmpty() || title.size() > 200 || hours < 1 || hours > 80)
+    if (title.trimmed().isEmpty() || specialty.trimmed().isEmpty() || title.size() > 200 || hours < 1 || hours > 80) {
         return fail("Renseignez une tâche, une spécialité et une durée de 1 à 80 h.");
+    }
     const Employee e = findEmployee(employeeId);
-    if (e.id() == 0 || !e.available())
+    if (e.id() == 0 || !e.available()) {
         return fail("L'employé doit exister et être disponible.");
+    }
     const int extra = taskLoad(hours);
-    if (e.load() + extra > 100)
+    if (e.load() + extra > 100) {
         return fail("Capacité insuffisante : réduisez la durée ou choisissez un autre employé.");
+    }
 
     Assignment a;
     a.setId(nextAssignmentId++);

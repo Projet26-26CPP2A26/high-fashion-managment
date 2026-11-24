@@ -8,19 +8,24 @@ BadgeLink &BadgeLink::instance()
     return *link;
 }
 
-BadgeLink::BadgeLink(QObject *parent) : QObject(parent)
+BadgeLink::BadgeLink(QObject *parent)
+    : QObject(parent)
 {
     connect(&m_serial, &QSerialPort::readyRead, this, [this] {
         m_buffer += m_serial.readAll();
         process(m_serial);
     });
     connect(&m_serial, &QSerialPort::errorOccurred, this, [this](QSerialPort::SerialPortError error) {
-        if (error != QSerialPort::ResourceError) return;
+        if (error != QSerialPort::ResourceError) {
+            return;
+        }
         m_serial.close();
         setState(Error, QStringLiteral("Carte débranchée"));
     });
     connect(&m_tcp, &QTcpSocket::readyRead, this, &BadgeLink::readNetwork);
-    connect(&m_tcp, &QTcpSocket::connected, this, [this] { setState(On, QStringLiteral("Connectée à Wokwi")); });
+    connect(&m_tcp, &QTcpSocket::connected, this, [this] {
+        setState(On, QStringLiteral("Connectée à Wokwi"));
+    });
     connect(&m_tcp, &QTcpSocket::errorOccurred, this, [this] {
         m_tcp.abort();
         setState(Error, QStringLiteral("Wokwi ne répond pas"));
@@ -57,7 +62,9 @@ void BadgeLink::connectWokwi()
 
 void BadgeLink::disconnectLink()
 {
-    if (m_auto) m_auto->stop();
+    if (m_auto) {
+        m_auto->stop();
+    }
     m_serial.close();
     m_tcp.abort();
     setState(Off, QStringLiteral("Non connectée"));
@@ -65,9 +72,15 @@ void BadgeLink::disconnectLink()
 
 void BadgeLink::startAuto()
 {
-    if (m_auto) return;
+    if (m_auto) {
+        return;
+    }
     m_auto = new QTimer(this);
-    connect(m_auto, &QTimer::timeout, this, [this] { if (idle()) connectWokwi(); });
+    connect(m_auto, &QTimer::timeout, this, [this] {
+        if (idle()) {
+            connectWokwi();
+        }
+    });
     m_auto->start(2000);
 }
 
@@ -77,14 +90,19 @@ void BadgeLink::readNetwork()
     for (const char ch : data) {
         const uchar c = uchar(ch);
         if (m_telnet == 0) {
-            if (c == 255) m_telnet = 1;
-            else m_buffer += ch;
+            if (c == 255) {
+                m_telnet = 1;
+            } else {
+                m_buffer += ch;
+            }
         } else if (m_telnet == 1) {
             m_telnet = c == 250 ? 3 : c >= 251 && c <= 254 ? 2 : 0;
         } else if (m_telnet == 2) {
             m_telnet = 0;
         } else if (m_telnet == 3) {
-            if (c == 255) m_telnet = 4;
+            if (c == 255) {
+                m_telnet = 4;
+            }
         } else {
             m_telnet = c == 240 ? 0 : 3;
         }
@@ -94,13 +112,19 @@ void BadgeLink::readNetwork()
 
 void BadgeLink::process(QIODevice &device)
 {
-    if (m_buffer.size() > 4096) m_buffer.clear();
+    if (m_buffer.size() > 4096) {
+        m_buffer.clear();
+    }
     int end;
     while ((end = int(m_buffer.indexOf('\n'))) >= 0) {
         const QString line = QString::fromLatin1(m_buffer.left(end)).trimmed();
         m_buffer.remove(0, end + 1);
-        if (!line.startsWith("BADGE:")) continue;
+        if (!line.startsWith("BADGE:")) {
+            continue;
+        }
         const QString reply = receiver ? receiver(line) : QStringLiteral("NO;Patientez");
-        if (!reply.isEmpty()) device.write(reply.toLatin1() + '\n');
+        if (!reply.isEmpty()) {
+            device.write(reply.toLatin1() + '\n');
+        }
     }
 }

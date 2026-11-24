@@ -11,10 +11,14 @@
 #include <cmath>
 
 namespace {
-QString hourMinute(int seconds) { return QStringLiteral("%1 h %2").arg(seconds / 3600).arg(seconds / 60 % 60, 2, 10, QChar('0')); }
+QString hourMinute(int seconds)
+{
+    return QStringLiteral("%1 h %2").arg(seconds / 3600).arg(seconds / 60 % 60, 2, 10, QChar('0'));
+}
 }
 
-TimeCard::TimeCard(QWidget *parent) : QWidget(parent)
+TimeCard::TimeCard(QWidget *parent)
+    : QWidget(parent)
 {
     setMinimumSize(420, 138);
     setCursor(Qt::PointingHandCursor);
@@ -23,14 +27,18 @@ TimeCard::TimeCard(QWidget *parent) : QWidget(parent)
     setToolTip(QStringLiteral("Cliquez pour voir le temps passé"));
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [this] {
-        if (!m_flip.running()) m_timer->stop();
+        if (!m_flip.running()) {
+            m_timer->stop();
+        }
         update();
     });
 }
 
 void TimeCard::setTimes(int work, int pause, bool paused, bool running)
 {
-    if (work == m_work && pause == m_pause && paused == m_paused && running == m_running) return;
+    if (work == m_work && pause == m_pause && paused == m_paused && running == m_running) {
+        return;
+    }
     m_work = work;
     m_pause = pause;
     m_paused = paused;
@@ -40,29 +48,46 @@ void TimeCard::setTimes(int work, int pause, bool paused, bool running)
 
 void TimeCard::setBack(bool back)
 {
-    if ((m_flip.target() > 0.5) == back) return;
-    if (!isVisible()) m_flip.jump(back);
-    else {
+    if ((m_flip.target() > 0.5) == back) {
+        return;
+    }
+    if (!isVisible()) {
+        m_flip.jump(back);
+    } else {
         m_flip.go(back, Motion::Slow);
         m_timer->start(Fx::frameInterval(this));
     }
-    setToolTip(back ? QStringLiteral("Cliquez pour voir le temps restant") : QStringLiteral("Cliquez pour voir le temps passé"));
+    setToolTip(back ? QStringLiteral("Cliquez pour voir le temps restant")
+                    : QStringLiteral("Cliquez pour voir le temps passé"));
     update();
 }
 
 void TimeCard::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && rect().contains(event->position().toPoint()) && clicked) clicked();
+    if (event->button() == Qt::LeftButton && rect().contains(event->position().toPoint()) && clicked) {
+        clicked();
+    }
 }
 
 void TimeCard::keyPressEvent(QKeyEvent *event)
 {
-    if ((event->key() == Qt::Key_Space || event->key() == Qt::Key_Return) && clicked) clicked();
-    else QWidget::keyPressEvent(event);
+    if ((event->key() == Qt::Key_Space || event->key() == Qt::Key_Return) && clicked) {
+        clicked();
+    } else {
+        QWidget::keyPressEvent(event);
+    }
 }
 
-void TimeCard::enterEvent(QEnterEvent *) { m_hover = true; update(); }
-void TimeCard::leaveEvent(QEvent *) { m_hover = false; update(); }
+void TimeCard::enterEvent(QEnterEvent *)
+{
+    m_hover = true;
+    update();
+}
+void TimeCard::leaveEvent(QEvent *)
+{
+    m_hover = false;
+    update();
+}
 
 void TimeCard::paintEvent(QPaintEvent *)
 {
@@ -85,14 +110,31 @@ void TimeCard::paintEvent(QPaintEvent *)
     const QString target = QStringLiteral(" sur ") + hourMinute(WorkRules::Day);
     Half work, pause;
     if (back) {
-        work = {QStringLiteral("Temps travaillé"), clockText(m_work), QStringLiteral("%1 %").arg(int(workRatio * 100)) + target, workRatio, false};
-        pause = {QStringLiteral("Pause prise"), clockText(m_pause), over ? QStringLiteral("dépassée de %1").arg(clockText(-pauseLeft)) : QStringLiteral("sur 60 min autorisées"), pauseRatio, over};
+        work = {QStringLiteral("Temps travaillé"), clockText(m_work),
+            QStringLiteral("%1 %").arg(int(workRatio * 100)) + target, workRatio, false};
+        pause = {QStringLiteral("Pause prise"), clockText(m_pause),
+            over ? QStringLiteral("dépassée de %1").arg(clockText(-pauseLeft))
+                 : QStringLiteral("sur 60 min autorisées"),
+            pauseRatio, over};
     } else {
-        work = {extra ? QStringLiteral("Heures supplémentaires") : QStringLiteral("Travail restant"), clockText(std::abs(workLeft)),
-                extra ? QStringLiteral("journée de 8 h terminée") : QStringLiteral("fin de la journée de 8 h"), extra ? 1 : 1 - workRatio, false};
-        if (!extra) work.note = m_paused ? QStringLiteral("chronomètre en pause") : QStringLiteral("fin prévue à %1").arg(QDateTime::currentDateTime().addSecs(workLeft + std::max(0, pauseLeft)).toString("HH:mm"));
-        pause = {over ? QStringLiteral("Pause dépassée") : QStringLiteral("Pause restante"), clockText(std::abs(pauseLeft)),
-                 m_paused ? QStringLiteral("pause en cours") : m_pause ? QStringLiteral("%1 déjà pris").arg(m_pause < 60 ? QStringLiteral("%1 s").arg(m_pause) : QStringLiteral("%1 min").arg(m_pause / 60)) : QStringLiteral("pas encore prise"), over ? 1 : 1 - pauseRatio, over};
+        work = {extra ? QStringLiteral("Heures supplémentaires") : QStringLiteral("Travail restant"),
+            clockText(std::abs(workLeft)),
+            extra ? QStringLiteral("journée de 8 h terminée") : QStringLiteral("fin de la journée de 8 h"),
+            extra ? 1 : 1 - workRatio, false};
+        if (!extra) {
+            work.note = m_paused
+                ? QStringLiteral("chronomètre en pause")
+                : QStringLiteral("fin prévue à %1")
+                      .arg(QDateTime::currentDateTime().addSecs(workLeft + std::max(0, pauseLeft)).toString("HH:mm"));
+        }
+        pause = {over ? QStringLiteral("Pause dépassée") : QStringLiteral("Pause restante"),
+            clockText(std::abs(pauseLeft)),
+            m_paused      ? QStringLiteral("pause en cours")
+                : m_pause ? QStringLiteral("%1 déjà pris")
+                                .arg(m_pause < 60 ? QStringLiteral("%1 s").arg(m_pause)
+                                                  : QStringLiteral("%1 min").arg(m_pause / 60))
+                          : QStringLiteral("pas encore prise"),
+            over ? 1 : 1 - pauseRatio, over};
     }
     const double middle = std::round(box.left() + box.width() * 0.55);
     p.setPen(QPen(QColor("#323236"), 1));
@@ -122,7 +164,9 @@ void TimeCard::paintHalf(QPainter &p, const QRectF &box, const Half &half, bool 
         p.setBrush(accent);
         p.drawRoundedRect(QRectF(icon.center().x() - 5, icon.center().y() - 5, 3.4, 10), 1.5, 1.5);
         p.drawRoundedRect(QRectF(icon.center().x() + 1.6, icon.center().y() - 5, 3.4, 10), 1.5, 1.5);
-    } else p.drawPixmap(QPointF(icon.center().x() - 8, icon.center().y() - 8), Icons::pixmap(Icons::Clock, accent, 16));
+    } else {
+        p.drawPixmap(QPointF(icon.center().x() - 8, icon.center().y() - 8), Icons::pixmap(Icons::Clock, accent, 16));
+    }
     f.setPointSizeF(9);
     f.setWeight(QFont::Medium);
     p.setFont(f);
@@ -131,7 +175,8 @@ void TimeCard::paintHalf(QPainter &p, const QRectF &box, const Half &half, bool 
     if (live) {
         p.setPen(Qt::NoPen);
         p.setBrush(accent);
-        p.drawEllipse(QPointF(icon.right() + 22 + p.fontMetrics().horizontalAdvance(half.title), icon.center().y()), 3.2, 3.2);
+        p.drawEllipse(
+            QPointF(icon.right() + 22 + p.fontMetrics().horizontalAdvance(half.title), icon.center().y()), 3.2, 3.2);
     }
     f.setPointSizeF(21);
     f.setWeight(QFont::Bold);
@@ -155,14 +200,18 @@ void TimeCard::paintHalf(QPainter &p, const QRectF &box, const Half &half, bool 
     f.setWeight(QFont::Normal);
     p.setFont(f);
     p.setPen(half.alert ? accent : QColor("#8f8c86"));
-    p.drawText(QRectF(box.left(), track.bottom() + 8, box.width(), 20), Qt::AlignVCenter, p.fontMetrics().elidedText(half.note, Qt::ElideRight, int(box.width())));
+    p.drawText(QRectF(box.left(), track.bottom() + 8, box.width(), 20), Qt::AlignVCenter,
+        p.fontMetrics().elidedText(half.note, Qt::ElideRight, int(box.width())));
 }
 
-ActivityLog::ActivityLog(QWidget *parent) : QWidget(parent)
+ActivityLog::ActivityLog(QWidget *parent)
+    : QWidget(parent)
 {
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [this] {
-        if (!m_enter.running()) m_timer->stop();
+        if (!m_enter.running()) {
+            m_timer->stop();
+        }
         update();
     });
     fit();
@@ -170,18 +219,37 @@ ActivityLog::ActivityLog(QWidget *parent) : QWidget(parent)
 
 ActivityLog::Kind ActivityLog::kindOf(const QString &text)
 {
-    if (text.startsWith("PC ") || text.startsWith("Inactif")) return Idle;
-    if (text.startsWith(QStringLiteral("Début de pause")) || text.startsWith(QStringLiteral("Pause"))) return Pause;
-    if (text.startsWith("Connexion") || text.startsWith("Reprise") || text.startsWith("Retour") || text.startsWith(QStringLiteral("Déconnexion"))) return Presence;
+    if (text.startsWith("PC ") || text.startsWith("Inactif")) {
+        return Idle;
+    }
+    if (text.startsWith(QStringLiteral("Début de pause")) || text.startsWith(QStringLiteral("Pause"))) {
+        return Pause;
+    }
+    if (text.startsWith("Connexion") || text.startsWith("Reprise") || text.startsWith("Retour")
+        || text.startsWith(QStringLiteral("Déconnexion"))) {
+        return Presence;
+    }
     return Task;
 }
 
 QString ActivityLog::kindName(Kind kind)
 {
-    return kind == Presence ? QStringLiteral("Présence") : kind == Pause ? QStringLiteral("Pause") : kind == Task ? QStringLiteral("Tâche") : QStringLiteral("Inactivité");
+    if (kind == Presence) {
+        return QStringLiteral("Présence");
+    }
+    if (kind == Pause) {
+        return QStringLiteral("Pause");
+    }
+    if (kind == Task) {
+        return QStringLiteral("Tâche");
+    }
+    return QStringLiteral("Inactivité");
 }
 
-QColor ActivityLog::kindColor(Kind kind) { return QColor(kind == Presence ? "#7fc08a" : kind == Pause ? "#e6c27a" : kind == Task ? "#8fb3c9" : "#e3a06d"); }
+QColor ActivityLog::kindColor(Kind kind)
+{
+    return QColor(kind == Presence ? "#7fc08a" : kind == Pause ? "#e6c27a" : kind == Task ? "#8fb3c9" : "#e3a06d");
+}
 
 void ActivityLog::add(const QDateTime &at, const QString &text)
 {
@@ -203,7 +271,9 @@ void ActivityLog::setFilter(int kind)
 
 int ActivityLog::count(int kind) const
 {
-    return int(std::count_if(m_rows.begin(), m_rows.end(), [kind](const Row &r) { return kind < 0 || r.kind == kind; }));
+    return int(std::count_if(m_rows.begin(), m_rows.end(), [kind](const Row &r) {
+        return kind < 0 || r.kind == kind;
+    }));
 }
 
 void ActivityLog::fit()
@@ -227,10 +297,14 @@ void ActivityLog::paintEvent(QPaintEvent *event)
     p.drawLine(QPointF(34, RowHeight / 2.0), QPointF(34, (total - 0.5) * RowHeight));
     int i = 0;
     for (const Row &r : m_rows) {
-        if (m_filter >= 0 && r.kind != m_filter) continue;
+        if (m_filter >= 0 && r.kind != m_filter) {
+            continue;
+        }
         const int index = i++;
         const QRectF row(6, index * RowHeight + 3 - (index ? RowHeight : 14) * shift, width() - 16, RowHeight - 6);
-        if (!row.intersects(QRectF(event->rect()))) continue;
+        if (!row.intersects(QRectF(event->rect()))) {
+            continue;
+        }
         p.setOpacity(index ? 1 : 1 - shift);
         const QColor color = kindColor(r.kind);
         QColor soft = color;
@@ -246,7 +320,13 @@ void ActivityLog::paintEvent(QPaintEvent *event)
             p.setBrush(color);
             p.drawRoundedRect(QRectF(c.x() - 4.6, c.y() - 5, 3.2, 10), 1.5, 1.5);
             p.drawRoundedRect(QRectF(c.x() + 1.4, c.y() - 5, 3.2, 10), 1.5, 1.5);
-        } else p.drawPixmap(QPointF(c.x() - 8, c.y() - 8), Icons::pixmap(r.kind == Presence ? Icons::Badge : r.kind == Task ? Icons::Check : Icons::Alert, color, 16));
+        } else {
+            p.drawPixmap(QPointF(c.x() - 8, c.y() - 8),
+                Icons::pixmap(r.kind == Presence ? Icons::Badge
+                        : r.kind == Task         ? Icons::Check
+                                                 : Icons::Alert,
+                    color, 16));
+        }
 
         QFont f = font();
         f.setPointSizeF(8.5);
@@ -268,12 +348,14 @@ void ActivityLog::paintEvent(QPaintEvent *event)
         f.setPointSizeF(10);
         p.setFont(f);
         p.setPen(QColor("#f7f4ee"));
-        p.drawText(QRectF(left, row.top() + 5, space, 22), Qt::AlignVCenter, p.fontMetrics().elidedText(head, Qt::ElideRight, int(space)));
+        p.drawText(QRectF(left, row.top() + 5, space, 22), Qt::AlignVCenter,
+            p.fontMetrics().elidedText(head, Qt::ElideRight, int(space)));
         f.setPointSizeF(9);
         f.setWeight(QFont::Normal);
         p.setFont(f);
         p.setPen(QColor("#8f8c86"));
         const QString line = r.at.toString("HH:mm:ss") + (tail.isEmpty() ? QString() : QStringLiteral(" · ") + tail);
-        p.drawText(QRectF(left, row.top() + 27, space, 20), Qt::AlignVCenter, p.fontMetrics().elidedText(line, Qt::ElideRight, int(space)));
+        p.drawText(QRectF(left, row.top() + 27, space, 20), Qt::AlignVCenter,
+            p.fontMetrics().elidedText(line, Qt::ElideRight, int(space)));
     }
 }

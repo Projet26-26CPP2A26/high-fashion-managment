@@ -20,7 +20,10 @@ public:
     BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidget *parent = nullptr);
     ~BadgePage() override;
     void enter();
-    BadgeService &service() { return m_service; }
+    BadgeService &service()
+    {
+        return m_service;
+    }
     QHash<int, bool> holders();
     QString virtualScan(const QString &uid);
 

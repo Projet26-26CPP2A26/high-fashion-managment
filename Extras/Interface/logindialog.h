@@ -18,7 +18,10 @@ class LoginDialog : public QDialog {
 public:
     enum Role { None, Admin, EmployeeRole };
     explicit LoginDialog(QWidget *parent = nullptr);
-    Role role() const { return m_role; }
+    Role role() const
+    {
+        return m_role;
+    }
     QString user() const;
     MorphOverlay *takeOverlay();
     void start();
@@ -33,8 +36,14 @@ public:
     std::function<BadgeResult(const QString &)> badgeHandler;
     std::function<QVector<QPair<QString, QString>>()> badgeList;
     std::function<void(const QString &)> refusedHandler;
-    int employeeId() const { return m_employeeId; }
-    bool usedBadge() const { return m_usedBadge; }
+    int employeeId() const
+    {
+        return m_employeeId;
+    }
+    bool usedBadge() const
+    {
+        return m_usedBadge;
+    }
     QString scanBadge(const QString &line, bool board = false);
     void showBadge(bool on);
     ~LoginDialog() override;

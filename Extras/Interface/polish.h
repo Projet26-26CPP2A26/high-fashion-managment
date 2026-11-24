@@ -16,7 +16,10 @@ public:
     qreal appear(int row) const;
     static void flash(QTableWidget *table, int row);
     qreal glow(int row) const;
-    int hovered() const { return m_hovered; }
+    int hovered() const
+    {
+        return m_hovered;
+    }
 
 protected:
     bool eventFilter(QObject *object, QEvent *event) override;

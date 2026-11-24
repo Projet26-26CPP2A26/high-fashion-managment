@@ -46,6 +46,13 @@ add_executable(AureaEmployes WIN32 main.cpp
     Extras/Outils/oraclecheck.cpp
     Extras/Outils/oraclemodulecheck.cpp
     Extras/Interface/polish.cpp
+    Extras/Interface/uihelpers.cpp
+    Extras/Interface/icons.cpp
+    Extras/Interface/greeting.cpp
+    Extras/Interface/sound.cpp
+    Suivi/Donnees/taskcatalog.cpp
+    Animations/UiAnimations.cpp
+    Animations/ConnectionAnimation.cpp
     Crud/employee.h
     Crud/employeemodule.h
     Crud/employeerepository.h

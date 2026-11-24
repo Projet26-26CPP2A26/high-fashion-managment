@@ -14,15 +14,21 @@ double ease(double v)
 }
 }
 
-LoginScene::LoginScene(QWidget *parent) : QWidget(parent)
+LoginScene::LoginScene(QWidget *parent)
+    : QWidget(parent)
 {
     const qreal ratio = devicePixelRatioF();
-    m_logo = QPixmap(":/assets/logo_aurea.png").scaled(QSize(124, 124) * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    m_logo = QPixmap(":/assets/logo_aurea.png")
+                 .scaled(QSize(124, 124) * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     m_logo.setDevicePixelRatio(ratio);
     auto *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this] {
-        if (!isVisible()) return;
-        if (!m_clock.isValid()) m_clock.start();
+        if (!isVisible()) {
+            return;
+        }
+        if (!m_clock.isValid()) {
+            m_clock.start();
+        }
         m_t = m_offset + m_clock.elapsed() / 1000.0;
         update();
     });
@@ -33,20 +39,27 @@ LoginScene::LoginScene(QWidget *parent) : QWidget(parent)
 void LoginScene::setLogoVisible(bool visible)
 {
     m_logoVisible = visible;
-    if (visible) repaint();
-    else update();
+    if (visible) {
+        repaint();
+    } else {
+        update();
+    }
 }
 
 QRect LoginScene::logoRect() const
 {
     const QSize size = (QSizeF(m_logo.size()) / m_logo.devicePixelRatio()).toSize();
-    return QRect(mapToGlobal(QPoint(qRound(width() / 2.0 - size.width() / 2.0), qRound(height() * 0.33 - size.height() / 2.0))), size);
+    return QRect(
+        mapToGlobal(QPoint(qRound(width() / 2.0 - size.width() / 2.0), qRound(height() * 0.33 - size.height() / 2.0))),
+        size);
 }
 
 double LoginScene::wave(double x, int line) const
 {
     const double u = x / width();
-    return height() * (0.865 + line * 0.028) + std::sin(u * 5.2 + m_t * (0.55 + line * 0.06) + line * 0.9) * (13 + line * 2) + std::sin(u * 11 - m_t * 0.35 + line) * 7;
+    return height() * (0.865 + line * 0.028)
+        + std::sin(u * 5.2 + m_t * (0.55 + line * 0.06) + line * 0.9) * (13 + line * 2)
+        + std::sin(u * 11 - m_t * 0.35 + line) * 7;
 }
 
 void LoginScene::paintEvent(QPaintEvent *)
@@ -68,9 +81,13 @@ void LoginScene::paintEvent(QPaintEvent *)
 
     for (int line = 4; line >= 0; --line) {
         const double drawn = width() * ease((m_t - 0.2 - line * 0.12) / 2.0);
-        if (drawn <= 4) continue;
+        if (drawn <= 4) {
+            continue;
+        }
         QPainterPath path(QPointF(0, wave(0, line)));
-        for (double x = 4; x <= drawn; x += 4) path.lineTo(x, wave(x, line));
+        for (double x = 4; x <= drawn; x += 4) {
+            path.lineTo(x, wave(x, line));
+        }
         p.setPen(QPen(QColor(226, 207, 159, line == 0 ? 190 : 78 - line * 13), line == 0 ? 1.8 : 1.1));
         p.setBrush(Qt::NoBrush);
         p.drawPath(path);
@@ -104,7 +121,11 @@ void LoginScene::paintEvent(QPaintEvent *)
     p.translate(center);
     p.scale(0.86 + 0.14 * shown, 0.86 + 0.14 * shown);
     const QSizeF size = QSizeF(m_logo.size()) / m_logo.devicePixelRatio();
-    if (m_logoVisible) p.drawPixmap(QPointF(qRound(center.x() - size.width() / 2) - center.x(), qRound(center.y() - size.height() / 2) - center.y()), m_logo);
+    if (m_logoVisible) {
+        p.drawPixmap(QPointF(qRound(center.x() - size.width() / 2) - center.x(),
+                         qRound(center.y() - size.height() / 2) - center.y()),
+            m_logo);
+    }
     p.restore();
 
     QFont brand("Cormorant Garamond", 42);
@@ -114,7 +135,9 @@ void LoginScene::paintEvent(QPaintEvent *)
     const QFontMetricsF fm(brand);
     const double gap = 5;
     double total = -gap;
-    for (const QChar c : word) total += fm.horizontalAdvance(c) + gap;
+    for (const QChar c : word) {
+        total += fm.horizontalAdvance(c) + gap;
+    }
     double x = (width() - total) / 2;
     const double base = height() * 0.33 + 152;
     const double sweep = std::fmod(m_t, 5.0) / 5.0 * 3.0 - 0.6;
@@ -134,5 +157,6 @@ void LoginScene::paintEvent(QPaintEvent *)
     p.setPen(QColor(201, 196, 184, int(255 * text)));
     p.drawText(QRectF(0, base + 22, width(), 24), Qt::AlignCenter, QStringLiteral("Atelier haute couture"));
     p.setPen(QColor(160, 154, 142, int(255 * text)));
-    p.drawText(QRectF(0, base + 50, width(), 44), Qt::AlignCenter, QStringLiteral("Gestion des employés,\nprésence et temps de travail en direct"));
+    p.drawText(QRectF(0, base + 50, width(), 44), Qt::AlignCenter,
+        QStringLiteral("Gestion des employés,\nprésence et temps de travail en direct"));
 }

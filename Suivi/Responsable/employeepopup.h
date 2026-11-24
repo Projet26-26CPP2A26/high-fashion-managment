@@ -22,7 +22,10 @@ public:
     EmployeePopup(ActivityBoard &board, ActivityStore &store, QWidget *window);
     void openFor(const QString &reference);
     void closePopup();
-    QString reference() const { return m_reference; }
+    QString reference() const
+    {
+        return m_reference;
+    }
     void refresh();
     void showTab(int index);
 

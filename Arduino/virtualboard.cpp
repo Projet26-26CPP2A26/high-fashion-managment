@@ -13,7 +13,8 @@
 #include <algorithm>
 #include <cmath>
 
-VirtualBoard::VirtualBoard(QWidget *parent) : QWidget(parent)
+VirtualBoard::VirtualBoard(QWidget *parent)
+    : QWidget(parent)
 {
     setMinimumHeight(236);
     display(QStringLiteral("AUREA Atelier"), QStringLiteral("Passez le badge"));
@@ -29,10 +30,14 @@ VirtualBoard::VirtualBoard(QWidget *parent) : QWidget(parent)
     box->addStretch();
     box->addLayout(row);
     connect(button, &QPushButton::clicked, this, [this] {
-        if (m_mode == Checking) return;
+        if (m_mode == Checking) {
+            return;
+        }
         const QString uid = m_badges->currentData().toString();
         present(uid);
-        if (scan) scan(uid);
+        if (scan) {
+            scan(uid);
+        }
     });
     m_life.start();
     auto *timer = new QTimer(this);
@@ -43,15 +48,21 @@ VirtualBoard::VirtualBoard(QWidget *parent) : QWidget(parent)
 void VirtualBoard::tick()
 {
     const qint64 ms = m_mode ? m_clock.elapsed() : 0;
-    if (m_mode && m_mode != Checking && ms > Motion::Slow * 2 && m_card.target() > 0) m_card.go(0, Motion::Slow);
-    if (m_mode == Accepted && ms > 2600 && m_door.target() > 0) m_door.go(0, Motion::Slow);
+    if (m_mode && m_mode != Checking && ms > Motion::Slow * 2 && m_card.target() > 0) {
+        m_card.go(0, Motion::Slow);
+    }
+    if (m_mode == Accepted && ms > 2600 && m_door.target() > 0) {
+        m_door.go(0, Motion::Slow);
+    }
     if (m_mode && ms > 3200) {
         m_mode = Idle;
         m_card.go(0, Motion::Slow);
         m_tone.go(0, Motion::Base);
         display(QStringLiteral("AUREA Atelier"), QStringLiteral("Passez le badge"));
     }
-    if (isVisible()) update();
+    if (isVisible()) {
+        update();
+    }
 }
 
 void VirtualBoard::display(const QString &top, const QString &bottom)
@@ -68,7 +79,9 @@ void VirtualBoard::setBadges(const QVector<QPair<QString, QString>> &badges)
     const QSignalBlocker block(m_badges);
     const QString keep = m_badges->currentData().toString();
     m_badges->clear();
-    for (const auto &b : badges) m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+    for (const auto &b : badges) {
+        m_badges->addItem(b.second + QStringLiteral(" · ") + b.first, b.first);
+    }
     m_badges->addItem(QStringLiteral("Badge inconnu · 0BADBAD0"), QStringLiteral("0BADBAD0"));
     m_badges->setCurrentIndex(std::max(0, m_badges->findData(keep)));
 }
@@ -86,13 +99,19 @@ void VirtualBoard::reply(const QString &line, bool sound)
 {
     const QString type = line.section(';', 0, 0), name = line.section(';', 1, 1), info = line.section(';', 2, 2);
     m_clock.start();
-    if (sound) Sound::play(type == "IN" ? QStringLiteral("arrivee") : type == "OUT" ? QStringLiteral("depart") : type == "WAIT" ? QStringLiteral("deja") : QStringLiteral("refus"));
+    if (sound) {
+        Sound::play(type == "IN" ? QStringLiteral("arrivee")
+                : type == "OUT"  ? QStringLiteral("depart")
+                : type == "WAIT" ? QStringLiteral("deja")
+                                 : QStringLiteral("refus"));
+    }
     m_mode = Refused;
     m_tone.go(1, Motion::Base);
     if (type == "IN" || type == "OUT") {
         m_mode = Accepted;
         m_door.go(1, Motion::Slow);
-        display((type == "IN" ? QStringLiteral("Bonjour ") : QStringLiteral("A bientot ")) + name, (type == "IN" ? QStringLiteral("Arrivee ") : QStringLiteral("Travail ")) + info);
+        display((type == "IN" ? QStringLiteral("Bonjour ") : QStringLiteral("A bientot ")) + name,
+            (type == "IN" ? QStringLiteral("Arrivee ") : QStringLiteral("Travail ")) + info);
     } else if (type == "WAIT") {
         m_mode = Known;
         display(name, QStringLiteral("Deja enregistre"));
@@ -118,7 +137,9 @@ void VirtualBoard::paintScreen(QPainter &p, const QColor &tone)
 {
     const double t = m_clock.isValid() ? m_clock.elapsed() / double(Motion::Slow) : 9;
     p.save();
-    if (m_mode == Refused && t < 1) p.translate(std::sin(t * 18) * 5 * (1 - t), 0);
+    if (m_mode == Refused && t < 1) {
+        p.translate(std::sin(t * 18) * 5 * (1 - t), 0);
+    }
     const QRectF lcd(6, 6, width() - 122, 108);
     const double level = m_tone.value();
     for (int i = 3; i > 0; --i) {
@@ -174,7 +195,9 @@ void VirtualBoard::paintDoor(QPainter &p)
     p.setBrush(light);
     p.drawRoundedRect(frame.adjusted(6, 6, -6, -6), 3, 3);
     QPolygonF door;
-    door << QPointF(frame.left() + 6, frame.top() + 6) << QPointF(frame.left() + 6 + w, frame.top() + 6 + skew) << QPointF(frame.left() + 6 + w, frame.bottom() - 6 - skew * 0.4) << QPointF(frame.left() + 6, frame.bottom() - 6);
+    door << QPointF(frame.left() + 6, frame.top() + 6) << QPointF(frame.left() + 6 + w, frame.top() + 6 + skew)
+         << QPointF(frame.left() + 6 + w, frame.bottom() - 6 - skew * 0.4)
+         << QPointF(frame.left() + 6, frame.bottom() - 6);
     p.setPen(QPen(QColor("#c9b27c"), 1.2));
     p.setBrush(QColor("#3a3427"));
     p.drawPolygon(door);
@@ -219,7 +242,9 @@ void VirtualBoard::paintReader(QPainter &p, const QColor &tone)
         const double length = mark.length() / pen.widthF();
         pen.setDashPattern({std::max(0.01, length * draw), length * 2 + 1});
         p.setPen(pen);
-        if (draw > 0.01) p.drawPath(mark);
+        if (draw > 0.01) {
+            p.drawPath(mark);
+        }
     } else if (!answered) {
         const double speed = m_mode == Checking ? 1.6 : 0.55;
         for (int i = 0; i < 3; ++i) {
@@ -239,7 +264,11 @@ void VirtualBoard::paintReader(QPainter &p, const QColor &tone)
     p.setBrush(m_mode ? tone : QColor("#77746e"));
     p.drawEllipse(QPointF(108, 163), 3, 3);
     p.setPen(m_mode ? tone : QColor("#8f8c86"));
-    const QString text = m_mode == Accepted ? QStringLiteral("Porte ouverte") : m_mode == Refused ? QStringLiteral("Accès refusé") : m_mode == Known ? QStringLiteral("Déjà enregistré") : m_mode == Checking ? QStringLiteral("Lecture du badge") : QStringLiteral("En attente");
+    const QString text = m_mode == Accepted ? QStringLiteral("Porte ouverte")
+        : m_mode == Refused                 ? QStringLiteral("Accès refusé")
+        : m_mode == Known                   ? QStringLiteral("Déjà enregistré")
+        : m_mode == Checking                ? QStringLiteral("Lecture du badge")
+                                            : QStringLiteral("En attente");
     p.drawText(QRectF(118, 151, width() - 200, 24), Qt::AlignVCenter, text);
 }
 

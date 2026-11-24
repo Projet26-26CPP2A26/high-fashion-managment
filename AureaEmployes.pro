@@ -23,12 +23,15 @@ SOURCES += \
     Arduino/badgepage.cpp \
     Arduino/badgeservice.cpp \
     Arduino/virtualboard.cpp \
+    Animations/ConnectionAnimation.cpp \
+    Animations/UiAnimations.cpp \
     Animations/BadgeAnimation.cpp \
     Animations/ClosingAnimation.cpp \
     Animations/LinesAnimation.cpp \
     Animations/LoginAnimation.cpp \
     Animations/LogoAnimation.cpp \
     Animations/TransitionAnimation.cpp \
+    Suivi/Donnees/taskcatalog.cpp \
     Suivi/Donnees/activitystore.cpp \
     Suivi/Donnees/companylink.cpp \
     Suivi/Employe/employeedesk.cpp \
@@ -39,6 +42,10 @@ SOURCES += \
     Suivi/Responsable/employeetile.cpp \
     Suivi/Responsable/passagefeed.cpp \
     Suivi/Responsable/reviewboard.cpp \
+    Extras/Interface/sound.cpp \
+    Extras/Interface/greeting.cpp \
+    Extras/Interface/icons.cpp \
+    Extras/Interface/uihelpers.cpp \
     Extras/Interface/dialogskin.cpp \
     Extras/Interface/logindialog.cpp \
     Extras/Interface/polish.cpp \

@@ -12,7 +12,8 @@ class DialogSkin : public QObject {
     Q_OBJECT
 public:
     static int run(QDialog &dialog);
-    static bool ask(QWidget *parent, const QString &title, const QString &text, const QString &yes = QStringLiteral("Oui"), const QString &no = QStringLiteral("Non"));
+    static bool ask(QWidget *parent, const QString &title, const QString &text,
+        const QString &yes = QStringLiteral("Oui"), const QString &no = QStringLiteral("Non"));
     static void info(QWidget *parent, const QString &title, const QString &text);
     static void warn(QWidget *parent, const QString &title, const QString &text);
 

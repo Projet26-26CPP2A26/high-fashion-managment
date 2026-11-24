@@ -37,7 +37,10 @@ QLabel *label(const QString &text, const char *role)
 }
 }
 
-BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidget *parent) : QWidget(parent), m_repository(repository), m_store(store)
+BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidget *parent)
+    : QWidget(parent)
+    , m_repository(repository)
+    , m_store(store)
 {
     auto *root = new QHBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
@@ -107,7 +110,8 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     right->setSpacing(14);
     auto *counts = new QHBoxLayout;
     counts->setSpacing(14);
-    const QStringList titles = {QStringLiteral("Badges actifs"), QStringLiteral("Au bureau"), QStringLiteral("Sans badge")};
+    const QStringList titles = {
+        QStringLiteral("Badges actifs"), QStringLiteral("Au bureau"), QStringLiteral("Sans badge")};
     for (int i = 0; i < 3; ++i) {
         auto *box = new QVBoxLayout;
         box->setSpacing(2);
@@ -144,22 +148,37 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
     connect(m_connect, &QPushButton::clicked, this, &BadgePage::toggleSerial);
     connect(&BadgeLink::instance(), &BadgeLink::stateChanged, this, &BadgePage::showLink);
     m_service.adminUid = m_store.setting(QStringLiteral("admin_badge"));
-    BadgeLink::instance().receiver = [this](const QString &line) { return handle(line, true); };
+    BadgeLink::instance().receiver = [this](const QString &line) {
+        return handle(line, true);
+    };
     connect(&m_service, &BadgeService::scanned, this, [this](int id, bool arrival) {
-        if (arrival) m_repository.clockIn(id);
-        else m_repository.clockOut(id);
+        if (arrival) {
+            m_repository.clockIn(id);
+        } else {
+            m_repository.clockOut(id);
+        }
         emit passed(id, arrival);
         emit attendanceChanged();
     });
     connect(&m_service, &BadgeService::refused, this, [this](const QString &uid) {
-        m_store.addEntry(QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
+        m_store.addEntry(
+            QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
         m_refusals->reload();
     });
     connect(&m_service, &BadgeService::changed, this, &BadgePage::refresh);
-    m_board->scan = [this](const QString &uid) { QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, uid] { virtualScan(uid); }); };
-    connect(last, &QPushButton::clicked, this, [this] { m_uid->setText(m_service.lastUid()); });
+    m_board->scan = [this](const QString &uid) {
+        QTimer::singleShot(Motion::Slow + Motion::Base, this, [this, uid] {
+            virtualScan(uid);
+        });
+    };
+    connect(last, &QPushButton::clicked, this, [this] {
+        m_uid->setText(m_service.lastUid());
+    });
     connect(m_people, &QComboBox::currentIndexChanged, this, [this] {
-        if (m_ready) m_uid->setText(m_people->currentData().toInt() < 0 ? m_service.adminUid : m_service.badgeOf(m_people->currentData().toInt()));
+        if (m_ready) {
+            m_uid->setText(m_people->currentData().toInt() < 0 ? m_service.adminUid
+                                                               : m_service.badgeOf(m_people->currentData().toInt()));
+        }
     });
     connect(assignButton, &QPushButton::clicked, this, [this] {
         const int id = m_people->currentData().toInt();
@@ -171,7 +190,9 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
                 m_service.adminUid = uid;
                 refresh();
             }
-            report(free, free ? QStringLiteral("Badge du responsable enregistré.") : QStringLiteral("Badge invalide ou déjà associé à un employé."));
+            report(free,
+                free ? QStringLiteral("Badge du responsable enregistré.")
+                     : QStringLiteral("Badge invalide ou déjà associé à un employé."));
             return;
         }
         if (BadgeService::normalize(m_uid->text()) == m_service.adminUid && !m_service.adminUid.isEmpty()) {
@@ -191,21 +212,28 @@ BadgePage::BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidg
             return;
         }
         const bool ok = m_service.release(m_people->currentData().toInt());
-        if (ok) m_uid->clear();
+        if (ok) {
+            m_uid->clear();
+        }
         report(ok, ok ? QStringLiteral("Badge retiré.") : m_service.error());
     });
     refreshPorts();
     showLink();
 }
 
-BadgePage::~BadgePage() { BadgeLink::instance().receiver = nullptr; }
+BadgePage::~BadgePage()
+{
+    BadgeLink::instance().receiver = nullptr;
+}
 
 QHash<int, bool> BadgePage::holders()
 {
     QHash<int, bool> out;
     for (const auto &b : m_service.badges()) {
         const int id = m_service.employeeOf(b.first);
-        if (id) out.insert(id, m_service.inside(id));
+        if (id) {
+            out.insert(id, m_service.inside(id));
+        }
     }
     return out;
 }
@@ -214,9 +242,13 @@ void BadgePage::report(bool ok, const QString &text)
 {
     m_hint->setText(text);
     m_hint->setStyleSheet(ok ? "color:#7fc08a" : "color:#f0b9bb");
-    if (!isVisible()) return;
+    if (!isVisible()) {
+        return;
+    }
     Fx::reveal(m_hint, 0, Motion::Base);
-    if (!ok) Fx::shake(m_uid);
+    if (!ok) {
+        Fx::shake(m_uid);
+    }
 }
 
 void BadgePage::enter()
@@ -228,15 +260,19 @@ void BadgePage::enter()
     }
     if (m_store.setting(QStringLiteral("scans_imported")).isEmpty()) {
         const QVector<BadgeScan> old = m_service.scans();
-        for (auto it = old.rbegin(); it != old.rend(); ++it)
-            m_store.addEntry(QString(), it->name.isEmpty() ? QStringLiteral("Badge inconnu") : it->name, QStringLiteral("BADGE"), it->kind, it->name.isEmpty() ? it->uid : QString(), it->at);
+        for (auto it = old.rbegin(); it != old.rend(); ++it) {
+            m_store.addEntry(QString(), it->name.isEmpty() ? QStringLiteral("Badge inconnu") : it->name,
+                QStringLiteral("BADGE"), it->kind, it->name.isEmpty() ? it->uid : QString(), it->at);
+        }
         m_store.saveSetting(QStringLiteral("scans_imported"), QStringLiteral("1"));
     }
     const int keep = m_people->currentData().toInt();
     m_people->clear();
     m_people->addItem(QStringLiteral("Responsable RH (administrateur)"), -1);
     const QVector<Employee> people = m_repository.loadEmployees();
-    for (const Employee &e : people) m_people->addItem(e.name() + QStringLiteral(" · ") + e.reference(), e.id());
+    for (const Employee &e : people) {
+        m_people->addItem(e.name() + QStringLiteral(" · ") + e.reference(), e.id());
+    }
     m_people->setCurrentIndex(std::max(0, m_people->findData(keep)));
     refreshPorts();
     refresh();
@@ -250,12 +286,17 @@ void BadgePage::enter()
 void BadgePage::refreshPorts()
 {
     if (!BadgeLink::instance().idle()) {
-        if (m_ports->count()) return;
+        if (m_ports->count()) {
+            return;
+        }
     }
     m_ports->clear();
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-    for (const QSerialPortInfo &info : ports)
-        m_ports->addItem(info.portName() + QStringLiteral(" · ") + (info.description().isEmpty() ? QStringLiteral("port série") : info.description()), info.portName());
+    for (const QSerialPortInfo &info : ports) {
+        m_ports->addItem(info.portName() + QStringLiteral(" · ")
+                + (info.description().isEmpty() ? QStringLiteral("port série") : info.description()),
+            info.portName());
+    }
     m_ports->addItem(QStringLiteral("Wokwi · simulateur"), QStringLiteral("wokwi"));
     m_connect->setEnabled(true);
 }
@@ -268,17 +309,24 @@ void BadgePage::toggleSerial()
         return;
     }
     const QString port = m_ports->currentData().toString();
-    if (port == "wokwi") link.connectWokwi();
-    else if (!link.connectSerial(port)) Fx::shake(m_cards.first());
+    if (port == "wokwi") {
+        link.connectWokwi();
+    } else if (!link.connectSerial(port)) {
+        Fx::shake(m_cards.first());
+    }
 }
 
 void BadgePage::showLink()
 {
     const BadgeLink &link = BadgeLink::instance();
     m_light->setState(LinkLight::State(link.state()));
-    m_connect->setText(link.state() == BadgeLink::On ? QStringLiteral("Déconnecter") : link.state() == BadgeLink::Waiting ? QStringLiteral("Annuler") : QStringLiteral("Connecter"));
+    m_connect->setText(link.state() == BadgeLink::On ? QStringLiteral("Déconnecter")
+            : link.state() == BadgeLink::Waiting     ? QStringLiteral("Annuler")
+                                                     : QStringLiteral("Connecter"));
     m_state->setText(link.text());
-    if (link.state() != BadgeLink::Off && link.text().contains("Wokwi") && m_ports->count()) m_ports->setCurrentIndex(std::max(0, m_ports->findData(QStringLiteral("wokwi"))));
+    if (link.state() != BadgeLink::Off && link.text().contains("Wokwi") && m_ports->count()) {
+        m_ports->setCurrentIndex(std::max(0, m_ports->findData(QStringLiteral("wokwi"))));
+    }
 }
 
 QString BadgePage::handle(const QString &line, bool mirror)
@@ -286,7 +334,9 @@ QString BadgePage::handle(const QString &line, bool mirror)
     const QString reply = m_service.receive(line);
     if (mirror && !reply.isEmpty()) {
         m_board->present(m_service.lastUid());
-        QTimer::singleShot(Motion::Slow, m_board, [this, reply] { m_board->reply(reply, false); });
+        QTimer::singleShot(Motion::Slow, m_board, [this, reply] {
+            m_board->reply(reply, false);
+        });
     }
     return reply;
 }
@@ -301,7 +351,9 @@ QString BadgePage::virtualScan(const QString &uid)
 void BadgePage::refresh()
 {
     QVector<QPair<QString, QString>> badges = m_service.badges();
-    if (m_service.adminUid.size() > 3) badges.prepend(qMakePair(m_service.adminUid, QStringLiteral("Responsable RH")));
+    if (m_service.adminUid.size() > 3) {
+        badges.prepend(qMakePair(m_service.adminUid, QStringLiteral("Responsable RH")));
+    }
     m_board->setBadges(badges);
     m_refusals->reload();
 
@@ -309,18 +361,28 @@ void BadgePage::refresh()
     const QVector<Employee> people = m_repository.loadEmployees();
     for (const auto &b : std::as_const(badges)) {
         const int id = m_service.employeeOf(b.first);
-        if (id) uids.insert(id, b.first);
+        if (id) {
+            uids.insert(id, b.first);
+        }
     }
     int active = 0, present = 0;
     m_table->setRowCount(0);
-    for (bool with : {true, false})
+    for (bool with : {true, false}) {
         for (const Employee &e : people) {
-            if (uids.contains(e.id()) != with) continue;
+            if (uids.contains(e.id()) != with) {
+                continue;
+            }
             const bool here = with && m_service.inside(e.id());
             active += with;
             present += here;
-            UiHelpers::addRow(m_table, {e.name(), with ? uids.value(e.id()) : QStringLiteral("—"), !with ? QStringLiteral("Sans badge") : here ? QStringLiteral("Présent") : QStringLiteral("Absent")}, e.id());
+            UiHelpers::addRow(m_table,
+                {e.name(), with ? uids.value(e.id()) : QStringLiteral("—"),
+                    !with      ? QStringLiteral("Sans badge")
+                        : here ? QStringLiteral("Présent")
+                               : QStringLiteral("Absent")},
+                e.id());
         }
+    }
     m_counts[0]->setText(QString::number(active));
     m_counts[1]->setText(QString::number(present));
     m_counts[2]->setText(QString::number(people.size() - active));

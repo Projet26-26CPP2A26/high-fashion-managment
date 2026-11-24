@@ -17,7 +17,9 @@ bool SubmitDialog::allowed(const QString &path)
     return types.contains(QFileInfo(path).suffix().toLower());
 }
 
-SubmitDialog::SubmitDialog(const WorkTask &task, QWidget *parent) : QDialog(parent), m_task(task.id)
+SubmitDialog::SubmitDialog(const WorkTask &task, QWidget *parent)
+    : QDialog(parent)
+    , m_task(task.id)
 {
     setWindowTitle(QStringLiteral("Déposer la tâche"));
     setMinimumWidth(560);
@@ -27,7 +29,9 @@ SubmitDialog::SubmitDialog(const WorkTask &task, QWidget *parent) : QDialog(pare
     auto *title = new QLabel(task.title);
     title->setTextFormat(Qt::PlainText);
     title->setProperty("section", true);
-    auto *info = new QLabel(QStringLiteral("%1 étapes validées · temps passé %2 (prévu %3)").arg(task.steps.size()).arg(clockText(task.spent), clockText(task.planned)));
+    auto *info = new QLabel(QStringLiteral("%1 étapes validées · temps passé %2 (prévu %3)")
+            .arg(task.steps.size())
+            .arg(clockText(task.spent), clockText(task.planned)));
     info->setProperty("muted", true);
     m_note = new QPlainTextEdit;
     m_note->setPlaceholderText(QStringLiteral("Compte rendu pour le responsable RH : ce qui a été fait, difficultés…"));
@@ -63,12 +67,18 @@ SubmitDialog::SubmitDialog(const WorkTask &task, QWidget *parent) : QDialog(pare
     });
 }
 
-QString SubmitDialog::note() const { return m_note->toPlainText().trimmed().left(1000); }
+QString SubmitDialog::note() const
+{
+    return m_note->toPlainText().trimmed().left(1000);
+}
 
 void SubmitDialog::attach()
 {
-    const QString source = QFileDialog::getOpenFileName(this, QStringLiteral("Pièce jointe"), QString(), QStringLiteral("Documents (*.png *.jpg *.jpeg *.pdf *.docx *.xlsx *.txt)"));
-    if (source.isEmpty()) return;
+    const QString source = QFileDialog::getOpenFileName(this, QStringLiteral("Pièce jointe"), QString(),
+        QStringLiteral("Documents (*.png *.jpg *.jpeg *.pdf *.docx *.xlsx *.txt)"));
+    if (source.isEmpty()) {
+        return;
+    }
     const QFileInfo info(source);
     if (!allowed(source) || info.size() > 10 * 1024 * 1024) {
         m_info->setText(QStringLiteral("Fichier refusé (type ou taille)."));
@@ -77,7 +87,8 @@ void SubmitDialog::attach()
     }
     const QString folder = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/depots";
     QDir().mkpath(folder);
-    const QString target = folder + QStringLiteral("/%1_%2_%3").arg(m_task).arg(QDateTime::currentSecsSinceEpoch()).arg(info.fileName());
+    const QString target =
+        folder + QStringLiteral("/%1_%2_%3").arg(m_task).arg(QDateTime::currentSecsSinceEpoch()).arg(info.fileName());
     if (!QFile::copy(source, target)) {
         m_info->setText(QStringLiteral("Copie impossible."));
         return;

@@ -10,31 +10,51 @@
 
 QColor statusColor(const QString &s)
 {
-    if (s == QStringLiteral("Actif")) return QColor("#7fc08a");
-    if (s == QStringLiteral("En pause")) return QColor("#e6c27a");
-    if (s == QStringLiteral("Inactif")) return QColor("#e3a06d");
-    if (s == QStringLiteral("PC hors ligne")) return QColor("#e08f8f");
+    if (s == QStringLiteral("Actif")) {
+        return QColor("#7fc08a");
+    }
+    if (s == QStringLiteral("En pause")) {
+        return QColor("#e6c27a");
+    }
+    if (s == QStringLiteral("Inactif")) {
+        return QColor("#e3a06d");
+    }
+    if (s == QStringLiteral("PC hors ligne")) {
+        return QColor("#e08f8f");
+    }
     return QColor("#8f8c86");
 }
 
 QStringList sessionAlerts(const WorkSession &s)
 {
     QStringList out;
-    if (s.status() == QStringLiteral("PC hors ligne")) out << QStringLiteral("PC hors ligne");
-    if (s.status() == QStringLiteral("Inactif")) out << QStringLiteral("Inactif");
-    if (s.pause > WorkRules::Pause) out << QStringLiteral("Pause dépassée");
-    if (!s.ended() && s.taskPlanned > 0 && s.taskSpent > s.taskPlanned) out << QStringLiteral("Tâche en retard");
+    if (s.status() == QStringLiteral("PC hors ligne")) {
+        out << QStringLiteral("PC hors ligne");
+    }
+    if (s.status() == QStringLiteral("Inactif")) {
+        out << QStringLiteral("Inactif");
+    }
+    if (s.pause > WorkRules::Pause) {
+        out << QStringLiteral("Pause dépassée");
+    }
+    if (!s.ended() && s.taskPlanned > 0 && s.taskSpent > s.taskPlanned) {
+        out << QStringLiteral("Tâche en retard");
+    }
     return out;
 }
 
-EmployeeTile::EmployeeTile(QWidget *parent) : QWidget(parent)
+EmployeeTile::EmployeeTile(QWidget *parent)
+    : QWidget(parent)
 {
     setFixedHeight(212);
     setMinimumWidth(240);
     setCursor(Qt::PointingHandCursor);
     m_hoverAnimation.setDuration(Motion::Quick);
     m_hoverAnimation.setEasingCurve(QEasingCurve::OutCubic);
-    QObject::connect(&m_hoverAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_hover = v.toReal(); update(); });
+    QObject::connect(&m_hoverAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+        m_hover = v.toReal();
+        update();
+    });
     m_barAnimation.setDuration(Motion::Slow);
     m_barAnimation.setStartValue(0.0);
     m_barAnimation.setEndValue(1.0);
@@ -47,7 +67,10 @@ EmployeeTile::EmployeeTile(QWidget *parent) : QWidget(parent)
     m_flashAnimation.setDuration(Motion::Glow);
     m_flashAnimation.setStartValue(1.0);
     m_flashAnimation.setEndValue(0.0);
-    QObject::connect(&m_flashAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_flash = v.toReal(); update(); });
+    QObject::connect(&m_flashAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+        m_flash = v.toReal();
+        update();
+    });
 }
 
 void EmployeeTile::enter(int delay)
@@ -58,8 +81,13 @@ void EmployeeTile::enter(int delay)
     a->setStartValue(0.0);
     a->setEndValue(1.0);
     a->setEasingCurve(QEasingCurve::OutCubic);
-    connect(a, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_enter = v.toReal(); update(); });
-    QTimer::singleShot(delay, a, [a] { a->start(QAbstractAnimation::DeleteWhenStopped); });
+    connect(a, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+        m_enter = v.toReal();
+        update();
+    });
+    QTimer::singleShot(delay, a, [a] {
+        a->start(QAbstractAnimation::DeleteWhenStopped);
+    });
 }
 
 void EmployeeTile::animateHover(qreal to)
@@ -72,13 +100,17 @@ void EmployeeTile::animateHover(qreal to)
 
 void EmployeeTile::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && rect().contains(event->pos()) && clicked) clicked();
+    if (event->button() == Qt::LeftButton && rect().contains(event->pos()) && clicked) {
+        clicked();
+    }
 }
 
 void EmployeeTile::setSession(const WorkSession &s, bool selected)
 {
     const QString status = s.status();
-    if (!m_first && (status != m_status || s.task != m_session.task)) m_flashAnimation.start();
+    if (!m_first && (status != m_status || s.task != m_session.task)) {
+        m_flashAnimation.start();
+    }
     m_first = false;
     m_session = s;
     m_status = status;
@@ -112,7 +144,9 @@ void EmployeeTile::paintEvent(QPaintEvent *)
     back.setColorAt(0, QColor(m_hover > 0.5 ? "#2f2e2c" : "#29292c"));
     back.setColorAt(1, QColor("#202023"));
     QColor border = m_selected ? QColor("#e2cf9f") : QColor("#38383d");
-    if (!m_selected && m_hover > 0) border = QColor("#8f7f58");
+    if (!m_selected && m_hover > 0) {
+        border = QColor("#8f7f58");
+    }
     p.setBrush(back);
     p.setPen(QPen(border, m_selected ? 2 : 1));
     p.drawRoundedRect(card, 14, 14);
@@ -154,15 +188,25 @@ void EmployeeTile::paintEvent(QPaintEvent *)
     p.setBrush(QColor("#3a3427"));
     p.drawEllipse(center, 21, 21);
     QString initials;
-    for (const QString &part : m_session.name.split(' ', Qt::SkipEmptyParts)) if (initials.size() < 2) initials += part[0].toUpper();
-    text(QRect(int(center.x()) - 20, int(center.y()) - 14, 40, 28), initials, QColor("#e9d8a8"), 10.5, QFont::Bold, Qt::AlignHCenter);
+    for (const QString &part : m_session.name.split(' ', Qt::SkipEmptyParts)) {
+        if (initials.size() < 2) {
+            initials += part[0].toUpper();
+        }
+    }
+    text(QRect(int(center.x()) - 20, int(center.y()) - 14, 40, 28), initials, QColor("#e9d8a8"), 10.5, QFont::Bold,
+        Qt::AlignHCenter);
 
     const int nameX = x + 54;
-    text(QRect(nameX, y + 16, right - nameX - 20, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold, Qt::AlignLeft);
-    text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#8f8c86"), 9, QFont::Normal, Qt::AlignLeft);
+    text(QRect(nameX, y + 16, right - nameX - 20, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold,
+        Qt::AlignLeft);
+    text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#8f8c86"), 9, QFont::Normal,
+        Qt::AlignLeft);
 
-    if (m_session.login.isValid() && !m_session.ended() && !m_session.via.isEmpty())
-        p.drawPixmap(QPointF(right - 16, y + 18), Icons::pixmap(m_session.via == "BADGE" ? Icons::Office : Icons::Online, QColor(m_session.via == "BADGE" ? "#e2cf9f" : "#8fb3c9"), 16));
+    if (m_session.login.isValid() && !m_session.ended() && !m_session.via.isEmpty()) {
+        p.drawPixmap(QPointF(right - 16, y + 18),
+            Icons::pixmap(m_session.via == "BADGE" ? Icons::Office : Icons::Online,
+                QColor(m_session.via == "BADGE" ? "#e2cf9f" : "#8fb3c9"), 16));
+    }
 
     QColor soft = color;
     soft.setAlpha(38);
@@ -172,24 +216,33 @@ void EmployeeTile::paintEvent(QPaintEvent *)
     p.setBrush(color);
     p.drawEllipse(QPointF(x + 13, y + 82), 3.2, 3.2);
     text(QRect(x + 23, y + 70, 92, 24), m_status, color, 9, QFont::DemiBold, Qt::AlignLeft);
-    text(QRect(right - 110, y + 68, 110, 28), clockText(m_session.work), QColor("#f4e7bc"), 14, QFont::Bold, Qt::AlignRight);
+    text(QRect(right - 110, y + 68, 110, 28), clockText(m_session.work), QColor("#f4e7bc"), 14, QFont::Bold,
+        Qt::AlignRight);
 
     const bool late = m_session.taskPlanned > 0 && m_session.taskSpent > m_session.taskPlanned;
-    text(QRect(x, y + 102, width - 72, 22), m_session.task.isEmpty() ? QStringLiteral("Aucune tâche en cours") : m_session.task, QColor("#eeeae1"), 9.5, QFont::Medium, Qt::AlignLeft);
-    if (m_session.taskPlanned > 0)
-        text(QRect(right - 70, y + 102, 70, 22), QString::number(std::min(999, int(m_session.taskSpent * 100LL / m_session.taskPlanned))) + " %", QColor(late ? "#e08f8f" : "#b9b4a8"), 9, QFont::Medium, Qt::AlignRight);
+    text(QRect(x, y + 102, width - 72, 22),
+        m_session.task.isEmpty() ? QStringLiteral("Aucune tâche en cours") : m_session.task, QColor("#eeeae1"), 9.5,
+        QFont::Medium, Qt::AlignLeft);
+    if (m_session.taskPlanned > 0) {
+        text(QRect(right - 70, y + 102, 70, 22),
+            QString::number(std::min(999, int(m_session.taskSpent * 100LL / m_session.taskPlanned))) + " %",
+            QColor(late ? "#e08f8f" : "#b9b4a8"), 9, QFont::Medium, Qt::AlignRight);
+    }
     const auto bar = [&](int top, qreal value, const QColor &a, const QColor &b) {
         p.setPen(Qt::NoPen);
         p.setBrush(QColor("#3b3b40"));
         p.drawRoundedRect(QRectF(x, top, width, 5), 2.5, 2.5);
-        if (value <= 0) return;
+        if (value <= 0) {
+            return;
+        }
         QLinearGradient g(x, 0, right, 0);
         g.setColorAt(0, a);
         g.setColorAt(1, b);
         p.setBrush(g);
         p.drawRoundedRect(QRectF(x, top, std::max(5.0, width * value), 5), 2.5, 2.5);
     };
-    bar(y + 127, m_progress, late ? QColor("#c27575") : QColor("#bfa370"), late ? QColor("#e8a3a3") : QColor("#e2cf9f"));
+    bar(y + 127, m_progress, late ? QColor("#c27575") : QColor("#bfa370"),
+        late ? QColor("#e8a3a3") : QColor("#e2cf9f"));
 
     const int third = width / 3;
     const auto mini = [&](int i, const QString &label, const QString &value, const QColor &c) {
@@ -197,17 +250,21 @@ void EmployeeTile::paintEvent(QPaintEvent *)
         text(QRect(x + i * third, y + 155, third, 18), value, c, 9, QFont::DemiBold, Qt::AlignLeft);
     };
     const QString hm = QStringLiteral("%1 min");
-    mini(0, QStringLiteral("Pause"), hm.arg(m_session.pause / 60), QColor(m_session.pause > WorkRules::Pause ? "#e08f8f" : "#d9d5cb"));
+    mini(0, QStringLiteral("Pause"), hm.arg(m_session.pause / 60),
+        QColor(m_session.pause > WorkRules::Pause ? "#e08f8f" : "#d9d5cb"));
     mini(1, QStringLiteral("Inactif"), hm.arg(m_session.idle / 60), QColor("#d9d5cb"));
-    mini(2, QStringLiteral("Arrivée"), m_session.login.isValid() ? m_session.login.toString("HH:mm") : QStringLiteral("—"), QColor("#d9d5cb"));
+    mini(2, QStringLiteral("Arrivée"),
+        m_session.login.isValid() ? m_session.login.toString("HH:mm") : QStringLiteral("—"), QColor("#d9d5cb"));
     if (m_alerts.isEmpty()) {
         bar(y + 184, m_day, QColor("#4f7d58"), QColor("#7fc08a"));
     } else {
-        text(QRect(x, y + 177, width, 18), QStringLiteral("▲  ") + m_alerts.join("  ·  "), QColor("#e8a3a3"), 8.5, QFont::DemiBold, Qt::AlignLeft);
+        text(QRect(x, y + 177, width, 18), QStringLiteral("▲  ") + m_alerts.join("  ·  "), QColor("#e8a3a3"), 8.5,
+            QFont::DemiBold, Qt::AlignLeft);
     }
 }
 
-StarRating::StarRating(QWidget *parent) : QWidget(parent)
+StarRating::StarRating(QWidget *parent)
+    : QWidget(parent)
 {
     setFixedSize(230, 50);
     setMouseTracking(true);
@@ -217,10 +274,15 @@ StarRating::StarRating(QWidget *parent) : QWidget(parent)
     m_timer = new QTimer(this);
     m_timer->setTimerType(Qt::PreciseTimer);
     m_timer->setInterval(8);
-    connect(m_timer, &QTimer::timeout, this, [this] { step(); });
+    connect(m_timer, &QTimer::timeout, this, [this] {
+        step();
+    });
 }
 
-int StarRating::starAt(double x) const { return std::clamp(int(x) / 45 + 1, 1, 5); }
+int StarRating::starAt(double x) const
+{
+    return std::clamp(int(x) / 45 + 1, 1, 5);
+}
 
 void StarRating::setValue(int v)
 {
@@ -258,7 +320,9 @@ void StarRating::step()
         m_ring = std::min(1.0, m_ring + dt / 0.45);
         moving = true;
     }
-    if (!moving) m_timer->stop();
+    if (!moving) {
+        m_timer->stop();
+    }
     update();
 }
 
@@ -284,7 +348,9 @@ void StarRating::paintEvent(QPaintEvent *)
         p.setPen(QPen(QColor("#5a5548"), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         p.setBrush(QColor("#1f1f22"));
         p.drawPath(star);
-        if (m_fill[i] < 0.01) continue;
+        if (m_fill[i] < 0.01) {
+            continue;
+        }
         p.setOpacity(m_fill[i]);
         QLinearGradient gold(c - QPointF(12, 14), c + QPointF(12, 14));
         gold.setColorAt(0, QColor("#fbe7ae"));
@@ -299,7 +365,9 @@ void StarRating::paintEvent(QPaintEvent *)
 void StarRating::mouseMoveEvent(QMouseEvent *e)
 {
     const int star = starAt(e->position().x());
-    if (star == m_hover) return;
+    if (star == m_hover) {
+        return;
+    }
     m_hover = star;
     m_frame.restart();
     m_timer->start();
@@ -321,12 +389,19 @@ void StarRating::leaveEvent(QEvent *)
     m_timer->start();
 }
 
-DayTimeline::DayTimeline(QWidget *parent) : QWidget(parent) { setMinimumHeight(64); }
+DayTimeline::DayTimeline(QWidget *parent)
+    : QWidget(parent)
+{
+    setMinimumHeight(64);
+}
 
 void DayTimeline::add(const QString &state, int seconds)
 {
-    if (!m_parts.isEmpty() && m_parts.last().first == state) m_parts.last().second += seconds;
-    else m_parts.append(qMakePair(state, seconds));
+    if (!m_parts.isEmpty() && m_parts.last().first == state) {
+        m_parts.last().second += seconds;
+    } else {
+        m_parts.append(qMakePair(state, seconds));
+    }
     update();
 }
 
@@ -341,7 +416,9 @@ void DayTimeline::paintEvent(QPaintEvent *)
     p.setClipPath(clip);
     p.fillRect(track, QColor("#3b3b40"));
     qint64 total = 0;
-    for (const auto &part : m_parts) total += part.second;
+    for (const auto &part : m_parts) {
+        total += part.second;
+    }
     qreal x = 0;
     for (const auto &part : m_parts) {
         const qreal w = total ? track.width() * part.second / total : 0;
@@ -353,7 +430,8 @@ void DayTimeline::paintEvent(QPaintEvent *)
     QFont f = font();
     f.setPointSizeF(8.5);
     p.setFont(f);
-    for (const QString &s : {QStringLiteral("Actif"), QStringLiteral("En pause"), QStringLiteral("Inactif"), QStringLiteral("PC hors ligne")}) {
+    for (const QString &s : {QStringLiteral("Actif"), QStringLiteral("En pause"), QStringLiteral("Inactif"),
+             QStringLiteral("PC hors ligne")}) {
         p.setPen(Qt::NoPen);
         p.setBrush(statusColor(s));
         p.drawEllipse(QPointF(lx + 4, 46), 4, 4);
@@ -363,13 +441,17 @@ void DayTimeline::paintEvent(QPaintEvent *)
     }
 }
 
-ProgressRing::ProgressRing(int size, QWidget *parent) : QWidget(parent)
+ProgressRing::ProgressRing(int size, QWidget *parent)
+    : QWidget(parent)
 {
     setMinimumSize(size * 7 / 10, size * 7 / 10);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_animation.setDuration(Motion::Slow);
     m_animation.setEasingCurve(QEasingCurve::OutCubic);
-    QObject::connect(&m_animation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) { m_value = v.toReal(); update(); });
+    QObject::connect(&m_animation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
+        m_value = v.toReal();
+        update();
+    });
 }
 
 void ProgressRing::setValue(qreal ratio, const QString &text, const QString &caption)
@@ -411,7 +493,9 @@ void ProgressRing::paintEvent(QPaintEvent *)
     p.setFont(f);
     p.setPen(QColor("#ffffff"));
     p.drawText(rect().translated(0, side < 118 ? 0 : int(-10 * k)), Qt::AlignCenter, m_text);
-    if (side < 118) return;
+    if (side < 118) {
+        return;
+    }
     f.setPointSizeF(std::clamp(8.5 * k, 8.0, 12.0));
     f.setBold(false);
     p.setFont(f);

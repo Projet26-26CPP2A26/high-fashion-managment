@@ -9,8 +9,12 @@
 class CompanySimulator : public QObject {
     Q_OBJECT
 public:
-    CompanySimulator(ActivityStore &store, const QVector<Employee> &employees, QObject *parent, const QString &lockPath = QString(), bool demo = true, const QHash<int, bool> &badges = {});
-    void setEmployees(const QVector<Employee> &employees) { m_employees = employees; }
+    CompanySimulator(ActivityStore &store, const QVector<Employee> &employees, QObject *parent,
+        const QString &lockPath = QString(), bool demo = true, const QHash<int, bool> &badges = {});
+    void setEmployees(const QVector<Employee> &employees)
+    {
+        m_employees = employees;
+    }
     void step(const QDateTime &now);
     void badge(int employeeId, bool arrival);
 
@@ -33,7 +37,8 @@ private:
     void fillTasks(const Employee &employee);
     void populate(const QDateTime &now);
     void adopt(const QDateTime &now);
-    void arrive(const Employee &employee, const QDateTime &at, const QDateTime &now, const QString &via, bool entry = true);
+    void arrive(
+        const Employee &employee, const QDateTime &at, const QDateTime &now, const QString &via, bool entry = true);
     void change(const Employee &employee, const QString &state, const QDateTime &now);
     void leave(const Employee &employee, const QDateTime &now, const QString &reason, bool entry = true);
     void traffic(const QDateTime &now);

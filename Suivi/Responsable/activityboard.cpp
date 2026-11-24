@@ -22,12 +22,18 @@
 
 namespace {
 enum Column { Name, Position, Status, Task, In, Out, Work, Over, Pause, Idle, Off, Percent, Count };
-const QStringList kHeaders = {QStringLiteral("Employé"), QStringLiteral("Poste"), QStringLiteral("Statut"), QStringLiteral("Tâche en cours"), QStringLiteral("Arrivée"), QStringLiteral("Départ"),
-    QStringLiteral("Travail"), QStringLiteral("Heures sup."), QStringLiteral("Pause"), QStringLiteral("Inactif"), QStringLiteral("PC veille"), QStringLiteral("Activité")};
-const QString kActive = QStringLiteral("Actif"), kPause = QStringLiteral("En pause"), kIdle = QStringLiteral("Inactif"), kOffline = QStringLiteral("PC hors ligne"),
-              kDone = QStringLiteral("Terminé"), kAbsent = QStringLiteral("Non connecté"), kWatch = QStringLiteral("À surveiller");
+const QStringList kHeaders = {QStringLiteral("Employé"), QStringLiteral("Poste"), QStringLiteral("Statut"),
+    QStringLiteral("Tâche en cours"), QStringLiteral("Arrivée"), QStringLiteral("Départ"), QStringLiteral("Travail"),
+    QStringLiteral("Heures sup."), QStringLiteral("Pause"), QStringLiteral("Inactif"), QStringLiteral("PC veille"),
+    QStringLiteral("Activité")};
+const QString kActive = QStringLiteral("Actif"), kPause = QStringLiteral("En pause"), kIdle = QStringLiteral("Inactif"),
+              kOffline = QStringLiteral("PC hors ligne"), kDone = QStringLiteral("Terminé"),
+              kAbsent = QStringLiteral("Non connecté"), kWatch = QStringLiteral("À surveiller");
 
-QString timeText(const QDateTime &t) { return t.isValid() ? t.toString("HH:mm") : QStringLiteral("—"); }
+QString timeText(const QDateTime &t)
+{
+    return t.isValid() ? t.toString("HH:mm") : QStringLiteral("—");
+}
 
 QLabel *kpi(QHBoxLayout *row, const QString &title, const QString &color)
 {
@@ -47,7 +53,9 @@ QLabel *kpi(QHBoxLayout *row, const QString &title, const QString &color)
 }
 }
 
-ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(parent), m_store(store)
+ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent)
+    : QWidget(parent)
+    , m_store(store)
 {
     auto *root = new QVBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
@@ -96,7 +104,9 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(pa
     m_table->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_table->horizontalHeader()->setStretchLastSection(true);
     const int widths[Count] = {134, 110, 138, 150, 66, 66, 86, 96, 86, 86, 86, 100};
-    for (int i = 0; i < Count; ++i) m_table->setColumnWidth(i, widths[i]);
+    for (int i = 0; i < Count; ++i) {
+        m_table->setColumnWidth(i, widths[i]);
+    }
     m_table->horizontalHeader()->setSortIndicator(Name, Qt::AscendingOrder);
 
     auto *holder = new QWidget;
@@ -118,18 +128,29 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(pa
     m_views->addWidget(m_table);
     root->addWidget(m_views, 1);
 
-    connect(m_filter, &QComboBox::currentIndexChanged, this, [this] { refresh(); });
-    connect(m_day, &QDateEdit::dateChanged, this, [this] { refresh(); });
-    connect(m_table, &QTableWidget::cellClicked, this, [this](int row, int) { openEmployee(m_table->item(row, Name)->data(Qt::UserRole).toString()); });
+    connect(m_filter, &QComboBox::currentIndexChanged, this, [this] {
+        refresh();
+    });
+    connect(m_day, &QDateEdit::dateChanged, this, [this] {
+        refresh();
+    });
+    connect(m_table, &QTableWidget::cellClicked, this, [this](int row, int) {
+        openEmployee(m_table->item(row, Name)->data(Qt::UserRole).toString());
+    });
     connect(m_viewButton, &QPushButton::clicked, this, [this] {
         Fx::switchPage(m_views, 1 - m_views->currentIndex());
         m_viewButton->setText(m_views->currentIndex() ? QStringLiteral("Vue cartes") : QStringLiteral("Vue tableau"));
     });
-    connect(m_alert, &QPushButton::clicked, this, [this] { m_filter->setCurrentIndex(m_filter->currentIndex() == 1 ? 0 : 1); });
+    connect(m_alert, &QPushButton::clicked, this, [this] {
+        m_filter->setCurrentIndex(m_filter->currentIndex() == 1 ? 0 : 1);
+    });
     connect(csv, &QPushButton::clicked, this, [this] {
-        const QString path = QFileDialog::getSaveFileName(this, QStringLiteral("Exporter"), "activite_" + m_day->date().toString("yyyy-MM-dd") + ".csv", "Excel CSV (*.csv)");
-        if (!path.isEmpty() && !exportCsv(path))
-            DialogSkin::warn(this, "AUREA", QStringLiteral("Impossible d'écrire ce fichier (est-il ouvert dans Excel ?)."));
+        const QString path = QFileDialog::getSaveFileName(this, QStringLiteral("Exporter"),
+            "activite_" + m_day->date().toString("yyyy-MM-dd") + ".csv", "Excel CSV (*.csv)");
+        if (!path.isEmpty() && !exportCsv(path)) {
+            DialogSkin::warn(
+                this, "AUREA", QStringLiteral("Impossible d'écrire ce fichier (est-il ouvert dans Excel ?)."));
+        }
     });
     auto *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this] {
@@ -137,7 +158,9 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(pa
         if (m_day->maximumDate() != today) {
             const bool followed = m_day->date() == m_day->maximumDate();
             m_day->setMaximumDate(today);
-            if (followed) m_day->setDate(today);
+            if (followed) {
+                m_day->setDate(today);
+            }
         }
         refresh();
         notify();
@@ -145,9 +168,15 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(pa
     timer->start(1000);
     auto *pulse = new QTimer(this);
     connect(pulse, &QTimer::timeout, this, [this] {
-        if (!isVisible() || m_views->currentIndex() != 0) return;
+        if (!isVisible() || m_views->currentIndex() != 0) {
+            return;
+        }
         m_phase = m_phase > 1 ? 0 : m_phase + 0.012;
-        for (EmployeeTile *t : std::as_const(m_tiles)) if (t->isVisible()) t->setPulse(std::min(1.0, m_phase));
+        for (EmployeeTile *t : std::as_const(m_tiles)) {
+            if (t->isVisible()) {
+                t->setPulse(std::min(1.0, m_phase));
+            }
+        }
     });
     pulse->start(33);
     refresh();
@@ -155,7 +184,11 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent) : QWidget(pa
 
 QString ActivityBoard::reference(int id) const
 {
-    for (auto it = m_people.begin(); it != m_people.end(); ++it) if (it->id() == id) return it.key();
+    for (auto it = m_people.begin(); it != m_people.end(); ++it) {
+        if (it->id() == id) {
+            return it.key();
+        }
+    }
     return QString();
 }
 
@@ -166,14 +199,20 @@ QString ActivityBoard::displayName(const QString &reference) const
 
 WorkSession ActivityBoard::session(const QString &reference) const
 {
-    for (const WorkSession &s : m_rows) if (s.name == reference) return s;
+    for (const WorkSession &s : m_rows) {
+        if (s.name == reference) {
+            return s;
+        }
+    }
     return WorkSession();
 }
 
 void ActivityBoard::setEmployees(const QVector<Employee> &employees)
 {
     m_people.clear();
-    for (const Employee &e : employees) m_people.insert(e.reference(), e);
+    for (const Employee &e : employees) {
+        m_people.insert(e.reference(), e);
+    }
     refresh();
 }
 
@@ -191,27 +230,41 @@ QString ActivityBoard::assignTask(const QString &reference, const QString &title
 
 void ActivityBoard::openEmployee(const QString &reference)
 {
-    if (!m_people.contains(reference)) return;
-    if (!m_popup) m_popup = new EmployeePopup(*this, m_store, window());
+    if (!m_people.contains(reference)) {
+        return;
+    }
+    if (!m_popup) {
+        m_popup = new EmployeePopup(*this, m_store, window());
+    }
     m_popup->openFor(reference);
 }
 
 int ActivityBoard::connected()
 {
     int n = 0;
-    for (const WorkSession &s : sessionsToday()) n += s.status() == kActive || s.status() == kPause || s.status() == kIdle;
+    for (const WorkSession &s : sessionsToday()) {
+        n += s.status() == kActive || s.status() == kPause || s.status() == kIdle;
+    }
     return n;
 }
 
-QVector<WorkSession> ActivityBoard::sessionsToday() { return collect(QDate::currentDate()); }
+QVector<WorkSession> ActivityBoard::sessionsToday()
+{
+    return collect(QDate::currentDate());
+}
 
 QVector<WorkSession> ActivityBoard::collect(const QDate &day)
 {
     QHash<QString, WorkSession> byPerson;
     for (const WorkSession &s : m_store.sessions(day)) {
-        if (!m_people.contains(s.name)) continue;
+        if (!m_people.contains(s.name)) {
+            continue;
+        }
         auto found = byPerson.find(s.name);
-        if (found == byPerson.end()) { byPerson.insert(s.name, s); continue; }
+        if (found == byPerson.end()) {
+            byPerson.insert(s.name, s);
+            continue;
+        }
         found->work += s.work;
         found->pause += s.pause;
         found->idle += s.idle;
@@ -223,21 +276,31 @@ QVector<WorkSession> ActivityBoard::collect(const QDate &day)
         WorkSession s = byPerson.value(it.key());
         s.name = it.key();
         s.position = it->position();
-        if (!s.login.isValid()) s.state = kAbsent;
+        if (!s.login.isValid()) {
+            s.state = kAbsent;
+        }
         if (day == QDate::currentDate()) {
             const QVector<WorkTask> tasks = m_store.tasks(s.name);
             s.tasksTotal = int(tasks.size());
             for (const WorkTask &t : tasks) {
-                if (t.state == WorkTask::Current) { s.taskSpent = t.spent; s.taskPlanned = t.planned; s.task = t.title; }
-                else if (t.state == WorkTask::Done) ++s.tasksDone;
-                else if (s.nextTask.isEmpty() && t.state != WorkTask::Submitted) s.nextTask = t.title;
+                if (t.state == WorkTask::Current) {
+                    s.taskSpent = t.spent;
+                    s.taskPlanned = t.planned;
+                    s.task = t.title;
+                } else if (t.state == WorkTask::Done) {
+                    ++s.tasksDone;
+                } else if (s.nextTask.isEmpty() && t.state != WorkTask::Submitted) {
+                    s.nextTask = t.title;
+                }
             }
         }
         out.append(s);
     }
     std::sort(out.begin(), out.end(), [this](const WorkSession &a, const WorkSession &b) {
         const bool x = a.login.isValid() && !a.ended(), y = b.login.isValid() && !b.ended();
-        if (x != y) return x;
+        if (x != y) {
+            return x;
+        }
         const int c = QString::localeAwareCompare(displayName(a.name), displayName(b.name));
         return c ? c < 0 : a.name < b.name;
     });
@@ -260,8 +323,14 @@ void ActivityBoard::refresh()
         paused += status == kPause;
         watch += alert;
         const QString wanted = m_filter->currentText();
-        if (m_filter->currentIndex() > 0 && (wanted == kWatch ? !alert : status != wanted)) continue;
-        if (!m_search.isEmpty() && !(displayName(s.name) + ' ' + s.name + ' ' + s.position + ' ' + s.task).contains(m_search, Qt::CaseInsensitive)) continue;
+        if (m_filter->currentIndex() > 0 && (wanted == kWatch ? !alert : status != wanted)) {
+            continue;
+        }
+        if (!m_search.isEmpty()
+            && !(displayName(s.name) + ' ' + s.name + ' ' + s.position + ' ' + s.task)
+                .contains(m_search, Qt::CaseInsensitive)) {
+            continue;
+        }
         rows.append(s);
     }
     Fx::countTo(m_online, online);
@@ -271,17 +340,22 @@ void ActivityBoard::refresh()
     m_alert->setVisible(watch > 0);
     m_alert->setText(QStringLiteral("▲  %1 à surveiller").arg(watch));
     m_status->setText(!error.isEmpty() ? QStringLiteral("Erreur : ") + error
-                      : live ? QStringLiteral("●  En direct · ") + QTime::currentTime().toString("HH:mm:ss") : QStringLiteral("Historique"));
+            : live                     ? QStringLiteral("●  En direct · ") + QTime::currentTime().toString("HH:mm:ss")
+                                       : QStringLiteral("Historique"));
 
     m_table->setSortingEnabled(false);
     m_table->setRowCount(int(rows.size()));
     for (int row = 0; row < rows.size(); ++row) {
         const WorkSession &s = rows[row];
-        const QVariantList values = {displayName(s.name), s.position, s.status(), s.task.isEmpty() ? QStringLiteral("—") : s.task, timeText(s.login), timeText(s.logout), clockText(s.work),
-                                     clockText(s.work - WorkRules::Day), clockText(s.pause), clockText(s.idle), clockText(s.off), s.activePercent()};
+        const QVariantList values = {displayName(s.name), s.position, s.status(),
+            s.task.isEmpty() ? QStringLiteral("—") : s.task, timeText(s.login), timeText(s.logout), clockText(s.work),
+            clockText(s.work - WorkRules::Day), clockText(s.pause), clockText(s.idle), clockText(s.off),
+            s.activePercent()};
         for (int col = 0; col < Count; ++col) {
             QTableWidgetItem *item = m_table->item(row, col);
-            if (!item) m_table->setItem(row, col, item = new QTableWidgetItem);
+            if (!item) {
+                m_table->setItem(row, col, item = new QTableWidgetItem);
+            }
             item->setData(Qt::DisplayRole, values[col]);
         }
         m_table->item(row, Name)->setData(Qt::UserRole, s.name);
@@ -289,7 +363,9 @@ void ActivityBoard::refresh()
     }
     m_table->setSortingEnabled(true);
     refreshTiles(rows);
-    if (m_popup) m_popup->refresh();
+    if (m_popup) {
+        m_popup->refresh();
+    }
 }
 
 void ActivityBoard::refreshTiles(const QVector<WorkSession> &rows)
@@ -302,13 +378,17 @@ void ActivityBoard::refreshTiles(const QVector<WorkSession> &rows)
         if (!tile) {
             tile = new EmployeeTile;
             tile->enter(int(order.size()) * 18);
-            tile->clicked = [this, key] { openEmployee(key); };
+            tile->clicked = [this, key] {
+                openEmployee(key);
+            };
         }
         WorkSession shown = s;
         shown.name = displayName(s.name);
         tile->setSession(shown, m_popup && m_popup->reference() == key);
     }
-    if (order == m_order) return;
+    if (order == m_order) {
+        return;
+    }
     m_order = order;
     m_columns = 0;
     layoutTiles();
@@ -317,13 +397,22 @@ void ActivityBoard::refreshTiles(const QVector<WorkSession> &rows)
 void ActivityBoard::layoutTiles()
 {
     const int columns = std::max(1, (m_views->width() - 10) / 264);
-    if (columns == m_columns) return;
-    for (int c = 0; c < std::max(columns, m_grid->columnCount()); ++c) m_grid->setColumnStretch(c, c < columns ? 1 : 0);
+    if (columns == m_columns) {
+        return;
+    }
+    for (int c = 0; c < std::max(columns, m_grid->columnCount()); ++c) {
+        m_grid->setColumnStretch(c, c < columns ? 1 : 0);
+    }
     m_columns = columns;
     for (auto it = m_tiles.begin(); it != m_tiles.end();) {
         m_grid->removeWidget(it.value());
-        if (!m_order.contains(it.key())) { it.value()->hide(); it.value()->deleteLater(); it = m_tiles.erase(it); }
-        else ++it;
+        if (!m_order.contains(it.key())) {
+            it.value()->hide();
+            it.value()->deleteLater();
+            it = m_tiles.erase(it);
+        } else {
+            ++it;
+        }
     }
     for (int i = 0; i < m_order.size(); ++i) {
         EmployeeTile *tile = m_tiles[m_order[i]];
@@ -336,16 +425,22 @@ void ActivityBoard::layoutTiles()
 void ActivityBoard::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-    QTimer::singleShot(0, this, [this] { layoutTiles(); });
+    QTimer::singleShot(0, this, [this] {
+        layoutTiles();
+    });
 }
 
 void ActivityBoard::notify()
 {
     const QVector<ActivityEvent> events = m_store.events(QDate::currentDate());
     for (const ActivityEvent &e : events) {
-        if (!m_people.contains(e.who) || !e.text.startsWith(QStringLiteral("Dépôt"))) continue;
+        if (!m_people.contains(e.who) || !e.text.startsWith(QStringLiteral("Dépôt"))) {
+            continue;
+        }
         const QString latest = e.at.toString(Qt::ISODate) + e.who + e.text;
-        if (!m_lastEvent.isEmpty() && latest != m_lastEvent && window()->isVisible()) Fx::toast(window(), displayName(e.who) + QStringLiteral(" — ") + e.text);
+        if (!m_lastEvent.isEmpty() && latest != m_lastEvent && window()->isVisible()) {
+            Fx::toast(window(), displayName(e.who) + QStringLiteral(" — ") + e.text);
+        }
         m_lastEvent = latest;
         return;
     }
@@ -355,16 +450,24 @@ void ActivityBoard::notify()
 QVector<WorkTask> ActivityBoard::reviews()
 {
     QVector<WorkTask> out;
-    for (const WorkTask &t : m_store.pendingReviews()) if (m_people.contains(t.who)) out.append(t);
+    for (const WorkTask &t : m_store.pendingReviews()) {
+        if (m_people.contains(t.who)) {
+            out.append(t);
+        }
+    }
     return out;
 }
 
 bool ActivityBoard::review(const WorkTask &task, bool accept, int rating, const QString &feedback)
 {
-    if (!m_store.review(task.id, accept, rating, feedback)) return false;
+    if (!m_store.review(task.id, accept, rating, feedback)) {
+        return false;
+    }
     WorkSession who;
     who.name = task.who;
-    m_store.log(who, (accept ? QStringLiteral("Dépôt validé (%1/5) : ").arg(rating) : QStringLiteral("Correction demandée : ")) + task.title);
+    m_store.log(who,
+        (accept ? QStringLiteral("Dépôt validé (%1/5) : ").arg(rating) : QStringLiteral("Correction demandée : "))
+            + task.title);
     refresh();
     return true;
 }
@@ -372,11 +475,15 @@ bool ActivityBoard::review(const WorkTask &task, bool accept, int rating, const 
 bool ActivityBoard::exportCsv(const QString &path) const
 {
     QSaveFile file(path);
-    if (!file.open(QIODevice::WriteOnly)) return false;
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
     const auto line = [](const QStringList &values) {
         QStringList out;
         for (QString v : values) {
-            if (!v.isEmpty() && QStringLiteral("=+-@").contains(v[0])) v.prepend('\'');
+            if (!v.isEmpty() && QStringLiteral("=+-@").contains(v[0])) {
+                v.prepend('\'');
+            }
             out << '"' + v.replace('"', "\"\"") + '"';
         }
         return (out.join(';') + "\r\n").toUtf8();
@@ -385,7 +492,9 @@ bool ActivityBoard::exportCsv(const QString &path) const
     file.write(line(kHeaders));
     for (int row = 0; row < m_table->rowCount(); ++row) {
         QStringList values;
-        for (int col = 0; col < Count; ++col) values << m_table->item(row, col)->text() + (col == Percent ? " %" : "");
+        for (int col = 0; col < Count; ++col) {
+            values << m_table->item(row, col)->text() + (col == Percent ? " %" : "");
+        }
         file.write(line(values));
     }
     return file.commit();

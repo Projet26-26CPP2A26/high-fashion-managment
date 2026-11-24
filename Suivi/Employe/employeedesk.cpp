@@ -41,7 +41,9 @@ int systemIdleSeconds()
 #ifdef Q_OS_WIN
     LASTINPUTINFO info;
     info.cbSize = sizeof(info);
-    if (GetLastInputInfo(&info)) return int((GetTickCount() - info.dwTime) / 1000);
+    if (GetLastInputInfo(&info)) {
+        return int((GetTickCount() - info.dwTime) / 1000);
+    }
 #endif
     return 0;
 }
@@ -71,26 +73,35 @@ QLabel *statCard(QHBoxLayout *row, const QString &title, QLabel **info = nullptr
     box->addWidget(value);
     auto *note = label(QString(), "muted");
     box->addWidget(note);
-    if (info) *info = note;
+    if (info) {
+        *info = note;
+    }
     row->addWidget(card(box), 1);
     return value;
 }
 
-QString minutesText(int seconds) { return QStringLiteral("%1 min").arg((std::max(0, seconds) + 59) / 60); }
+QString minutesText(int seconds)
+{
+    return QStringLiteral("%1 min").arg((std::max(0, seconds) + 59) / 60);
+}
 }
 
-EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via, QWidget *parent) : QMainWindow(parent), m_store(store), m_employee(employee)
+EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via, QWidget *parent)
+    : QMainWindow(parent)
+    , m_store(store)
+    , m_employee(employee)
 {
     setWindowTitle(QStringLiteral("AUREA — Espace employé"));
     setMinimumSize(1020, 600);
     resize(1240, 780);
     Fx::fullScreenKey(this);
     QFile theme(":/theme.qss");
-    if (theme.open(QIODevice::ReadOnly))
-        setStyleSheet(QString::fromUtf8(theme.readAll()) +
-                      "QFrame#chip{background:#242427;border:1px solid #3a3a3f;border-radius:12px;} QLabel#clock{font-size:13pt;font-weight:700;color:#f4e7bc;}"
-                      "QLabel#state{font-size:9pt;font-weight:600;} QLabel#taskName{font-size:19pt;font-weight:700;color:white;} QLabel#nextName{font-size:13pt;font-weight:600;}"
-                      "QPushButton#pause{padding:6px 14px;}");
+    if (theme.open(QIODevice::ReadOnly)) {
+        setStyleSheet(QString::fromUtf8(theme.readAll())
+            + "QFrame#chip{background:#242427;border:1px solid #3a3a3f;border-radius:12px;} QLabel#clock{font-size:13pt;font-weight:700;color:#f4e7bc;}"
+              "QLabel#state{font-size:9pt;font-weight:600;} QLabel#taskName{font-size:19pt;font-weight:700;color:white;} QLabel#nextName{font-size:13pt;font-weight:600;}"
+              "QPushButton#pause{padding:6px 14px;}");
+    }
 
     m_session.name = m_employee.reference();
     m_session.position = m_employee.position();
@@ -99,8 +110,12 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
     m_session.task = kNoTask;
     m_session.login = m_session.lastSeen = m_last = QDateTime::currentDateTime();
     m_store.closeLostSessions(m_session.name);
-    for (const WorkSession &s : m_store.sessions(m_session.login.date()))
-        if (s.name == m_session.name) { m_baseWork += s.work; m_basePause += s.pause; }
+    for (const WorkSession &s : m_store.sessions(m_session.login.date())) {
+        if (s.name == m_session.name) {
+            m_baseWork += s.work;
+            m_basePause += s.pause;
+        }
+    }
     if (!m_store.hasTaskHistory(m_session.name)) {
         for (const TaskModel &m : TaskCatalog::forSpecialty(specialty())) {
             WorkTask t;
@@ -113,7 +128,9 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
             m_store.addTask(t);
         }
     }
-    if (m_store.start(m_session)) m_store.addEntry(m_session.name, m_employee.name(), via, QStringLiteral("ARRIVEE"));
+    if (m_store.start(m_session)) {
+        m_store.addEntry(m_session.name, m_employee.name(), via, QStringLiteral("ARRIVEE"));
+    }
 
     auto *central = new QWidget;
     central->setObjectName("centralwidget");
@@ -138,7 +155,8 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
     LivingLogo::attach(logo);
     side->addWidget(word);
     side->addSpacing(20);
-    const QStringList names = {QStringLiteral("  Ma journée"), QStringLiteral("  Mes tâches"), QStringLiteral("  Mon activité")};
+    const QStringList names = {
+        QStringLiteral("  Ma journée"), QStringLiteral("  Mes tâches"), QStringLiteral("  Mon activité")};
     const Icons::Kind kinds[] = {Icons::Grid, Icons::Assign, Icons::Clock};
     for (int i = 0; i < 3; ++i) {
         auto *b = new QPushButton(names[i]);
@@ -149,8 +167,13 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
         b->setIconSize(QSize(20, 20));
         b->setMinimumHeight(44);
         b->setCursor(Qt::PointingHandCursor);
-        connect(b, &QPushButton::clicked, this, [this, i] { showPage(i); });
-        connect(new QShortcut(QKeySequence(QStringLiteral("Ctrl+%1").arg(i + 1)), this), &QShortcut::activated, this, [this, i] { showPage(i); });
+        connect(b, &QPushButton::clicked, this, [this, i] {
+            showPage(i);
+        });
+        connect(new QShortcut(QKeySequence(QStringLiteral("Ctrl+%1").arg(i + 1)), this), &QShortcut::activated, this,
+            [this, i] {
+                showPage(i);
+            });
         side->addWidget(b);
         m_nav.append(b);
     }
@@ -210,8 +233,10 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
     m_pages->addWidget(createTasksPage());
     m_pages->addWidget(createLogPage());
     main->addWidget(m_pages, 1);
-    m_notice = label(QStringLiteral("Transparence : le responsable RH voit vos heures, pauses, inactivité, tâches et l'état du PC. "
-                                    "Aucune capture d'écran, aucune frappe clavier n'est enregistrée."), "muted");
+    m_notice = label(
+        QStringLiteral("Transparence : le responsable RH voit vos heures, pauses, inactivité, tâches et l'état du PC. "
+                       "Aucune capture d'écran, aucune frappe clavier n'est enregistrée."),
+        "muted");
     m_notice->setWordWrap(true);
     m_notice->setToolTip(QStringLiteral("F11 : plein écran"));
     main->addWidget(m_notice);
@@ -219,20 +244,37 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const
     setCentralWidget(central);
 
     connect(m_pauseButton, &QPushButton::clicked, this, &EmployeeDesk::togglePause);
-    connect(logout, &QPushButton::clicked, this, [this] { m_logout = true; close(); });
-    connect(qApp, &QGuiApplication::commitDataRequest, this, [this](QSessionManager &) { finish(QStringLiteral("Arrêt ou fermeture de session Windows")); }, Qt::DirectConnection);
+    connect(logout, &QPushButton::clicked, this, [this] {
+        m_logout = true;
+        close();
+    });
+    connect(
+        qApp, &QGuiApplication::commitDataRequest, this,
+        [this](QSessionManager &) {
+            finish(QStringLiteral("Arrêt ou fermeture de session Windows"));
+        },
+        Qt::DirectConnection);
     auto *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [this] { tick(QDateTime::currentDateTime(), systemIdleSeconds()); });
+    connect(timer, &QTimer::timeout, this, [this] {
+        tick(QDateTime::currentDateTime(), systemIdleSeconds());
+    });
     timer->start(1000);
     auto *sync = new QTimer(this);
-    connect(sync, &QTimer::timeout, this, [this] { if (!m_finished) loadTasks(); });
+    connect(sync, &QTimer::timeout, this, [this] {
+        if (!m_finished) {
+            loadTasks();
+        }
+    });
     sync->start(3000);
 
     TablePolish::apply(this);
     Fx::navIndicator(sidebar, m_nav);
     addLog(QStringLiteral("Connexion — chronomètre démarré"));
     loadTasks();
-    if (m_current.id == 0 && !m_tasks.isEmpty() && (m_tasks.first().state == WorkTask::Todo || m_tasks.first().state == WorkTask::Rework)) startTask(m_tasks.first().id);
+    if (m_current.id == 0 && !m_tasks.isEmpty()
+        && (m_tasks.first().state == WorkTask::Todo || m_tasks.first().state == WorkTask::Rework)) {
+        startTask(m_tasks.first().id);
+    }
     showPage(0);
     refresh();
 }
@@ -317,8 +359,12 @@ QWidget *EmployeeDesk::createDayPage()
 
     connect(m_finishButton, &QPushButton::clicked, this, &EmployeeDesk::openSubmit);
     connect(m_nextButton, &QPushButton::clicked, this, [this] {
-        for (const WorkTask &t : std::as_const(m_tasks))
-            if (t.state == WorkTask::Todo || t.state == WorkTask::Rework) { startTask(t.id); return; }
+        for (const WorkTask &t : std::as_const(m_tasks)) {
+            if (t.state == WorkTask::Todo || t.state == WorkTask::Rework) {
+                startTask(t.id);
+                return;
+            }
+        }
         addLog(QStringLiteral("Demande de nouvelle tâche"));
         m_store.log(m_session, QStringLiteral("Demande une nouvelle tâche"));
         Fx::toast(this, QStringLiteral("Demande envoyée au responsable RH"));
@@ -337,7 +383,8 @@ QWidget *EmployeeDesk::createTasksPage()
     auto *row = new QHBoxLayout(page);
     row->setContentsMargins(0, 0, 0, 0);
     row->setSpacing(12);
-    const QStringList names = {QStringLiteral("À faire"), QStringLiteral("En cours"), QStringLiteral("En revue"), QStringLiteral("Validées")};
+    const QStringList names = {
+        QStringLiteral("À faire"), QStringLiteral("En cours"), QStringLiteral("En revue"), QStringLiteral("Validées")};
     const QStringList colors = {"#b9b4a8", "#e2cf9f", "#f4d27a", "#7fc08a"};
     for (int i = 0; i < 4; ++i) {
         auto *column = new QVBoxLayout;
@@ -402,10 +449,13 @@ QWidget *EmployeeDesk::createLogPage()
         b->setCheckable(true);
         b->setChecked(i == 0);
         b->setCursor(Qt::PointingHandCursor);
-        b->setStyleSheet("QPushButton{padding:5px 12px;} QPushButton:checked{background:#3a3427;border:1px solid #c9b27c;color:#f1e1b4;}");
+        b->setStyleSheet(
+            "QPushButton{padding:5px 12px;} QPushButton:checked{background:#3a3427;border:1px solid #c9b27c;color:#f1e1b4;}");
         group->addButton(b);
         head->addWidget(b);
-        connect(b, &QPushButton::clicked, this, [this, i] { m_log->setFilter(i - 1); });
+        connect(b, &QPushButton::clicked, this, [this, i] {
+            m_log->setFilter(i - 1);
+        });
     }
     journal->addLayout(head);
     auto *scroll = new QScrollArea;
@@ -421,9 +471,11 @@ QWidget *EmployeeDesk::createLogPage()
 
 void EmployeeDesk::showPage(int index)
 {
-    const QStringList titles = {QStringLiteral("Bonjour, ") + m_employee.name(), QStringLiteral("Mes tâches"), QStringLiteral("Mon activité")};
-    const QStringList subtitles = {m_employee.reference() + QStringLiteral(" · ") + m_employee.position(), specialty() + QStringLiteral(" · de « à faire » à « validée »"),
-                                          QStringLiteral("Tout ce qui a été enregistré pendant cette session.")};
+    const QStringList titles = {
+        QStringLiteral("Bonjour, ") + m_employee.name(), QStringLiteral("Mes tâches"), QStringLiteral("Mon activité")};
+    const QStringList subtitles = {m_employee.reference() + QStringLiteral(" · ") + m_employee.position(),
+        specialty() + QStringLiteral(" · de « à faire » à « validée »"),
+        QStringLiteral("Tout ce qui a été enregistré pendant cette session.")};
     m_title->setText(titles[index]);
     m_subtitle->setText(subtitles[index]);
     m_nav[index]->setChecked(true);
@@ -434,57 +486,87 @@ void EmployeeDesk::togglePause()
 {
     tick(QDateTime::currentDateTime(), 0);
     m_paused = !m_paused;
-    setState(m_paused ? kPause : kWork, m_paused ? QStringLiteral("Début de pause") : QStringLiteral("Reprise du travail"));
+    setState(
+        m_paused ? kPause : kWork, m_paused ? QStringLiteral("Début de pause") : QStringLiteral("Reprise du travail"));
     Fx::toast(this, m_paused ? QStringLiteral("Bonne pause !") : QStringLiteral("Chronomètre relancé"));
 }
 
 void EmployeeDesk::loadTasks()
 {
-    if (m_current.id) m_store.saveTaskTime(m_current.id, m_current.spent);
+    if (m_current.id) {
+        m_store.saveTaskTime(m_current.id, m_current.spent);
+    }
     const QVector<WorkTask> fresh = m_store.tasks(m_session.name);
-    if (!m_store.error().isEmpty()) { m_notice->setText(QStringLiteral("Lecture impossible : ") + m_store.error()); return; }
+    if (!m_store.error().isEmpty()) {
+        m_notice->setText(QStringLiteral("Lecture impossible : ") + m_store.error());
+        return;
+    }
     int maxId = 0;
     QString added;
     for (const WorkTask &t : fresh) {
         maxId = std::max(maxId, t.id);
-        if (m_maxTask >= 0 && t.id > m_maxTask) added = t.title;
+        if (m_maxTask >= 0 && t.id > m_maxTask) {
+            added = t.title;
+        }
     }
     for (const WorkTask &t : fresh) {
         for (const WorkTask &old : std::as_const(m_tasks)) {
-            if (old.id != t.id || old.state != WorkTask::Submitted || t.state == WorkTask::Submitted) continue;
+            if (old.id != t.id || old.state != WorkTask::Submitted || t.state == WorkTask::Submitted) {
+                continue;
+            }
             const bool ok = t.state == WorkTask::Done;
-            addLog((ok ? QStringLiteral("Validée %1/5 : ").arg(t.rating) : QStringLiteral("À corriger : ")) + t.title + (t.feedback.isEmpty() ? QString() : QStringLiteral(" — ") + t.feedback));
-            Fx::toast(this, ok ? QStringLiteral("Dépôt validé  %1/5 ★  %2").arg(t.rating).arg(t.title) : QStringLiteral("Correction demandée : ") + t.title);
+            addLog((ok ? QStringLiteral("Validée %1/5 : ").arg(t.rating) : QStringLiteral("À corriger : ")) + t.title
+                + (t.feedback.isEmpty() ? QString() : QStringLiteral(" — ") + t.feedback));
+            Fx::toast(this,
+                ok ? QStringLiteral("Dépôt validé  %1/5 ★  %2").arg(t.rating).arg(t.title)
+                   : QStringLiteral("Correction demandée : ") + t.title);
         }
     }
     bool changed = m_maxTask < 0 || fresh.size() != m_tasks.size();
-    for (int i = 0; !changed && i < fresh.size(); ++i) changed = fresh[i].id != m_tasks[i].id || fresh[i].state != m_tasks[i].state;
+    for (int i = 0; !changed && i < fresh.size(); ++i) {
+        changed = fresh[i].id != m_tasks[i].id || fresh[i].state != m_tasks[i].state;
+    }
     m_maxTask = std::max(m_maxTask, maxId);
     m_tasks = fresh;
     m_current = WorkTask();
-    for (const WorkTask &t : fresh) if (t.state == WorkTask::Current) m_current = t;
+    for (const WorkTask &t : fresh) {
+        if (t.state == WorkTask::Current) {
+            m_current = t;
+        }
+    }
     m_session.task = m_current.id ? m_current.title : kNoTask;
     if (!added.isEmpty()) {
         addLog(QStringLiteral("Nouvelle tâche reçue : ") + added);
         Fx::toast(this, QStringLiteral("Nouvelle tâche : ") + added);
     }
-    if (changed) showTasks();
+    if (changed) {
+        showTasks();
+    }
     refresh();
 }
 
 void EmployeeDesk::startTask(int id)
 {
-    if (m_current.id) m_store.saveTaskTime(m_current.id, m_current.spent);
-    if (!m_store.setTaskState(m_session.name, id, WorkTask::Current)) { m_notice->setText(m_store.error()); return; }
+    if (m_current.id) {
+        m_store.saveTaskTime(m_current.id, m_current.spent);
+    }
+    if (!m_store.setTaskState(m_session.name, id, WorkTask::Current)) {
+        m_notice->setText(m_store.error());
+        return;
+    }
     loadTasks();
     setState(m_session.state, QStringLiteral("Tâche démarrée : ") + m_current.title);
 }
 
 void EmployeeDesk::setStep(int index, bool done)
 {
-    if (!m_current.id || index >= m_current.steps.size()) return;
+    if (!m_current.id || index >= m_current.steps.size()) {
+        return;
+    }
     const int mask = done ? m_current.stepsDone | (1 << index) : m_current.stepsDone & ~(1 << index);
-    if (mask == m_current.stepsDone) return;
+    if (mask == m_current.stepsDone) {
+        return;
+    }
     m_current.stepsDone = mask;
     m_store.setSteps(m_current.id, mask);
     if (done) {
@@ -498,50 +580,75 @@ void EmployeeDesk::showSteps()
 {
     m_stepsFor = m_current.id;
     while (QLayoutItem *item = m_steps->takeAt(0)) {
-        if (item->widget()) { item->widget()->hide(); item->widget()->deleteLater(); }
+        if (item->widget()) {
+            item->widget()->hide();
+            item->widget()->deleteLater();
+        }
         delete item;
     }
     for (int i = 0; i < m_current.steps.size(); ++i) {
         auto *box = new QCheckBox(m_current.steps[i]);
         box->setChecked(m_current.stepsDone & (1 << i));
-        connect(box, &QCheckBox::toggled, this, [this, i](bool on) { setStep(i, on); });
+        connect(box, &QCheckBox::toggled, this, [this, i](bool on) {
+            setStep(i, on);
+        });
         m_steps->addWidget(box);
     }
 }
 
 void EmployeeDesk::openSubmit()
 {
-    if (!m_current.id || !m_current.ready() || m_paused) return;
+    if (!m_current.id || !m_current.ready() || m_paused) {
+        return;
+    }
     const int id = m_current.id;
     SubmitDialog dialog(m_current, this);
-    if (DialogSkin::run(dialog) == QDialog::Accepted && m_current.id == id) submitTask(dialog.note(), dialog.file());
+    if (DialogSkin::run(dialog) == QDialog::Accepted && m_current.id == id) {
+        submitTask(dialog.note(), dialog.file());
+    }
 }
 
 bool EmployeeDesk::submitTask(const QString &note, const QString &file)
 {
-    if (!m_current.id || !m_current.ready()) return false;
+    if (!m_current.id || !m_current.ready()) {
+        return false;
+    }
     const WorkTask done = m_current;
     m_store.saveTaskTime(done.id, done.spent);
-    if (!m_store.submit(done.id, note, file)) { m_notice->setText(QStringLiteral("Dépôt impossible. ") + m_store.error()); return false; }
+    if (!m_store.submit(done.id, note, file)) {
+        m_notice->setText(QStringLiteral("Dépôt impossible. ") + m_store.error());
+        return false;
+    }
     m_current = WorkTask();
     loadTasks();
     setState(m_session.state, QStringLiteral("Dépôt pour revue : ") + done.title + " (" + clockText(done.spent) + ")");
     Fx::toast(this, QStringLiteral("Déposée : en attente de validation"));
-    for (const WorkTask &t : std::as_const(m_tasks))
-        if (t.state == WorkTask::Todo || t.state == WorkTask::Rework) { startTask(t.id); break; }
+    for (const WorkTask &t : std::as_const(m_tasks)) {
+        if (t.state == WorkTask::Todo || t.state == WorkTask::Rework) {
+            startTask(t.id);
+            break;
+        }
+    }
     return true;
 }
 
 void EmployeeDesk::showTasks()
 {
     int counts[4] = {0, 0, 0, 0};
-    for (QVBoxLayout *column : m_columns)
+    for (QVBoxLayout *column : m_columns) {
         while (QLayoutItem *item = column->takeAt(0)) {
-            if (item->widget()) { item->widget()->hide(); item->widget()->deleteLater(); }
+            if (item->widget()) {
+                item->widget()->hide();
+                item->widget()->deleteLater();
+            }
             delete item;
         }
+    }
     for (const WorkTask &t : std::as_const(m_tasks)) {
-        const int c = t.state == WorkTask::Current ? 1 : t.state == WorkTask::Submitted ? 2 : t.state == WorkTask::Done ? 3 : 0;
+        const int c = t.state == WorkTask::Current ? 1
+            : t.state == WorkTask::Submitted       ? 2
+            : t.state == WorkTask::Done            ? 3
+                                                   : 0;
         ++counts[c];
         auto *box = new QVBoxLayout;
         box->setSpacing(6);
@@ -554,7 +661,9 @@ void EmployeeDesk::showTasks()
         if (t.state == WorkTask::Done || t.state == WorkTask::Submitted) {
             box->addWidget(label(QStringLiteral("Temps : ") + clockText(t.spent), "muted"));
         } else {
-            box->addWidget(label(QStringLiteral("Prévu ") + minutesText(t.planned) + QStringLiteral(" · %1 étapes").arg(t.steps.size()), "muted"));
+            box->addWidget(label(
+                QStringLiteral("Prévu ") + minutesText(t.planned) + QStringLiteral(" · %1 étapes").arg(t.steps.size()),
+                "muted"));
             auto *progress = new QProgressBar;
             progress->setTextVisible(false);
             progress->setRange(0, std::max(1, t.planned));
@@ -574,34 +683,48 @@ void EmployeeDesk::showTasks()
             box->addWidget(feedback);
         }
         if (c == 0) {
-            auto *start = new QPushButton(t.state == WorkTask::Rework ? QStringLiteral("Corriger") : QStringLiteral("Démarrer"));
+            auto *start =
+                new QPushButton(t.state == WorkTask::Rework ? QStringLiteral("Corriger") : QStringLiteral("Démarrer"));
             start->setProperty("primary", t.state == WorkTask::Rework);
             const int id = t.id;
 
-            connect(start, &QPushButton::clicked, this, [this, id] { startTask(id); }, Qt::QueuedConnection);
+            connect(
+                start, &QPushButton::clicked, this,
+                [this, id] {
+                    startTask(id);
+                },
+                Qt::QueuedConnection);
             box->addWidget(start);
         }
         m_columns[c]->addWidget(card(box));
     }
-    static const QStringList hints = {QStringLiteral("Plus rien à démarrer"), QStringLiteral("Démarrez une tâche"), QStringLiteral("Aucun dépôt en attente"), QStringLiteral("Vos tâches validées aujourd'hui")};
+    static const QStringList hints = {QStringLiteral("Plus rien à démarrer"), QStringLiteral("Démarrez une tâche"),
+        QStringLiteral("Aucun dépôt en attente"), QStringLiteral("Vos tâches validées aujourd'hui")};
     for (int i = 0; i < 4; ++i) {
         m_counts[i]->setText(QString::number(counts[i]));
-        if (counts[i]) continue;
+        if (counts[i]) {
+            continue;
+        }
         auto *hint = label(hints[i], "muted");
         hint->setAlignment(Qt::AlignCenter);
         hint->setMinimumHeight(120);
         m_columns[i]->addWidget(hint);
     }
     const ReviewStats stats = m_store.reviewStats(m_session.name);
-    m_quality->setText(stats.rating > 0 ? QStringLiteral("Qualité %1/5 ★").arg(stats.rating, 0, 'f', 1) : QStringLiteral("Pas encore notée"));
+    m_quality->setText(stats.rating > 0 ? QStringLiteral("Qualité %1/5 ★").arg(stats.rating, 0, 'f', 1)
+                                        : QStringLiteral("Pas encore notée"));
 }
 
 void EmployeeDesk::tick(const QDateTime &now, int idleSeconds)
 {
-    if (m_finished) return;
+    if (m_finished) {
+        return;
+    }
     const int delta = int(m_last.secsTo(now));
     if (delta < 1) {
-        if (delta < 0) m_last = now;
+        if (delta < 0) {
+            m_last = now;
+        }
         return;
     }
     m_session.lastSeen = now;
@@ -623,16 +746,25 @@ void EmployeeDesk::tick(const QDateTime &now, int idleSeconds)
         }
     } else {
         const bool idle = idleSeconds >= kIdleLimit;
-        if (idle && m_session.state == kWork) setState(kIdle, QStringLiteral("Inactif (aucune activité clavier/souris)"));
-        else if (!idle && m_session.state == kIdle) setState(kWork, QStringLiteral("Retour d'activité"));
+        if (idle && m_session.state == kWork) {
+            setState(kIdle, QStringLiteral("Inactif (aucune activité clavier/souris)"));
+        } else if (!idle && m_session.state == kIdle) {
+            setState(kWork, QStringLiteral("Retour d'activité"));
+        }
         (idle ? m_session.idle : m_session.work) += delta;
         track(idle ? kIdle : kWork, delta);
-        if (!idle && m_current.id) m_current.spent += delta;
+        if (!idle && m_current.id) {
+            m_current.spent += delta;
+        }
     }
     if ((m_sinceSave += delta) >= 3) {
         m_sinceSave = 0;
-        if (m_current.id) m_store.saveTaskTime(m_current.id, m_current.spent);
-        if (!m_store.save(m_session)) m_notice->setText(QStringLiteral("Enregistrement impossible : ") + m_store.error());
+        if (m_current.id) {
+            m_store.saveTaskTime(m_current.id, m_current.spent);
+        }
+        if (!m_store.save(m_session)) {
+            m_notice->setText(QStringLiteral("Enregistrement impossible : ") + m_store.error());
+        }
     }
     refresh();
 }
@@ -649,57 +781,79 @@ void EmployeeDesk::setState(const QString &state, const QString &event)
 void EmployeeDesk::addLog(const QString &text)
 {
     m_log->add(QDateTime::currentDateTime(), text);
-    static const QStringList names = {QStringLiteral("Tout"), QStringLiteral("Présence"), QStringLiteral("Pauses"), QStringLiteral("Tâches"), QStringLiteral("Inactivité")};
-    for (int i = 0; i < 5; ++i) m_filters[i]->setText(names[i] + QStringLiteral(" · %1").arg(m_log->count(i - 1)));
+    static const QStringList names = {QStringLiteral("Tout"), QStringLiteral("Présence"), QStringLiteral("Pauses"),
+        QStringLiteral("Tâches"), QStringLiteral("Inactivité")};
+    for (int i = 0; i < 5; ++i) {
+        m_filters[i]->setText(names[i] + QStringLiteral(" · %1").arg(m_log->count(i - 1)));
+    }
 }
 
 void EmployeeDesk::refresh()
 {
     const int work = m_baseWork + m_session.work, pause = m_basePause + m_session.pause;
     const int workLeft = WorkRules::Day - work, pauseLeft = WorkRules::Pause - pause;
-    for (TimeCard *t : std::as_const(m_times)) t->setTimes(work, pause, m_paused, m_session.state == kWork);
+    for (TimeCard *t : std::as_const(m_times)) {
+        t->setTimes(work, pause, m_paused, m_session.state == kWork);
+    }
     m_clock->setText(m_elapsed ? clockText(work) : clockText(std::abs(workLeft)));
-    m_clockInfo->setText((m_elapsed ? QStringLiteral("travaillé · pause ") : workLeft < 0 ? QStringLiteral("heures sup. · pause ") : QStringLiteral("restant · pause "))
-                         + (m_elapsed ? QStringLiteral("%1 min").arg(pause / 60) : pauseLeft < 0 ? QStringLiteral("dépassée") : minutesText(pauseLeft)));
+    m_clockInfo->setText((m_elapsed             ? QStringLiteral("travaillé · pause ")
+                                 : workLeft < 0 ? QStringLiteral("heures sup. · pause ")
+                                                : QStringLiteral("restant · pause "))
+        + (m_elapsed            ? QStringLiteral("%1 min").arg(pause / 60)
+                : pauseLeft < 0 ? QStringLiteral("dépassée")
+                                : minutesText(pauseLeft)));
     m_state->setText(QStringLiteral("●  ") + m_session.state);
     m_state->setStyleSheet("color:" + statusColor(m_session.state).name());
     m_pauseButton->setText(m_paused ? QStringLiteral("Reprendre") : QStringLiteral("Pause"));
 
     m_taskName->setText(m_session.task);
     m_finishButton->setEnabled(m_current.id > 0 && m_current.ready() && !m_paused);
-    m_finishButton->setToolTip(m_paused ? QStringLiteral("Reprenez le travail avant de déposer") : QStringLiteral("Cochez toutes les étapes pour déposer"));
-    m_details->setText(m_current.feedback.isEmpty() ? m_current.details : QStringLiteral("À corriger : ") + m_current.feedback);
+    m_finishButton->setToolTip(m_paused ? QStringLiteral("Reprenez le travail avant de déposer")
+                                        : QStringLiteral("Cochez toutes les étapes pour déposer"));
+    m_details->setText(
+        m_current.feedback.isEmpty() ? m_current.details : QStringLiteral("À corriger : ") + m_current.feedback);
     m_details->setStyleSheet(m_current.feedback.isEmpty() ? "" : "color:#e3a06d");
-    if (m_stepsFor != m_current.id) showSteps();
+    if (m_stepsFor != m_current.id) {
+        showSteps();
+    }
     const int left = m_current.planned - m_current.spent;
     const qreal ratio = m_current.planned > 0 ? m_current.spent / qreal(m_current.planned) : 0;
     m_taskRing->setValue(ratio, QStringLiteral("%1 %").arg(int(ratio * 100)), QStringLiteral("de la tâche"));
     m_taskInfo->setText(!m_current.id ? QStringLiteral("Choisissez une tâche dans « Mes tâches ».")
-                        : left >= 0 ? clockText(m_current.spent) + QStringLiteral(" passées · reste ") + clockText(left)
-                                    : clockText(m_current.spent) + QStringLiteral(" passées · dépassement de ") + clockText(-left));
+            : left >= 0 ? clockText(m_current.spent) + QStringLiteral(" passées · reste ") + clockText(left)
+                        : clockText(m_current.spent) + QStringLiteral(" passées · dépassement de ") + clockText(-left));
     m_taskInfo->setStyleSheet(left < 0 ? "color:#e08f8f" : "");
-    m_dayRing->setValue(work / qreal(WorkRules::Day), QStringLiteral("%1 %").arg(std::min(100, int(work * 100LL / WorkRules::Day))), QStringLiteral("de la journée"));
+    m_dayRing->setValue(work / qreal(WorkRules::Day),
+        QStringLiteral("%1 %").arg(std::min(100, int(work * 100LL / WorkRules::Day))), QStringLiteral("de la journée"));
 
     int done = 0;
     const WorkTask *next = nullptr;
     for (const WorkTask &t : std::as_const(m_tasks)) {
         done += t.state == WorkTask::Done;
-        if (!next && (t.state == WorkTask::Todo || t.state == WorkTask::Rework)) next = &t;
+        if (!next && (t.state == WorkTask::Todo || t.state == WorkTask::Rework)) {
+            next = &t;
+        }
     }
     m_next->setText(next ? next->title : QStringLiteral("Plus de tâche prévue"));
-    m_nextInfo->setText(next ? QStringLiteral("Durée prévue : ") + minutesText(next->planned) : QStringLiteral("Tout est déposé ou validé."));
+    m_nextInfo->setText(next ? QStringLiteral("Durée prévue : ") + minutesText(next->planned)
+                             : QStringLiteral("Tout est déposé ou validé."));
     m_nextButton->setText(next ? QStringLiteral("Passer à cette tâche  ›") : QStringLiteral("Demander une tâche"));
     m_idle->setText(clockText(m_session.idle));
     m_idleToday->setText(clockText(m_session.idle));
     m_done->setText(QStringLiteral("%1 / %2").arg(done).arg(m_tasks.size()));
-    if (m_current.id)
-        if (auto *bar = findChild<QProgressBar *>(QStringLiteral("task%1").arg(m_current.id))) bar->setValue(std::min(m_current.spent, m_current.planned));
+    if (m_current.id) {
+        if (auto *bar = findChild<QProgressBar *>(QStringLiteral("task%1").arg(m_current.id))) {
+            bar->setValue(std::min(m_current.spent, m_current.planned));
+        }
+    }
 }
 
 TimeCard *EmployeeDesk::timeCard()
 {
     auto *t = new TimeCard;
-    t->clicked = [this] { flipTimes(); };
+    t->clicked = [this] {
+        flipTimes();
+    };
     m_times << t;
     return t;
 }
@@ -707,27 +861,38 @@ TimeCard *EmployeeDesk::timeCard()
 void EmployeeDesk::flipTimes()
 {
     m_elapsed = !m_elapsed;
-    for (TimeCard *t : std::as_const(m_times)) t->setBack(m_elapsed);
+    for (TimeCard *t : std::as_const(m_times)) {
+        t->setBack(m_elapsed);
+    }
     refresh();
 }
 
 void EmployeeDesk::track(const QString &state, int seconds)
 {
-    for (DayTimeline *t : std::as_const(m_timelines)) t->add(state, seconds);
+    for (DayTimeline *t : std::as_const(m_timelines)) {
+        t->add(state, seconds);
+    }
 }
 
 bool EmployeeDesk::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == m_chip && event->type() == QEvent::MouseButtonRelease && static_cast<QMouseEvent *>(event)->button() == Qt::LeftButton) flipTimes();
+    if (watched == m_chip && event->type() == QEvent::MouseButtonRelease
+        && static_cast<QMouseEvent *>(event)->button() == Qt::LeftButton) {
+        flipTimes();
+    }
     return QMainWindow::eventFilter(watched, event);
 }
 
 void EmployeeDesk::finish(const QString &reason)
 {
-    if (m_finished) return;
+    if (m_finished) {
+        return;
+    }
     tick(QDateTime::currentDateTime(), systemIdleSeconds());
     m_finished = true;
-    if (m_current.id) m_store.saveTaskTime(m_current.id, m_current.spent);
+    if (m_current.id) {
+        m_store.saveTaskTime(m_current.id, m_current.spent);
+    }
     m_session.logout = m_session.lastSeen = QDateTime::currentDateTime();
     m_session.endReason = reason;
     m_store.save(m_session);
@@ -745,7 +910,9 @@ void EmployeeDesk::leaveByBadge()
 void EmployeeDesk::closeEvent(QCloseEvent *event)
 {
     if (!m_finished) {
-        if (!DialogSkin::ask(this, QStringLiteral("Terminer la journée ?"), QStringLiteral("Travail aujourd'hui : ") + clockText(m_baseWork + m_session.work), QStringLiteral("Terminer"), QStringLiteral("Continuer"))) {
+        if (!DialogSkin::ask(this, QStringLiteral("Terminer la journée ?"),
+                QStringLiteral("Travail aujourd'hui : ") + clockText(m_baseWork + m_session.work),
+                QStringLiteral("Terminer"), QStringLiteral("Continuer"))) {
             m_logout = false;
             event->ignore();
             return;
@@ -753,8 +920,12 @@ void EmployeeDesk::closeEvent(QCloseEvent *event)
         finish(m_logout ? QStringLiteral("Fin de journée") : QStringLiteral("Application fermée"));
     }
     event->accept();
-    if (m_leaving) return;
+    if (m_leaving) {
+        return;
+    }
     m_leaving = true;
-    for (QTimer *t : findChildren<QTimer *>()) t->stop();
+    for (QTimer *t : findChildren<QTimer *>()) {
+        t->stop();
+    }
     emit closed(m_logout);
 }
