@@ -81,7 +81,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
     const Icons::Kind kinds[]={Icons::Grid,Icons::People,Icons::Assign,Icons::Clock};
     ui->helpButton->setIcon(Icons::nav(Icons::Help)); ui->helpButton->setIconSize(QSize(20,20)); ui->helpButton->setCursor(Qt::PointingHandCursor);
 
-    ui->globalSearch->addAction(QIcon(Icons::pixmap(Icons::Search,QColor("#8f8c86"),16)),QLineEdit::LeadingPosition);
+    ui->globalSearch->addAction(QIcon(Icons::pixmap(Icons::Search,QColor("#b3aea3"),16)),QLineEdit::LeadingPosition);
     connect(ui->globalSearch,&QLineEdit::textChanged,this,[this](const QString &text){
         employeeModule->findChild<QLineEdit*>("employeeSearch")->setText(text);
         board->setSearch(text);

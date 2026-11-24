@@ -174,7 +174,7 @@ DialogSkin::DialogSkin(QDialog *dialog, QWidget *owner) : m_dialog(dialog), m_ow
     else dialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
     dialog->setStyleSheet(QStringLiteral(
         "QDialog#aureaDialog{background:%1;border:none;}"
-        "QDialog#aureaDialog QLabel{background:transparent;color:#f3f0ea;font-family:'Inter';font-size:10.5pt;}"
+        "QDialog#aureaDialog QLabel{background:transparent;color:#f3f0ea;font-family:'Segoe UI';font-size:10.5pt;}"
         "QDialog#aureaDialog QLabel[section=\"true\"]{font-size:15pt;font-weight:700;color:#ffffff;}"
         "QDialog#aureaDialog QLabel[muted=\"true\"]{font-size:9.5pt;color:#a9a294;}"
         "QDialog#aureaDialog QPlainTextEdit{background:#17171a;border:1px solid #4a4434;border-radius:10px;padding:8px;color:#f3f0ea;}"

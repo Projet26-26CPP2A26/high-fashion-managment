@@ -98,7 +98,7 @@ private:
         p->setPen(Qt::NoPen);
         p->setBrush(QColor("#3b3b40"));
         p->drawRoundedRect(track, 3, 3);
-        const QColor color = load ? QColor(value >= 90 ? "#e08f8f" : value >= 70 ? "#e6c27a" : "#7fc08a") : QColor(value >= 75 ? "#7fc08a" : value >= 45 ? "#e6c27a" : "#8f8c86");
+        const QColor color = load ? QColor(value >= 90 ? "#e08f8f" : value >= 70 ? "#e6c27a" : "#7fc08a") : QColor(value >= 75 ? "#7fc08a" : value >= 45 ? "#e6c27a" : "#b3aea3");
         p->setBrush(color);
         p->drawRoundedRect(QRectF(track.left(), track.top(), w * value / 100.0, 6), 3, 3);
         p->setPen(QColor("#d9d5cb"));
@@ -148,7 +148,7 @@ TablePolish::TablePolish(QTableWidget *table) : QObject(table), m_table(table)
     m_empty->setAlignment(Qt::AlignCenter);
     m_empty->setAttribute(Qt::WA_TransparentForMouseEvents);
     m_empty->setText(QStringLiteral("<div style='font-size:40pt;color:transparent'>.</div><div style='font-size:11pt;color:#b9b4a8'>Rien à afficher pour le moment</div>"
-                                    "<div style='font-size:9pt;color:#77746e'>Les données apparaîtront ici automatiquement.</div>"));
+                                    "<div style='font-size:9pt;color:#a39e94'>Les données apparaîtront ici automatiquement.</div>"));
     m_empty->setStyleSheet("background:transparent");
     m_emptyIcon = new LivingIcon(LivingIcon::Empty, 78, m_empty);
     connect(table->model(), &QAbstractItemModel::rowsInserted, this, &TablePolish::updateEmpty);

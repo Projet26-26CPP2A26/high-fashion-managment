@@ -9,7 +9,6 @@
     <file alias="assets/down.png">Assets/down.png</file>
     <file alias="assets/up.png">Assets/up.png</file>
     <file alias="assets/check.png">Assets/check.png</file>
-    <file alias="assets/fonts/Inter.ttf">Assets/fonts/Inter.ttf</file>
     <file alias="assets/fonts/CormorantGaramond.ttf">Assets/fonts/CormorantGaramond.ttf</file>
     <file alias="assets/fonts/CormorantGaramond-Italic.ttf">Assets/fonts/CormorantGaramond-Italic.ttf</file>
   </qresource>

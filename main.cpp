@@ -46,12 +46,9 @@ int main(int argc, char *argv[])
     app.setStyle("Fusion");
     QLocale::setDefault(QLocale(QLocale::French, QLocale::France));
 
-    for (const QString &file : QStringList{"segoeui.ttf", "segoeuib.ttf", "georgia.ttf"})
-        QFontDatabase::addApplicationFont(QDir(qEnvironmentVariable("WINDIR", "C:/Windows")).filePath("Fonts/" + file));
-    for (const QString &file : QStringList{"Inter.ttf", "CormorantGaramond.ttf", "CormorantGaramond-Italic.ttf"})
+    for (const QString &file : QStringList{"CormorantGaramond.ttf", "CormorantGaramond-Italic.ttf"})
         QFontDatabase::addApplicationFont(":/assets/fonts/" + file);
-    QFont base("Inter", 10);
-    base.setHintingPreference(QFont::PreferNoHinting);
+    QFont base("Segoe UI", 10);
     base.setStyleStrategy(QFont::PreferAntialias);
     app.setFont(base);
     app.setStyleSheet("QToolTip { background: #eee2bf; color: #23292b; border: none; padding: 7px; }");

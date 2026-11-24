@@ -80,7 +80,7 @@ void LivingIcon::paintEvent(QPaintEvent *)
         p.setPen(Qt::NoPen);
         for (int i = 0; i < 3; ++i) p.drawEllipse(QPointF(-9 + 9 * i, -3.5 * std::max(0.0, std::sin(t * 3.4 - i * 0.7))), 2.4, 2.4);
     } else {
-        QFont f("Inter");
+        QFont f("Segoe UI");
         f.setPixelSize(24);
         f.setBold(true);
         p.setFont(f);

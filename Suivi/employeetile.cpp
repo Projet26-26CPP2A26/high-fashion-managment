@@ -14,7 +14,7 @@ QColor statusColor(const QString &s)
     if (s == QStringLiteral("En pause")) return QColor("#e6c27a");
     if (s == QStringLiteral("Inactif")) return QColor("#e3a06d");
     if (s == QStringLiteral("PC hors ligne")) return QColor("#e08f8f");
-    return QColor("#8f8c86");
+    return QColor("#b3aea3");
 }
 
 QStringList sessionAlerts(const WorkSession &s)
@@ -159,7 +159,7 @@ void EmployeeTile::paintEvent(QPaintEvent *)
 
     const int nameX = x + 54;
     text(QRect(nameX, y + 16, right - nameX - 20, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold, Qt::AlignLeft);
-    text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#8f8c86"), 9, QFont::Normal, Qt::AlignLeft);
+    text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#b3aea3"), 9, QFont::Normal, Qt::AlignLeft);
 
     if (m_session.login.isValid() && !m_session.ended() && !m_session.via.isEmpty())
         p.drawPixmap(QPointF(right - 16, y + 18), Icons::pixmap(m_session.via == "BADGE" ? Icons::Office : Icons::Online, QColor(m_session.via == "BADGE" ? "#e2cf9f" : "#8fb3c9"), 16));
@@ -193,7 +193,7 @@ void EmployeeTile::paintEvent(QPaintEvent *)
 
     const int third = width / 3;
     const auto mini = [&](int i, const QString &label, const QString &value, const QColor &c) {
-        text(QRect(x + i * third, y + 140, third, 16), label, QColor("#8f8c86"), 7.5, QFont::Normal, Qt::AlignLeft);
+        text(QRect(x + i * third, y + 140, third, 16), label, QColor("#b3aea3"), 7.5, QFont::Normal, Qt::AlignLeft);
         text(QRect(x + i * third, y + 155, third, 18), value, c, 9, QFont::DemiBold, Qt::AlignLeft);
     };
     const QString hm = QStringLiteral("%1 min");
@@ -415,6 +415,6 @@ void ProgressRing::paintEvent(QPaintEvent *)
     f.setPointSizeF(std::clamp(8.5 * k, 8.0, 12.0));
     f.setBold(false);
     p.setFont(f);
-    p.setPen(QColor("#8f8c86"));
+    p.setPen(QColor("#b3aea3"));
     p.drawText(rect().translated(0, int(22 * k)), Qt::AlignCenter, m_caption);
 }

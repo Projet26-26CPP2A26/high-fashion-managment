@@ -56,7 +56,7 @@ ReviewBoard::ReviewBoard(ActivityBoard &board, QWidget *parent) : QWidget(parent
 
     auto *empty = new QWidget;
     auto *emptyBox = new QVBoxLayout(empty);
-    auto *emptyText = new QLabel(QStringLiteral("<div style='font-size:15pt;color:#f7f4ee'><b>Tout est à jour</b></div><div style='font-size:10pt;color:#8f8c86'>Les prochains dépôts des employés apparaîtront ici.</div>"));
+    auto *emptyText = new QLabel(QStringLiteral("<div style='font-size:15pt;color:#f7f4ee'><b>Tout est à jour</b></div><div style='font-size:10pt;color:#b3aea3'>Les prochains dépôts des employés apparaîtront ici.</div>"));
     emptyText->setAlignment(Qt::AlignCenter);
     emptyBox->addStretch();
     emptyBox->addWidget(new LivingIcon(LivingIcon::Check, 130), 0, Qt::AlignCenter);

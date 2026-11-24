@@ -212,14 +212,14 @@ QImage ClosingView::message() const
     image.fill(Qt::transparent);
     QPainter p(&image);
     p.setRenderHint(QPainter::TextAntialiasing);
-    QFont title("Inter");
+    QFont title("Segoe UI");
     title.setPointSizeF(21);
     title.setWeight(QFont::Bold);
     title.setStyleStrategy(QFont::NoSubpixelAntialias);
     p.setFont(title);
     p.setPen(QColor("#fff9ea"));
     p.drawText(QRectF(0, 16, 900, 42), Qt::AlignCenter, m_scene.title);
-    QFont small("Inter");
+    QFont small("Segoe UI");
     small.setPointSizeF(10.5);
     small.setStyleStrategy(QFont::NoSubpixelAntialias);
     p.setFont(small);
