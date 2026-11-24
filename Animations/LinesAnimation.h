@@ -11,9 +11,9 @@ public:
     enum Mode { EmployeeIn, EmployeeOut, AdminIn, AdminOut, Closing };
     class Frame {
     public:
-        Mode mode;
+        Mode mode = EmployeeIn;
         QPointF center;
-        double logo, time, arrive, leave;
+        double logo = 0, time = 0, arrive = 0, leave = 0;
         QSizeF area;
     };
     void build(const Frame &frame);
@@ -22,7 +22,7 @@ public:
 private:
     class Point {
     public:
-        double x, y, z;
+        double x = 0, y = 0, z = 0;
     };
     Point turn(Point p, double ax, double ay, double az) const;
     void segment(const Point &a, const Point &b, double alpha, int color);

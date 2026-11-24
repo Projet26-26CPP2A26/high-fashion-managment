@@ -660,7 +660,7 @@ void EmployeeDesk::refresh()
     for (TimeCard *t : std::as_const(m_times)) t->setTimes(work, pause, m_paused, m_session.state == kWork);
     m_clock->setText(m_elapsed ? clockText(work) : clockText(std::abs(workLeft)));
     m_clockInfo->setText((m_elapsed ? QStringLiteral("travaillé · pause ") : workLeft < 0 ? QStringLiteral("heures sup. · pause ") : QStringLiteral("restant · pause "))
-                         + (m_elapsed ? QStringLiteral("%1 min prises").arg(pause / 60) : pauseLeft < 0 ? QStringLiteral("dépassée") : minutesText(pauseLeft)));
+                         + (m_elapsed ? QStringLiteral("%1 min").arg(pause / 60) : pauseLeft < 0 ? QStringLiteral("dépassée") : minutesText(pauseLeft)));
     m_state->setText(QStringLiteral("●  ") + m_session.state);
     m_state->setStyleSheet("color:" + statusColor(m_session.state).name());
     m_pauseButton->setText(m_paused ? QStringLiteral("Reprendre") : QStringLiteral("Pause"));

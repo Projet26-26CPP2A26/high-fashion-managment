@@ -14,6 +14,7 @@ public:
     void setEntries(const QVector<AccessEntry> &entries, bool animate);
     std::function<WorkSession(const AccessEntry &)> details;
     void toggle(int index);
+    void refresh();
     QString emptyText = QStringLiteral("Les passages apparaîtront ici en direct.");
 
 protected:

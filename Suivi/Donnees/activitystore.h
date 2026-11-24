@@ -39,10 +39,10 @@ public:
 
 class StoredAttendance {
 public:
-    int employeeId;
+    int employeeId = 0;
     QDate day;
     QTime arrival, departure;
-    int pause;
+    int pause = 0;
 };
 
 class ReviewStats {

@@ -26,8 +26,8 @@ private:
     class Half {
     public:
         QString title, value, note;
-        double ratio;
-        bool alert;
+        double ratio = 0;
+        bool alert = false;
     };
     void paintHalf(QPainter &p, const QRectF &box, const Half &half, bool pause, bool live) const;
     int m_work = 0, m_pause = 0;
@@ -55,7 +55,7 @@ private:
     public:
         QDateTime at;
         QString text;
-        Kind kind;
+        Kind kind = Task;
     };
     void fit();
     static constexpr int RowHeight = 58;

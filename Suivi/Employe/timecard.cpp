@@ -20,6 +20,7 @@ TimeCard::TimeCard(QWidget *parent) : QWidget(parent)
     setCursor(Qt::PointingHandCursor);
     setFocusPolicy(Qt::TabFocus);
     setAccessibleName(QStringLiteral("Temps de travail et pause"));
+    setToolTip(QStringLiteral("Cliquez pour voir le temps passé"));
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [this] {
         if (!m_flip.running()) m_timer->stop();
@@ -91,7 +92,7 @@ void TimeCard::paintEvent(QPaintEvent *)
                 extra ? QStringLiteral("journée de 8 h terminée") : QStringLiteral("fin de la journée de 8 h"), extra ? 1 : 1 - workRatio, false};
         if (!extra) work.note = m_paused ? QStringLiteral("chronomètre en pause") : QStringLiteral("fin prévue à %1").arg(QDateTime::currentDateTime().addSecs(workLeft + std::max(0, pauseLeft)).toString("HH:mm"));
         pause = {over ? QStringLiteral("Pause dépassée") : QStringLiteral("Pause restante"), clockText(std::abs(pauseLeft)),
-                 m_paused ? QStringLiteral("pause en cours") : m_pause ? QStringLiteral("%1 min déjà prises").arg(m_pause / 60) : QStringLiteral("pas encore prise"), over ? 1 : 1 - pauseRatio, over};
+                 m_paused ? QStringLiteral("pause en cours") : m_pause ? QStringLiteral("%1 déjà pris").arg(m_pause < 60 ? QStringLiteral("%1 s").arg(m_pause) : QStringLiteral("%1 min").arg(m_pause / 60)) : QStringLiteral("pas encore prise"), over ? 1 : 1 - pauseRatio, over};
     }
     const double middle = std::round(box.left() + box.width() * 0.55);
     p.setPen(QPen(QColor("#323236"), 1));

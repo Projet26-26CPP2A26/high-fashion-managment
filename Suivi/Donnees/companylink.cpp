@@ -27,9 +27,10 @@ void CompanyLink::loadAttendance()
 {
     for (const StoredAttendance &a : m_store.attendance()) {
         MorphOverlay::breathe();
-        if (a.departure.isValid()) m_repository.saveAttendance(a.employeeId, a.day, a.arrival, a.departure, a.pause);
-        else if (a.day == QDate::currentDate()) m_repository.clockIn(a.employeeId, a.arrival);
-        m_saved.insert(keyOf(a.employeeId, a.day), QString());
+        bool loaded = false;
+        if (a.departure.isValid()) loaded = m_repository.saveAttendance(a.employeeId, a.day, a.arrival, a.departure, a.pause);
+        else if (a.day == QDate::currentDate()) loaded = m_repository.clockIn(a.employeeId, a.arrival);
+        if (loaded) m_saved.insert(keyOf(a.employeeId, a.day), QString());
     }
 }
 
@@ -57,7 +58,9 @@ bool CompanyLink::syncAttendance()
         if (!found) touched |= m_repository.clockIn(id, minute(s.login));
         if (s.ended()) {
             const QTime arrival = found ? found->arrival() : minute(s.login), departure = minute(s.logout);
-            const int presence = arrival.secsTo(departure) / 60, pause = std::min(240, s.pause / 60);
+            const int presence = arrival.secsTo(departure) / 60;
+            const int outside = std::max(0, int(s.login.secsTo(s.logout)) - s.work - s.pause - s.idle - s.off);
+            const int pause = std::min(240, (s.pause + outside) / 60);
             if (presence > pause && (!found || found->departure() != departure) && s.logout > m_store.manualAt(id, today))
                 touched |= m_repository.saveAttendance(id, today, arrival, departure, pause);
         }

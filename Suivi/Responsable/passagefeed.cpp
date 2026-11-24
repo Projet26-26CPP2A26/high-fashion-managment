@@ -76,6 +76,13 @@ void PassageList::setEntries(const QVector<AccessEntry> &entries, bool animate)
     update();
 }
 
+void PassageList::refresh()
+{
+    const int open = openIndex();
+    if (open >= 0 && details) m_day = details(m_entries[open]);
+    update();
+}
+
 int PassageList::openIndex() const
 {
     for (int i = 0; i < m_entries.size(); ++i) if (m_entries[i].id == m_open) return i;
@@ -131,7 +138,6 @@ void PassageList::paintEvent(QPaintEvent *event)
     }
     const double shift = m_shift.value(), grow = m_expand.value();
     const int open = openIndex();
-    if (open >= 0 && details) m_day = details(m_entries[open]);
     p.setPen(QPen(QColor("#34343a"), 1.4));
     p.drawLine(QPointF(39, 26), QPointF(39, m_entries.size() * Row - 30 + (open >= 0 ? Extra * grow : 0)));
     for (int i = 0; i < m_entries.size(); ++i) {
@@ -348,7 +354,7 @@ void PassageFeed::reload()
     const QVector<AccessEntry> list = m_store.entries(60, m_via, m_filter);
     const int newest = list.isEmpty() ? 0 : list.first().id;
     if (newest != m_last) m_list->setEntries(list, m_last > 0);
-    else m_list->update();
+    m_list->refresh();
     m_last = newest;
     if (m_filter == EntryFilter::Passages) countPresent();
 }
