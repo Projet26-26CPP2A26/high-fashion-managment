@@ -149,6 +149,18 @@ Player &player()
     static Player *p = new Player;
     return *p;
 }
+
+QObject *worker()
+{
+    static QObject *object = nullptr;
+    if (!object) {
+        auto *thread = new QThread;
+        object = new QObject;
+        object->moveToThread(thread);
+        thread->start(QThread::TimeCriticalPriority);
+    }
+    return object;
+}
 }
 #endif
 
@@ -156,14 +168,18 @@ namespace Sound {
 void prepare()
 {
 #ifdef Q_OS_WIN
-    player();
+    QMetaObject::invokeMethod(worker(), [] {
+        player();
+    });
 #endif
 }
 
 void play(const QString &name)
 {
 #ifdef Q_OS_WIN
-    player().play(name);
+    QMetaObject::invokeMethod(worker(), [name] {
+        player().play(name);
+    });
 #else
     Q_UNUSED(name);
 #endif

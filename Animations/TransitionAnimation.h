@@ -26,7 +26,9 @@ public:
     void waitMessage();
     void waitClosed();
     static void breathe();
+    static bool covering();
     static void warmUp();
+    static void prepare(QWidget *window);
     static QRect areaFor(QWidget *window);
 
 protected:

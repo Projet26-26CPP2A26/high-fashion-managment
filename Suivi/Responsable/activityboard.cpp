@@ -2,6 +2,7 @@
 #include "employeepopup.h"
 #include "employeetile.h"
 #include "dialogskin.h"
+#include "TransitionAnimation.h"
 #include "UiAnimations.h"
 #include <QComboBox>
 #include <QDateEdit>
@@ -169,7 +170,7 @@ ActivityBoard::ActivityBoard(ActivityStore &store, QWidget *parent)
     timer->start(1000);
     auto *pulse = new QTimer(this);
     connect(pulse, &QTimer::timeout, this, [this] {
-        if (!isVisible() || m_views->currentIndex() != 0) {
+        if (!isVisible() || m_views->currentIndex() != 0 || MorphOverlay::covering()) {
             return;
         }
         m_phase = std::fmod(m_phase + m_pulseClock.restart() / 2750.0, 1.0);

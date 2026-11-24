@@ -133,6 +133,7 @@ const QVector<QPixmap> &MorphOverlay::logos()
 void MorphOverlay::warmUp()
 {
     logos();
+    ClosingView::available();
     QImage surface(64, 64, QImage::Format_ARGB32_Premultiplied);
     QPainter p(&surface);
     for (const double size : {10.0, 13.0, 19.0, 30.0}) {
@@ -146,6 +147,21 @@ void MorphOverlay::warmUp()
     brand.setWeight(QFont::DemiBold);
     p.setFont(brand);
     p.drawText(0, 40, QStringLiteral("AUREA"));
+}
+
+void MorphOverlay::prepare(QWidget *window)
+{
+    window->resize(areaFor(window).size());
+    window->ensurePolished();
+    for (QWidget *child : window->findChildren<QWidget *>()) {
+        child->ensurePolished();
+        breathe();
+    }
+    const int parts = 10, step = window->height() / parts + 1;
+    for (int i = 0; i < parts; ++i) {
+        window->grab(QRect(0, i * step, window->width(), step));
+        breathe();
+    }
 }
 
 void MorphOverlay::advance()
@@ -167,6 +183,12 @@ void MorphOverlay::breathe()
     }
     current->advance();
     current->repaint();
+}
+
+bool MorphOverlay::covering()
+{
+    const bool opening = current && (current->m_mode == Spectacle::EmployeeIn || current->m_mode == Spectacle::AdminIn);
+    return opening && current->isVisible() && current->m_landAt < 0 && current->seconds() >= Expand;
 }
 
 void MorphOverlay::waitClosed()

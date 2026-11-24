@@ -1,4 +1,5 @@
 #include "employeemodule.h"
+#include "TransitionAnimation.h"
 #include "UiAnimations.h"
 #include "ui_employees.h"
 #include "icons.h"
@@ -11,7 +12,9 @@ EmployeeModule::EmployeeModule(QWidget *parent)
     , ui(new Ui::EmployeeModule)
 {
     ui->setupUi(this);
+    MorphOverlay::breathe();
     repo.loadEmployees();
+    MorphOverlay::breathe();
     initialized = repo.error().isEmpty();
 
     for (QLayout *layout : QList<QLayout *>{ui->employeeRoot, ui->employeeListPageLayout, ui->assignmentPageLayout,
@@ -246,7 +249,9 @@ void EmployeeModule::refresh()
         const int s = ui->taskSpecialty->findText(specialty);
         ui->taskSpecialty->setCurrentIndex(std::max(0, s));
     }
+    MorphOverlay::breathe();
     refreshEmployees();
+    MorphOverlay::breathe();
     refreshCandidates();
     ui->assignmentsTable->setRowCount(0);
     ui->recentTable->setRowCount(0);
@@ -300,6 +305,7 @@ void EmployeeModule::refresh()
 void EmployeeModule::updateDashboard()
 {
     updateTeamGrid();
+    MorphOverlay::breathe();
     updateHoursChart();
 }
 void EmployeeModule::updateTeamGrid()

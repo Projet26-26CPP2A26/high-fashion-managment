@@ -1,4 +1,5 @@
 #include "employeetile.h"
+#include "TransitionAnimation.h"
 #include "UiAnimations.h"
 #include "icons.h"
 #include "AnimationSpeed.h"
@@ -64,6 +65,11 @@ EmployeeTile::EmployeeTile(QWidget *parent)
     QObject::connect(&m_barAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
         m_progress = m_fromProgress + (m_toProgress - m_fromProgress) * v.toReal();
         m_day = m_fromDay + (m_toDay - m_fromDay) * v.toReal();
+        if (!MorphOverlay::covering()) {
+            update();
+        }
+    });
+    QObject::connect(&m_barAnimation, &QAbstractAnimation::finished, this, [this] {
         update();
     });
     m_flashAnimation.setDuration(Motion::Glow);
@@ -85,6 +91,11 @@ void EmployeeTile::enter(int delay)
     a->setEasingCurve(QEasingCurve::OutCubic);
     connect(a, &QVariantAnimation::valueChanged, this, [this](const QVariant &v) {
         m_enter = v.toReal();
+        if (!MorphOverlay::covering()) {
+            update();
+        }
+    });
+    connect(a, &QAbstractAnimation::finished, this, [this] {
         update();
     });
     QTimer::singleShot(delay, a, [a] {

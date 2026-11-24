@@ -119,7 +119,7 @@ LivingLogo::LivingLogo(QLabel *logo)
     m_clock.start();
     auto *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this] {
-        if (isVisible() && sweep() < 1.8) {
+        if (isVisible() && sweep() < 1.8 && !m_logo->property("logoHidden").toBool()) {
             update();
         }
     });

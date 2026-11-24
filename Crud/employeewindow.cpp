@@ -52,6 +52,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store, bool demo, QWidget *parent)
     pages->addWidget(employeeModule);
     reviews = new ReviewBoard(*board, this);
     pages->addWidget(reviews);
+    MorphOverlay::breathe();
     reviewButton = new QPushButton(QStringLiteral("  Revues"), this);
     reviewButton->setProperty("nav", true);
     reviewButton->setCheckable(true);
@@ -62,6 +63,7 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store, bool demo, QWidget *parent)
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navEmployees), reviewButton);
     connect(reviewButton, &QPushButton::clicked, this, &EmployeeWindow::showReviews);
     badges = new BadgePage(employeeModule->repository(), store, this);
+    MorphOverlay::breathe();
     pages->addWidget(badges);
     badgeButton = new QPushButton(QStringLiteral("  Badges"), this);
     badgeButton->setProperty("nav", true);

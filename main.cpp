@@ -135,8 +135,8 @@ int main(int argc, char *argv[])
     const QString adminName = QStringLiteral("ADMIN"), adminEvent = QStringLiteral("Connexion du responsable RH");
 
     MorphOverlay::warmUp();
+    Sound::prepare();
     std::unique_ptr<QThread> warm(QThread::create([] {
-        Sound::prepare();
         OracleConnection::warmUp();
     }));
     warm->start();
@@ -218,6 +218,14 @@ int main(int argc, char *argv[])
         } else {
             login->start();
         }
+        auto *early = new QTimer(login.get());
+        QObject::connect(early, &QTimer::timeout, early, [early, &warm] {
+            if (warm->isFinished()) {
+                early->stop();
+                OracleConnection::instance().open();
+            }
+        });
+        early->start(400);
         const bool accepted = login->exec() == QDialog::Accepted;
         overlay = login->takeOverlay();
         if (!accepted) {
@@ -311,6 +319,7 @@ int main(int argc, char *argv[])
                 leave(again, QStringLiteral("À bientôt, ") + firstName,
                     QStringLiteral("Travail enregistré : ") + clockText(desk->workToday()));
             });
+            MorphOverlay::prepare(desk.get());
             Fx::steady(desk.get());
             desk->showMaximized();
             MorphOverlay::breathe();
@@ -333,6 +342,7 @@ int main(int argc, char *argv[])
             QObject::connect(window.get(), &EmployeeWindow::closed, &loop, [&](bool again) {
                 leave(again, QStringLiteral("À bientôt"), QStringLiteral("Vos données sont enregistrées."));
             });
+            MorphOverlay::prepare(window.get());
             Fx::steady(window.get());
             window->showMaximized();
             MorphOverlay::breathe();

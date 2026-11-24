@@ -1,4 +1,5 @@
 #include "badgepage.h"
+#include "TransitionAnimation.h"
 #include "UiAnimations.h"
 #include "ConnectionAnimation.h"
 #include "activitystore.h"
@@ -230,6 +231,7 @@ QHash<int, bool> BadgePage::holders()
 {
     QHash<int, bool> out;
     for (const auto &b : m_service.badges()) {
+        MorphOverlay::breathe();
         const int id = m_service.employeeOf(b.first);
         if (id) {
             out.insert(id, m_service.inside(id));

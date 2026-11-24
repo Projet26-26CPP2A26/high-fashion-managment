@@ -173,9 +173,13 @@ bool ClosingView::available()
     if (QGuiApplication::platformName() != "windows") {
         return false;
     }
-    QOpenGLContext context;
-    context.setFormat(surface());
-    return context.create() && context.format().version() >= qMakePair(3, 3) && context.format().alphaBufferSize() >= 8;
+    static const bool ready = [] {
+        QOpenGLContext context;
+        context.setFormat(surface());
+        return context.create() && context.format().version() >= qMakePair(3, 3)
+            && context.format().alphaBufferSize() >= 8;
+    }();
+    return ready;
 }
 
 ClosingView::ClosingView(const Scene &scene)
@@ -300,8 +304,8 @@ void ClosingView::step()
 void ClosingView::initializeGL()
 {
     initializeOpenGLFunctions();
-    m_ready = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, Vertex)
-        && m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, Fragment) && m_program.link() && m_vao.create();
+    m_ready = m_program.addCacheableShaderFromSourceCode(QOpenGLShader::Vertex, Vertex)
+        && m_program.addCacheableShaderFromSourceCode(QOpenGLShader::Fragment, Fragment) && m_program.link() && m_vao.create();
     if (!m_ready) {
         return;
     }
