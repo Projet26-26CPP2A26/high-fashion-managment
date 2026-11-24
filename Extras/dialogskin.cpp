@@ -21,7 +21,7 @@ DialogSkin::DialogSkin(QWidget *parent, LivingIcon::Kind kind, const QString &ti
     auto *column = new QVBoxLayout;
     column->setSpacing(12);
     auto *head = new QLabel(title);
-    head->setStyleSheet("font-family:'Cormorant Garamond','Georgia';font-size:20pt;color:#e9d8a8;background:transparent;");
+    head->setStyleSheet("font-family:'Segoe UI';font-size:19pt;font-weight:600;color:#e9d8a8;background:transparent;");
     auto *body = new QLabel(text);
     body->setTextFormat(Qt::PlainText);
     body->setWordWrap(true);

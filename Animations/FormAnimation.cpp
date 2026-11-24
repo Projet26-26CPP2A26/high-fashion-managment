@@ -173,8 +173,9 @@ void FormAnimation::paintEvent(QPaintEvent *)
     p.drawPixmap(QRectF(-24, -24, 48, 48), m_icon, QRectF(m_icon.rect()));
     p.restore();
 
-    QFont title("Cormorant Garamond");
-    title.setPixelSize(26);
+    QFont title("Segoe UI");
+    title.setPointSizeF(15);
+    title.setWeight(QFont::DemiBold);
     QFont normal = p.font();
     p.setFont(title);
     p.setPen(QColor(m_data.name.isEmpty() ? "#77746d" : "#e9d8a8"));
@@ -208,7 +209,7 @@ void FormAnimation::paintEvent(QPaintEvent *)
     p.setPen(QColor("#8f8c86"));
     p.drawText(QRectF(track.left(), card.top() + 74, track.width(), 24), Qt::AlignVCenter | Qt::AlignLeft, QStringLiteral("Valeur du stock"));
     QFont strong = normal;
-    strong.setBold(true);
+    strong.setWeight(QFont::DemiBold);
     strong.setPointSizeF(13);
     p.setFont(strong);
     p.setPen(QColor("#f1e1b4"));

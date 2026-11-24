@@ -149,11 +149,12 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
     p.setOpacity(words * gone);
     QFont title("Cormorant Garamond");
     title.setPixelSize(46);
+    title.setWeight(QFont::DemiBold);
     title.setLetterSpacing(QFont::AbsoluteSpacing, 8);
     p.setFont(title);
-    p.setPen(QColor("#e9d8a8"));
+    p.setPen(QColor("#e2cf9f"));
     p.drawText(QRectF(4, center.y() + 112 + 18 * (1 - words), width(), 58), Qt::AlignCenter, m_title);
-    QFont small("Inter");
+    QFont small("Segoe UI");
     small.setPixelSize(14);
     p.setFont(small);
     p.setPen(QColor("#b9b4a8"));

@@ -103,7 +103,7 @@ void LivingIcon::paintEvent(QPaintEvent *)
         p.setBrush(Qt::NoBrush);
         p.drawPath(mark);
     } else {
-        QFont font("Inter");
+        QFont font("Segoe UI");
         font.setPixelSize(20);
         font.setBold(true);
         p.setFont(font);

@@ -24,13 +24,13 @@ int main(int argc, char *argv[])
     QLocale::setDefault(QLocale(QLocale::French, QLocale::France));
 
     const QString windowsFonts = QDir(qEnvironmentVariable("WINDIR", "C:/Windows")).filePath("Fonts/");
-    const QStringList systemFonts = {"segoeui.ttf", "segoeuib.ttf", "georgia.ttf"};
+    const QStringList systemFonts = {"segoeui.ttf", "seguisb.ttf", "segoeuib.ttf"};
     for (const QString &file : systemFonts)
         QFontDatabase::addApplicationFont(windowsFonts + file);
     const QStringList appFonts = {"Inter.ttf", "CormorantGaramond.ttf", "CormorantGaramond-Italic.ttf"};
     for (const QString &file : appFonts)
         QFontDatabase::addApplicationFont(":/assets/fonts/" + file);
-    app.setFont(QFont("Inter", 10));
+    app.setFont(QFont("Segoe UI", 10));
     app.setStyleSheet("QToolTip { background: #eee2bf; color: #23292b; border: none; padding: 7px; }");
 
     if (!OracleConnection::instance().open()) {
