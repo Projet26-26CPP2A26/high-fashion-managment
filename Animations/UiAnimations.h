@@ -1,5 +1,9 @@
 #pragma once
-#include "Motion.h"
+#include "AnimationSpeed.h"
+#include <QElapsedTimer>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPainterPath>
 #include <QEvent>
 #include <QFrame>
 #include <QGraphicsDropShadowEffect>
@@ -12,40 +16,112 @@
 #include <QVariantAnimation>
 #include <functional>
 
-namespace UiEffects {
+namespace UiAnimations {
 
-// Change de page : l'ancienne page s'efface en glissant.
-inline void changePage(QStackedWidget *pages, int index)
-{
-    if (pages->currentIndex() == index || !pages->isVisible()) {
-        pages->setCurrentIndex(index);
-        return;
+// Change de page : une ligne de lumière traverse l'écran et découvre la nouvelle page.
+class PageSwipe : public QWidget {
+public:
+    static void go(QStackedWidget *pages, int index)
+    {
+        if (pages->currentIndex() == index || !pages->isVisible()) {
+            pages->setCurrentIndex(index);
+            return;
+        }
+        const bool forward = index > pages->currentIndex();
+        if (QWidget *old = pages->findChild<QWidget *>("pageSwipe"))
+            delete old;
+        new PageSwipe(pages, index, forward);
     }
-    const int direction = index > pages->currentIndex() ? -1 : 1;
-    if (QLabel *old = pages->findChild<QLabel *>("pageGhost"))
-        delete old;
-    auto *ghost = new QLabel(pages);
-    ghost->setObjectName("pageGhost");
-    ghost->setAttribute(Qt::WA_TransparentForMouseEvents);
-    ghost->setPixmap(pages->currentWidget()->grab());
-    ghost->setGeometry(pages->rect());
-    pages->setCurrentIndex(index);
-    ghost->show();
-    ghost->raise();
-    auto *opacity = new QGraphicsOpacityEffect(ghost);
-    ghost->setGraphicsEffect(opacity);
-    auto *a = new QVariantAnimation(ghost);
-    a->setDuration(Motion::Normal);
-    a->setStartValue(0.0);
-    a->setEndValue(1.0);
-    QObject::connect(a, &QVariantAnimation::valueChanged, ghost, [=](const QVariant &v) {
-        const double t = Motion::soft(v.toDouble());
-        opacity->setOpacity(1 - t);
-        ghost->move(int(direction * 28 * t), 0);
-    });
-    QObject::connect(a, &QAbstractAnimation::finished, ghost, &QObject::deleteLater);
-    a->start();
-}
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        const double t = Motion::both(m_clock.elapsed() / 460.0);
+        QPainter p(this);
+        const double w = width(), x = m_forward ? w * t : w * (1 - t);
+        const QRectF hidden = m_forward ? QRectF(x, 0, w - x, height()) : QRectF(0, 0, x, height());
+        p.save();
+        p.setClipRect(hidden);
+        p.setOpacity(1 - 0.65 * t);
+        // Aligné en bas : le contenu ne saute pas si la hauteur de la page change.
+        p.drawPixmap(QPointF((m_forward ? 40 : -40) * t, height() - m_shot.deviceIndependentSize().height()), m_shot);
+        p.restore();
+        const double light = std::sin(t * Motion::Pi);
+        QLinearGradient beam(x - 46, 0, x + 46, 0);
+        beam.setColorAt(0, QColor(226, 207, 159, 0));
+        beam.setColorAt(0.5, QColor(241, 225, 180, int(90 * light)));
+        beam.setColorAt(1, QColor(226, 207, 159, 0));
+        p.fillRect(QRectF(x - 46, 0, 92, height()), beam);
+        p.fillRect(QRectF(x - 0.8, 0, 1.6, height()), QColor(255, 246, 220, int(210 * light)));
+    }
+
+private:
+    PageSwipe(QStackedWidget *pages, int index, bool forward) : QWidget(pages), m_forward(forward), m_shot(pages->window()->grab(QRect(pages->mapTo(pages->window(), QPoint()), pages->size())))
+    {
+        setObjectName("pageSwipe");
+        setAttribute(Qt::WA_TransparentForMouseEvents);
+        setGeometry(pages->rect());
+        pages->setCurrentIndex(index);
+        show();
+        raise();
+        m_clock.start();
+        auto *timer = new QTimer(this);
+        timer->setTimerType(Qt::PreciseTimer);
+        connect(timer, &QTimer::timeout, this, [this, timer] {
+            setGeometry(parentWidget()->rect());
+            update();
+            if (m_clock.elapsed() > 460) {
+                timer->stop();
+                deleteLater();
+            }
+        });
+        timer->start(Motion::frame(this));
+    }
+    bool m_forward;
+    QPixmap m_shot;
+    QElapsedTimer m_clock;
+};
+inline void changePage(QStackedWidget *pages, int index) { PageSwipe::go(pages, index); }
+
+// Onde au clic sur un bouton.
+class Ripple : public QWidget {
+public:
+    Ripple(QPushButton *button, const QPoint &at) : QWidget(button), m_at(at)
+    {
+        setAttribute(Qt::WA_TransparentForMouseEvents);
+        setGeometry(button->rect());
+        show();
+        m_clock.start();
+        auto *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, [this, timer] {
+            update();
+            if (m_clock.elapsed() > 520) {
+                timer->stop();
+                deleteLater();
+            }
+        });
+        timer->start(Motion::frame(this));
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        const double t = m_clock.elapsed() / 520.0;
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+        QPainterPath clip;
+        clip.addRoundedRect(QRectF(rect()).adjusted(1, 1, -1, -1), 9, 9);
+        p.setClipPath(clip);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(255, 246, 220, int(70 * std::max(0.0, 1 - t))));
+        const double r = std::max(width(), 60) * Motion::soft(t);
+        p.drawEllipse(m_at, r, r);
+    }
+
+private:
+    QPointF m_at;
+    QElapsedTimer m_clock;
+};
 
 // Un chiffre qui compte jusqu'à sa nouvelle valeur.
 inline void count(QLabel *label, double value, const std::function<QString(double)> &text)
@@ -125,17 +201,18 @@ public:
         auto *glow = new HoverGlow(root);
         const auto buttons = root->findChildren<QPushButton *>();
         for (QPushButton *b : buttons)
-            if (!b->property("nav").toBool())
-                b->installEventFilter(glow);
+            b->installEventFilter(glow);
     }
 
 protected:
     explicit HoverGlow(QObject *parent) : QObject(parent) {}
     bool eventFilter(QObject *o, QEvent *e) override
     {
-        if (e->type() != QEvent::Enter && e->type() != QEvent::Leave)
-            return false;
         auto *b = static_cast<QPushButton *>(o);
+        if (e->type() == QEvent::MouseButtonPress && b->isEnabled())
+            new Ripple(b, static_cast<QMouseEvent *>(e)->position().toPoint());
+        if ((e->type() != QEvent::Enter && e->type() != QEvent::Leave) || b->property("nav").toBool())
+            return false;
         auto *shadow = qobject_cast<QGraphicsDropShadowEffect *>(b->graphicsEffect());
         if (!shadow) {
             shadow = new QGraphicsDropShadowEffect(b);

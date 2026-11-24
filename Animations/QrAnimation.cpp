@@ -1,5 +1,5 @@
 #include "QrAnimation.h"
-#include "Motion.h"
+#include "AnimationSpeed.h"
 #include <QEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -12,6 +12,7 @@ const double Sew = 1500, Scan = 900, Result_ = 1600;
 
 QrAnimation::QrAnimation(QWidget *parent) : QWidget(parent)
 {
+    setAttribute(Qt::WA_OpaquePaintEvent);
     setCursor(Qt::PointingHandCursor);
     setToolTip(QStringLiteral("Cliquer pour rejouer l'animation"));
     if (parent) {
@@ -65,7 +66,7 @@ void QrAnimation::replay()
     if (m_modules.isNull())
         return;
     m_clock.start();
-    m_timer.start(Motion::Frame);
+    m_timer.start(Motion::frame(this));
 }
 
 void QrAnimation::succeed(const QString &text)
@@ -73,14 +74,14 @@ void QrAnimation::succeed(const QString &text)
     m_result = Ok;
     m_text = text;
     m_resultClock.start();
-    m_timer.start(Motion::Frame);
+    m_timer.start(Motion::frame(this));
 }
 
 void QrAnimation::refuse()
 {
     m_result = Refused;
     m_resultClock.start();
-    m_timer.start(Motion::Frame);
+    m_timer.start(Motion::frame(this));
 }
 
 void QrAnimation::resizeEvent(QResizeEvent *)
