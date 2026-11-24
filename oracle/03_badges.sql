@@ -19,4 +19,6 @@ CREATE TABLE badge_scans (
 
 CREATE INDEX idx_badge_scans_emp ON badge_scans(employee_id, date_scan) TABLESPACE users;
 
+CREATE SEQUENCE seq_badge_scans START WITH 1 INCREMENT BY 1 NOCACHE;
+
 COMMIT;

@@ -40,10 +40,20 @@ QString OracleConnection::connectionName()
 int OracleConnection::nextId(const QString &table)
 {
     QSqlQuery query;
-    if (query.exec(QStringLiteral("SELECT COALESCE(MAX(id), 0) + 1 FROM ") + table) && query.next()) {
-        return query.value(0).toInt();
+    if (!query.exec(QStringLiteral("SELECT COALESCE(MAX(id), 0) FROM ") + table) || !query.next()) {
+        return 0;
     }
-    return 0;
+    const int highest = query.value(0).toInt();
+    query.finish();
+    QSqlQuery sequence;
+    const QString next = QStringLiteral("SELECT seq_") + table + QStringLiteral(".NEXTVAL FROM dual");
+    while (sequence.exec(next) && sequence.next()) {
+        const int id = sequence.value(0).toInt();
+        if (id > highest) {
+            return id;
+        }
+    }
+    return highest + 1;
 }
 
 bool OracleConnection::isOpen() const

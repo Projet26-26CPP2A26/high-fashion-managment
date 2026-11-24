@@ -92,14 +92,14 @@ void runSteps(QSqlDatabase &db, Log &log)
     }
     if (!step(db, log,
             QStringLiteral(
-                "CREATE TABLE AUREA_TST_PARENT (id NUMBER(10) PRIMARY KEY, label VARCHAR2(100 CHAR) NOT NULL, "
-                "amount NUMBER(12,2), born DATE, created TIMESTAMP, note VARCHAR2(100 CHAR))"),
+                "CREATE TABLE AUREA_TST_PARENT (id NUMBER(10) PRIMARY KEY USING INDEX TABLESPACE users, label VARCHAR2(100 CHAR) NOT NULL, "
+                "amount NUMBER(12,2), born DATE, created TIMESTAMP, note VARCHAR2(100 CHAR)) TABLESPACE users"),
             QStringLiteral("CREATE TABLE parent (droit CREATE TABLE requis)"))) {
         return;
     }
     if (!step(db, log,
-            QStringLiteral("CREATE TABLE AUREA_TST_CHILD (id NUMBER(10) PRIMARY KEY, "
-                           "parent_id NUMBER(10) NOT NULL REFERENCES AUREA_TST_PARENT(id))"),
+            QStringLiteral("CREATE TABLE AUREA_TST_CHILD (id NUMBER(10) PRIMARY KEY USING INDEX TABLESPACE users, "
+                           "parent_id NUMBER(10) NOT NULL REFERENCES AUREA_TST_PARENT(id)) TABLESPACE users"),
             QStringLiteral("CREATE TABLE enfant avec clé étrangère"))) {
         return;
     }

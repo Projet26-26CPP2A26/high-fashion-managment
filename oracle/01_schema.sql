@@ -12,4 +12,6 @@ CREATE TABLE employees (
   CONSTRAINT ck_employees_base_load CHECK (base_load BETWEEN 0 AND 100)
 ) TABLESPACE users;
 
+CREATE SEQUENCE seq_employees START WITH 1 INCREMENT BY 1 NOCACHE;
+
 COMMIT;
