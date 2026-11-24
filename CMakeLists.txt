@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/Crud)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network OpenGL)
 
 add_library(quirc STATIC
     Extras/libs/quirc/quirc.c Extras/libs/quirc/decode.c
@@ -28,7 +28,7 @@ set(APP_SOURCES
     Extras/dialogskin.cpp Extras/libs/qrcodegen/qrcodegen.cpp Resources/assets.qrc)
 
 set(APP_INCLUDES Crud Metier arduino Animations Extras Extras/libs/qrcodegen)
-set(APP_LIBRARIES quirc Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network winmm)
+set(APP_LIBRARIES quirc Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network Qt6::OpenGL winmm)
 
 add_executable(AureaMatieres WIN32 main.cpp ${APP_SOURCES})
 target_include_directories(AureaMatieres PRIVATE ${APP_INCLUDES})

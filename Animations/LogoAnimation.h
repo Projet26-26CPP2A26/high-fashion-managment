@@ -6,16 +6,18 @@
 
 class QLabel;
 
-// Logo vivant : un reflet passe et une étincelle tourne autour.
+// Logo du menu : un reflet discret le traverse.
 class LivingLogo : public QWidget {
 public:
     explicit LivingLogo(QLabel *logo);
+    static QRect place(const QLabel *logo, const QWidget *in);
 
 protected:
+    bool eventFilter(QObject *object, QEvent *event) override;
     void paintEvent(QPaintEvent *) override;
 
 private:
-    QPixmap m_logo;
+    QLabel *m_logo;
     QElapsedTimer m_clock;
     QTimer m_timer;
 };

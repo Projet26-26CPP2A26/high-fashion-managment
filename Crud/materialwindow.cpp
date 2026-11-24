@@ -42,6 +42,8 @@
 #include "bornepage.h"
 #include "sound.h"
 #include <QCloseEvent>
+#include <QEventLoop>
+#include <QScreen>
 #include <QApplication>
 #include <QPainter>
 #include <QStyledItemDelegate>
@@ -52,6 +54,12 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     ui->setupUi(this);
     QFile theme(QStringLiteral(":/assets/theme.qss"));
     if(theme.open(QIODevice::ReadOnly)) setStyleSheet(QString::fromUtf8(theme.readAll()));
+    {
+        QPixmap mark=QPixmap(":/assets/logo_aurea.png").scaled(QSize(70,70)*devicePixelRatioF(),Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        mark.setDevicePixelRatio(devicePixelRatioF()); ui->logoMark->setPixmap(mark);
+    }
+    ui->navCaption->hide();
+    ui->sidebarLayout->insertSpacing(ui->sidebarLayout->indexOf(ui->brandSubtitle)+1,18);
     livingLogo=new LivingLogo(ui->logoMark);
     spool=new SpoolAnimation; ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->sidebarNote),spool);
     chart=new ChartAnimation(ui->chartLabel);
@@ -73,6 +81,7 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     for(QLabel *label:{ui->referencesNote,ui->alertsNote,ui->valueNote,ui->suppliersNote}) label->setWordWrap(true);
     auto *nav=new QButtonGroup(this); nav->setExclusive(true);
     const QList<QPushButton*> buttons=navButtons();
+    for(QPushButton *b:buttons) {b->setMinimumHeight(44); b->setCursor(Qt::PointingHandCursor);}
     new UiAnimations::NavPill(ui->sidebar,buttons);
     for(int i=0;i<buttons.size();++i) {
         nav->addButton(buttons[i],i);
@@ -151,11 +160,10 @@ void MaterialWindow::setArduinoState(bool on,const QString &text) {
 }
 void MaterialWindow::playOpening() {
     opening=true;
-    livingLogo->hide(); Sound::play("ouverture");
+    Sound::play("ouverture");
     const int low=int(lowIds.size());
     auto *intro=new TransitionAnimation(this,ui->logoMark,QStringLiteral("AUREA"),low?QStringLiteral("Bonjour · %1 matière(s) à commander").arg(low):QStringLiteral("Bonjour · votre stock est complet"));
     connect(intro,&TransitionAnimation::finished,this,[this]{
-        livingLogo->show();
         opening=false;
         for(QLabel *label:{ui->referencesValue,ui->alertsValue,ui->suppliersValue,ui->valueValue}) label->setProperty("shown",0.0);
         refresh();
@@ -163,11 +171,25 @@ void MaterialWindow::playOpening() {
     });
 }
 void MaterialWindow::closeEvent(QCloseEvent *event) {
-    if(leaving||!isVisible()||qApp->isSavingSession()) {event->accept(); return;}
-    event->ignore();
-    if(findChild<ClosingAnimation*>()) return;
-    Sound::play("fermeture");
-    connect(new ClosingAnimation(this),&ClosingAnimation::finished,this,[this]{leaving=true; close();});
+    event->accept();
+    if(leaving||!isVisible()||isMinimized()||qApp->isSavingSession()) return;
+    leaving=true;
+    if(!ClosingView::available()) return;
+    ClosingView::Scene scene;
+    scene.area=isFullScreen()?screen()->geometry():screen()->availableGeometry();
+    scene.window=QRectF(QRect(mapToGlobal(QPoint(0,0)),size()));
+    const QRect logo=LivingLogo::place(ui->logoMark,this);
+    scene.logo=QRectF(QRect(mapToGlobal(logo.topLeft()),logo.size()));
+    scene.shot=grab().toImage();
+    scene.mark=QImage(":/assets/logo_aurea.png").scaled(QSize(240,240)*devicePixelRatioF(),Qt::KeepAspectRatio,Qt::SmoothTransformation);
+    ClosingView view(scene);
+    if(!view.begin()) return;
+    view.setMessage(QStringLiteral("À bientôt"),QStringLiteral("Vos données sont enregistrées."));
+    hide();
+    QEventLoop loop; QTimer check; check.setTimerType(Qt::PreciseTimer);
+    connect(&check,&QTimer::timeout,&loop,[&]{if(view.over()) loop.quit();});
+    check.start(4); loop.exec();
+    view.hide();
 }
 MaterialWindow::~MaterialWindow() {A.getserial()->disconnect(this); A.getsimulator()->disconnect(this); A.close_arduino(); delete ui;}
 void MaterialWindow::setSidebarVisible(bool visible) {ui->sidebar->setVisible(visible);}

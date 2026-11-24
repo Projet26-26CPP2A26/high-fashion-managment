@@ -1,27 +1,53 @@
+// Module commun de l'équipe AUREA : animation de fermeture reprise telle quelle du projet AUREA_Employes
+// (Animations/ClosingAnimation), écrite par le responsable du module Employés.
 #pragma once
 #include <QElapsedTimer>
-#include <QPixmap>
-#include <QTimer>
-#include <QWidget>
+#include <QImage>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
+#include <QRectF>
+#include <memory>
 
-// Fermeture : la fenêtre se replie dans le logo, les fils l'entourent, puis tout s'éteint.
-class ClosingAnimation : public QWidget {
-    Q_OBJECT
+class ClosingView : public QOpenGLWindow, protected QOpenGLFunctions {
 public:
-    explicit ClosingAnimation(QWidget *window);
+    static constexpr double Length = 1.68;
 
-signals:
-    void finished();
+    struct Scene {
+        QRect area;
+        QRectF window, logo;
+        QImage shot, mark;
+        QString title, subtitle;
+        double ringTime = -1;
+    };
+    static bool available();
+    explicit ClosingView(const Scene &scene);
+    ~ClosingView() override;
+    void setMessage(const QString &title, const QString &subtitle);
+    bool begin();
+    bool over() const { return m_time >= Length; }
+    QImage frameAt(double time);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void mousePressEvent(QMouseEvent *) override { finish(); }
+    void initializeGL() override;
+    void paintGL() override;
+    void mousePressEvent(QMouseEvent *) override { m_rate = 2.5; }
+    void keyPressEvent(QKeyEvent *) override { m_rate = 2.5; }
 
 private:
-    void finish();
-    QPixmap m_shot, m_logo;
+    static QSurfaceFormat surface();
+    void step();
+    std::unique_ptr<QOpenGLTexture> texture(const QImage &image);
+    QImage message() const;
+    Scene m_scene;
+    QOpenGLShaderProgram m_program;
+    QOpenGLVertexArrayObject m_vao;
+    std::unique_ptr<QOpenGLTexture> m_shot, m_mark, m_text;
     QElapsedTimer m_clock;
-    QPixmap m_back;
-    QTimer m_timer;
-    bool m_done = false;
+    qint64 m_last = -1;
+    double m_time = 0, m_rate = 1, m_textAt = -1;
+    int m_frames = 0;
+    bool m_ready = false, m_started = false, m_textDirty = false, m_frozen = false;
 };

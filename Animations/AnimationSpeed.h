@@ -7,6 +7,7 @@
 // Durées (ms) et courbes communes à toutes les animations.
 namespace Motion {
 constexpr int Fast = 180;
+constexpr int Page = 240;
 constexpr int Normal = 320;
 constexpr int Long = 700;
 constexpr double Pi = 3.14159265358979;

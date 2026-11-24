@@ -1,6 +1,7 @@
 #include "TransitionAnimation.h"
 #include "AnimationSpeed.h"
 #include "LinesAnimation.h"
+#include "LogoAnimation.h"
 #include <QEvent>
 #include <QLabel>
 #include <QPainter>
@@ -104,9 +105,7 @@ void TransitionAnimation::paintEvent(QPaintEvent *)
     QRectF from(center - QPointF(logo.width() / 2, logo.height() / 2), logo);
     const double pop = Motion::mix(0.72, 1, Motion::spring(Motion::part(ms, 350, 1100)));
     from = QRectF(center - QPointF(logo.width(), logo.height()) * pop / 2, logo * pop);
-    QRectF to(m_logo->mapTo(window(), QPoint((m_logo->width() - 44) / 2, (m_logo->height() - 44) / 2)), QSizeF(44, 44));
-    if (logo.width() > 0)
-        to.setHeight(44 * logo.height() / logo.width());
+    const QRectF to = LivingLogo::place(m_logo, window());
     QRectF at(Motion::mix(from.x(), to.x(), leave), Motion::mix(from.y(), to.y(), leave) - 60 * std::sin(leave * Motion::Pi),
               Motion::mix(from.width(), to.width(), leave), Motion::mix(from.height(), to.height(), leave));
     QRadialGradient glow(at.center(), at.width() * 1.1);
