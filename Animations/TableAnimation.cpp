@@ -24,7 +24,7 @@ TableAnimation::TableAnimation(QTableWidget *table) : QStyledItemDelegate(table)
         wake();
     });
     connect(&m_timer, &QTimer::timeout, this, [this] {
-        bool moving = m_enter.isValid() && m_enter.elapsed() < 1200;
+        bool moving = m_enter.isValid() && m_enter.elapsed() < 2400;
         for (auto it = m_glow.begin(); it != m_glow.end();) {
             const double target = it.key() == m_hover ? 1 : 0;
             it.value() += (target - it.value()) * 0.22;
@@ -51,6 +51,12 @@ void TableAnimation::wake()
 {
     if (!m_timer.isActive())
         m_timer.start(Motion::frame(m_table));
+}
+
+void TableAnimation::replay()
+{
+    m_enter.start();
+    wake();
 }
 
 QString TableAnimation::header(int column) const
@@ -99,8 +105,8 @@ QPixmap TableAnimation::icon(const QString &type) const
 void TableAnimation::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     const int row = index.row(), column = index.column();
-    const double ms = m_enter.isValid() ? m_enter.elapsed() - 45 * std::min(row, 12) : 1e9;
-    const double in = Motion::soft(ms / 520), hover = glow(row);
+    const double ms = m_enter.isValid() ? m_enter.elapsed() - 160 - 75 * std::min(row, 12) : 1e9;
+    const double in = Motion::soft(ms / 620), hover = glow(row);
     const bool selected = option.state & QStyle::State_Selected;
     const QString name = header(column), text = index.data().toString();
     p->save();
@@ -116,7 +122,7 @@ void TableAnimation::paint(QPainter *p, const QStyleOptionViewItem &option, cons
     p->setPen(QColor("#2c2c30"));
     p->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
     p->setOpacity(std::clamp(in, 0.0, 1.0));
-    p->translate(18 * (1 - in), 0);
+    p->translate(0, 26 * (1 - in));
     QRect r = option.rect.adjusted(10, 0, -8, 0);
     if (name == QStringLiteral("État")) {
         const QColor tone(text == QStringLiteral("Rupture") ? "#e8a9b0" : text == QStringLiteral("Disponible") ? "#b7ccb3" : "#e6ce89");

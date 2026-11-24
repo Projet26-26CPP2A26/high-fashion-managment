@@ -20,7 +20,8 @@ set(APP_SOURCES
     arduino/arduino.cpp arduino/borne_interface.cpp arduino/bornepage.cpp
     Animations/ChartAnimation.cpp Animations/ChartAnimation.h
     Animations/ClosingAnimation.cpp Animations/ClosingAnimation.h
-    Animations/LinesAnimation.cpp Animations/LinesAnimation.h
+    Animations/CardAnimation.cpp Animations/CardAnimation.h
+    Animations/FormAnimation.cpp Animations/FormAnimation.h
     Animations/LogoAnimation.cpp Animations/LogoAnimation.h
     Animations/QrAnimation.cpp Animations/QrAnimation.h
     Animations/TableAnimation.cpp Animations/TableAnimation.h

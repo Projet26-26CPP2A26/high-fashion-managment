@@ -9,6 +9,7 @@
 namespace Ui { class MaterialWindow; }
 class BornePage;
 class ChartAnimation;
+class FormAnimation;
 class LivingLogo;
 class SpoolAnimation;
 class LinkLight;
@@ -39,6 +40,7 @@ private:
     QImage currentQr;
     QString currentQrText;
     void refresh();
+    void showMetrics();
     void updateInventory();
     void updateStats();
     void updateLot();
@@ -58,6 +60,10 @@ private:
     QPushButton *navBorne;
     QrAnimation *qrAnimation;
     ChartAnimation *chart;
+    FormAnimation *form;
+    void buildForm();
+    void enterPage(int index);
+    void previewForm();
     LivingLogo *livingLogo;
     SpoolAnimation *spool;
     bool opening=false, leaving=false;

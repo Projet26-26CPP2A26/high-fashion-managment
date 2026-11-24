@@ -1,4 +1,5 @@
 #include "oracleconnection.h"
+#include "AnimationSpeed.h"
 #include "materialwindow.h"
 #include <QApplication>
 #include <QDir>
@@ -14,6 +15,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    Motion::SmoothTimers smoothTimers;
     app.setApplicationName("AUREA");
     app.setOrganizationName("Velora");
     app.setApplicationDisplayName("AUREA — Gestion des matières");

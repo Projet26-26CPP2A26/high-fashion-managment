@@ -30,7 +30,9 @@
 #include <algorithm>
 #include <cmath>
 #include "uihelpers.h"
+#include "CardAnimation.h"
 #include "ChartAnimation.h"
+#include "FormAnimation.h"
 #include "ClosingAnimation.h"
 #include "ConnectionAnimation.h"
 #include "dialogskin.h"
@@ -153,7 +155,49 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     connectArduino();
     UiAnimations::HoverGlow::install(this);
     for(QTableWidget *table:findChildren<QTableWidget*>()) new TableAnimation(table);
+    for(QFrame *card:{ui->referencesCard,ui->alertsCard,ui->valueCard,ui->suppliersCard}) new CardGlow(card);
+    buildForm();
     refresh(); setPage(0);
+}
+void MaterialWindow::buildForm() {
+    form=new FormAnimation;
+    ui->formCardLayout->insertWidget(ui->formCardLayout->indexOf(ui->validationLabel),form);
+    const auto text=[](QLineEdit *e){return [e]{return !e->text().trimmed().isEmpty();};};
+    const auto value=[](QDoubleSpinBox *s){return [s]{return s->value()>0;};};
+    QVector<FieldGlow*> fields;
+    for(QLineEdit *e:{ui->nameEdit,ui->lotEdit,ui->colorEdit,ui->supplierEdit}) {
+        fields.append(new FieldGlow(e,text(e))); connect(e,&QLineEdit::textChanged,this,&MaterialWindow::previewForm);
+    }
+    for(QDoubleSpinBox *s:{ui->quantityEdit,ui->minimumEdit,ui->priceEdit}) {
+        fields.append(new FieldGlow(s,value(s))); connect(s,&QDoubleSpinBox::valueChanged,this,&MaterialWindow::previewForm);
+    }
+    for(QComboBox *c:{ui->typeEdit,ui->unitEdit}) {
+        fields.append(new FieldGlow(c,[c]{return !c->currentText().isEmpty();})); connect(c,&QComboBox::currentTextChanged,this,&MaterialWindow::previewForm);
+    }
+    form->setFields(fields); previewForm();
+}
+void MaterialWindow::previewForm() {
+    FormAnimation::Data d;
+    d.name=ui->nameEdit->text(); d.type=ui->typeEdit->currentText(); d.color=ui->colorEdit->text(); d.supplier=ui->supplierEdit->text();
+    d.lot=ui->lotEdit->text(); d.unit=ui->unitEdit->currentText();
+    d.quantity=ui->quantityEdit->value(); d.minimum=ui->minimumEdit->value(); d.price=ui->priceEdit->value();
+    form->show(d);
+}
+// Entrée d'une page : les blocs surgissent l'un après l'autre.
+void MaterialWindow::enterPage(int index) {
+    if(opening||!isVisible()) return;
+    QList<QWidget*> blocks;
+    if(index==0||index==2) {
+        blocks={ui->referencesCard,ui->alertsCard,ui->valueCard,ui->suppliersCard};
+        for(QLabel *label:{ui->referencesValue,ui->alertsValue,ui->suppliersValue,ui->valueValue}) label->setProperty("shown",0.0);
+    }
+    if(index==0) blocks+={ui->filtersRow,ui->inventoryActions};
+    if(index==1) blocks={ui->identityRow,ui->descriptionRow,ui->quantityRow,form,ui->formActions};
+    if(index==2) blocks+={ui->alertIntro};
+    for(int i=0;i<blocks.size();++i) PopIn::play(blocks[i],70*i);
+    if(index==0) if(auto *t=dynamic_cast<TableAnimation*>(ui->materialsTable->itemDelegate())) t->replay();
+    if(index==2) if(auto *t=dynamic_cast<TableAnimation*>(ui->alertsTable->itemDelegate())) t->replay();
+    if(index==0||index==2) QTimer::singleShot(260,this,[this]{showMetrics();});
 }
 void MaterialWindow::setArduinoState(bool on,const QString &text) {
     arduinoLabel->setText(text); arduinoLight->setOn(on); borne->setLink(on,text);
@@ -165,8 +209,7 @@ void MaterialWindow::playOpening() {
     auto *intro=new TransitionAnimation(this,ui->logoMark,QStringLiteral("AUREA"),low?QStringLiteral("Bonjour · %1 matière(s) à commander").arg(low):QStringLiteral("Bonjour · votre stock est complet"));
     connect(intro,&TransitionAnimation::finished,this,[this]{
         opening=false;
-        for(QLabel *label:{ui->referencesValue,ui->alertsValue,ui->suppliersValue,ui->valueValue}) label->setProperty("shown",0.0);
-        refresh();
+        refresh(); enterPage(0);
         if(!waitingAlerts.isEmpty()) {const auto list=waitingAlerts; waitingAlerts.clear(); showAlert(list);}
     });
 }
@@ -208,14 +251,19 @@ void MaterialWindow::setPage(int index) {
     const QList<QPushButton*> buttons=navButtons(); buttons[index]->setChecked(true);
     ui->newMaterialButton->setVisible(index!=1);
     if(index==4) QTimer::singleShot(0,this,[this]{updateStats();});
+    QTimer::singleShot(0,this,[this,index]{if(ui->pages->currentIndex()==index) enterPage(index);});
 }
-void MaterialWindow::refresh() {
-    materials=repo.loadMaterials(); if(!repo.error().isEmpty()) {failure(repo.error()); return;}
+void MaterialWindow::showMetrics() {
     int low=0; double value=0; QSet<QString> suppliers;
     for(const auto &m:materials) {low+=m.low(); value+=m.quantity()*m.price(); suppliers.insert(m.supplier().toCaseFolded());}
     const auto whole=[](double v){return QString::number(std::lround(v));};
     UiAnimations::count(ui->referencesValue,materials.size(),whole); UiAnimations::count(ui->alertsValue,low,whole);
     UiAnimations::count(ui->valueValue,value,[](double v){return StockReports::money(v);}); UiAnimations::count(ui->suppliersValue,suppliers.size(),whole);
+}
+void MaterialWindow::refresh() {
+    materials=repo.loadMaterials(); if(!repo.error().isEmpty()) {failure(repo.error()); return;}
+    int low=0; for(const auto &m:materials) low+=m.low();
+    showMetrics();
     updateInventory();
     QVector<Material> lowList,newLow; QSet<int> ids;
     for(const auto &m:materials) if(m.low()) {lowList.append(m); ids.insert(m.id()); if(!lowIds.contains(m.id())) newLow.append(m);}

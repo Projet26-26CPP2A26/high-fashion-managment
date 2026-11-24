@@ -1,6 +1,5 @@
 #include "TransitionAnimation.h"
 #include "AnimationSpeed.h"
-#include "LinesAnimation.h"
 #include "LogoAnimation.h"
 #include <QEvent>
 #include <QLabel>
@@ -8,17 +7,22 @@
 #include <QPainterPath>
 
 namespace {
-const double Gather = 1150, Leave = 2050, End = 2950;
+const double Leave = 1350, End = 2150;
 }
 
 TransitionAnimation::TransitionAnimation(QWidget *window, QLabel *logo, const QString &title, const QString &subtitle)
-    : QWidget(window), m_logo(logo), m_title(title), m_subtitle(subtitle), m_shot(window->grab())
+    : QWidget(window), m_logo(logo), m_title(title), m_subtitle(subtitle), m_menuLogo(logo->pixmap())
 {
     // Opaque : Qt n'a pas à redessiner toute la fenêtre à chaque image.
     setAttribute(Qt::WA_OpaquePaintEvent);
+    // Le logo du menu est vidé avant la photo : il n'y en a jamais deux.
+    QPixmap empty = m_menuLogo;
+    empty.fill(Qt::transparent);
+    m_logo->setPixmap(empty);
+    m_shot = window->grab();
     setGeometry(window->rect());
     window->installEventFilter(this);
-    m_big = QPixmap(":/assets/logo_aurea.png").scaled(QSize(170, 170) * devicePixelRatioF(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    m_big = QPixmap(":/assets/logo_aurea.png").scaled(QSize(190, 190) * devicePixelRatioF(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     connect(&m_timer, &QTimer::timeout, this, [this] {
         update();
         if (m_clock.elapsed() > End)
@@ -31,10 +35,27 @@ TransitionAnimation::TransitionAnimation(QWidget *window, QLabel *logo, const QS
     m_timer.start(Motion::frame(this));
 }
 
+TransitionAnimation::~TransitionAnimation()
+{
+    restoreLogo();
+}
+
+void TransitionAnimation::restoreLogo()
+{
+    if (m_logo && !m_menuLogo.isNull())
+        m_logo->setPixmap(m_menuLogo);
+    m_menuLogo = QPixmap();
+}
+
 bool TransitionAnimation::eventFilter(QObject *object, QEvent *event)
 {
-    if (object == parent() && event->type() == QEvent::Resize)
+    if (object == parent() && event->type() == QEvent::Resize) {
         setGeometry(parentWidget()->rect());
+        hide();
+        m_shot = parentWidget()->grab();
+        show();
+        raise();
+    }
     return QWidget::eventFilter(object, event);
 }
 
@@ -44,6 +65,7 @@ void TransitionAnimation::finish()
         return;
     m_done = true;
     m_timer.stop();
+    restoreLogo();
     hide();
     emit finished();
     deleteLater();
@@ -51,108 +73,89 @@ void TransitionAnimation::finish()
 
 void TransitionAnimation::paintEvent(QPaintEvent *)
 {
+    if (!m_logo)
+        return;
     QPainter p(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     const double ms = m_clock.elapsed();
-    const double leave = Motion::both(Motion::part(ms, Leave, End));
-    const QPointF center(width() / 2.0, height() / 2.0 - 36);
-    const double reach = std::hypot(width(), height()) * 0.62;
+    const double leave = Motion::both(Motion::part(ms, Leave, End - 60));
+    const QPointF center(width() / 2.0, height() / 2.0 - 34);
 
-    // Fond, percé d'un cercle qui grandit et laisse voir l'application.
-    const double hole = reach * Motion::both(Motion::part(ms, Leave + 120, End));
-    if (m_back.deviceIndependentSize().toSize() != size()) {      // le fond n'est calculé qu'une fois
+    if (m_back.deviceIndependentSize().toSize() != size()) {
         m_back = QPixmap(size() * devicePixelRatioF());
         m_back.setDevicePixelRatio(devicePixelRatioF());
         QPainter b(&m_back);
-        QRadialGradient back(center, reach);
-        back.setColorAt(0, QColor("#26241f"));
-        back.setColorAt(0.45, QColor("#1b1b1d"));
-        back.setColorAt(1, QColor("#121214"));
+        QRadialGradient back(center, std::hypot(width(), height()) * 0.55);
+        back.setColorAt(0, QColor("#232220"));
+        back.setColorAt(0.55, QColor("#18181a"));
+        back.setColorAt(1, QColor("#111113"));
         b.fillRect(rect(), back);
     }
     p.drawPixmap(0, 0, m_back);
-    if (hole > 0) {
-        QPainterPath circle;
-        circle.addEllipse(center, hole, hole);
+
+    // L'application arrive du fond : elle grandit et devient nette.
+    const double come = Motion::soft(Motion::part(ms, Leave - 60, End - 120));
+    if (come > 0) {
+        const double zoom = Motion::mix(0.90, 1, come);
+        const QSizeF card(width() * zoom, height() * zoom);
+        const QRectF at(QPointF((width() - card.width()) / 2, (height() - card.height()) / 2), card);
+        QPainterPath clip;
+        clip.addRoundedRect(at, 22 * (1 - come), 22 * (1 - come));
         p.save();
-        p.setClipPath(circle);
-        p.drawPixmap(0, 0, m_shot);
+        p.setOpacity(Motion::part(ms, Leave - 60, Leave + 340));
+        p.setClipPath(clip);
+        p.drawPixmap(at, m_shot, QRectF(m_shot.rect()));
         p.restore();
     }
-    if (hole > 0) {
-        for (int i = 0; i < 4; ++i) {
-            QColor rim(241, 225, 180);
-            rim.setAlphaF((1 - leave) * (0.55 - 0.13 * i));
-            p.setPen(QPen(rim, 1.5 + 4 * i));
-            p.setBrush(Qt::NoBrush);
-            p.drawEllipse(center, hole, hole);
-        }
+
+    // Lumière unique, qui s'ouvre quand le logo surgit puis s'éteint.
+    const double flash = Motion::part(ms, 160, 900);
+    const double fade = 1 - Motion::part(ms, Leave - 150, Leave + 350);
+    if (fade > 0) {
+        QRadialGradient light(center, 250);
+        light.setColorAt(0, QColor(226, 207, 159, int(64 * Motion::soft(flash) * fade)));
+        light.setColorAt(1, QColor(226, 207, 159, 0));
+        p.fillRect(QRectF(center - QPointF(250, 250), QSizeF(500, 500)), light);
+    }
+    if (flash > 0 && flash < 1) {
+        QColor ring(241, 225, 180);
+        ring.setAlphaF(0.5 * std::pow(1 - flash, 2));
+        p.setPen(QPen(ring, 1.6));
+        p.setBrush(Qt::NoBrush);
+        p.drawEllipse(center, 70 + 130 * Motion::soft(flash), 70 + 130 * Motion::soft(flash));
     }
 
-    LinesAnimation::Scene lines;
-    lines.area = rect();
-    lines.center = center;
-    lines.radius = 108 * (1 + 2.6 * leave);
-    lines.time = ms / 1000;
-    lines.drawn = Motion::both(Motion::part(ms, 0, 950));
-    lines.gather = Motion::part(ms, 450, Gather + 250);
-    lines.alpha = 1 - Motion::part(ms, Leave + 100, End - 250);
-    LinesAnimation::paint(p, lines, false);
-
-    // Logo : apparaît au centre, puis vole jusqu'à sa place dans le menu.
-    const double in = Motion::soft(Motion::part(ms, 350, 1100));
-    const QSizeF logo = QSizeF(m_big.size()) / devicePixelRatioF();
-    QRectF from(center - QPointF(logo.width() / 2, logo.height() / 2), logo);
-    const double pop = Motion::mix(0.72, 1, Motion::spring(Motion::part(ms, 350, 1100)));
-    from = QRectF(center - QPointF(logo.width(), logo.height()) * pop / 2, logo * pop);
+    // Le logo : il vient de loin, dépasse un peu sa taille, se stabilise, puis rejoint le menu.
+    const double in = Motion::part(ms, 0, 820);
+    const double size = 190 * std::max(0.0, Motion::mix(0.12, 1, Motion::spring(in)));
+    const double ratio = m_big.width() ? double(m_big.height()) / m_big.width() : 1;
+    const QRectF from(center.x() - size / 2, center.y() - size * ratio / 2, size, size * ratio);
     const QRectF to = LivingLogo::place(m_logo, window());
-    QRectF at(Motion::mix(from.x(), to.x(), leave), Motion::mix(from.y(), to.y(), leave) - 60 * std::sin(leave * Motion::Pi),
-              Motion::mix(from.width(), to.width(), leave), Motion::mix(from.height(), to.height(), leave));
-    QRadialGradient glow(at.center(), at.width() * 1.1);
-    glow.setColorAt(0, QColor(226, 207, 159, int(60 * in * (1 - leave))));
-    glow.setColorAt(1, QColor(226, 207, 159, 0));
-    p.fillRect(at.adjusted(-at.width(), -at.width(), at.width(), at.width()), glow);
-    p.setOpacity(in);
-    p.drawPixmap(at, m_big, QRectF(m_big.rect()));
-    const double sweep = Motion::part(ms, 1050, 1750);
-    if (sweep > 0 && sweep < 1) {
-        QPainterPath disc;
-        disc.addEllipse(at.center(), at.width() * 0.4, at.width() * 0.4);
-        p.save();
-        p.setClipPath(disc);
-        const double x = at.left() - at.width() * 0.4 + at.width() * 1.8 * sweep;
-        QLinearGradient shine(x - 34, at.top(), x + 34, at.top() + 20);
-        shine.setColorAt(0, QColor(255, 246, 214, 0));
-        shine.setColorAt(0.5, QColor(255, 246, 214, 130));
-        shine.setColorAt(1, QColor(255, 246, 214, 0));
-        p.fillRect(at, shine);
-        p.restore();
+    const QRectF at(Motion::mix(from.x(), to.x(), leave), Motion::mix(from.y(), to.y(), leave),
+                    Motion::mix(from.width(), to.width(), leave), Motion::mix(from.height(), to.height(), leave));
+    const double depth = (1 - Motion::soft(in)) * (1 - leave);
+    for (int i = 3; i > 0 && depth > 0.02; --i) {      // profondeur : échos qui se rejoignent
+        const double k = 1 + 0.16 * i * depth;
+        p.setOpacity(0.16 * depth * Motion::part(ms, 40, 220));
+        p.drawPixmap(QRectF(at.center() - QPointF(at.width() * k / 2, at.height() * k / 2), at.size() * k), m_big, QRectF(m_big.rect()));
     }
+    p.setOpacity(Motion::part(ms, 0, 240));
+    p.drawPixmap(at, m_big, QRectF(m_big.rect()));
     p.setOpacity(1);
-    LinesAnimation::paint(p, lines, true);
 
-    // Titre, lettre par lettre.
+    const double words = Motion::soft(Motion::part(ms, 480, 980)), gone = 1 - Motion::part(ms, Leave - 120, Leave + 160);
+    if (words * gone <= 0)
+        return;
+    p.setOpacity(words * gone);
     QFont title("Cormorant Garamond");
     title.setPixelSize(46);
+    title.setLetterSpacing(QFont::AbsoluteSpacing, 8);
     p.setFont(title);
-    const double gap = 9, out = 1 - Motion::part(ms, Leave - 120, Leave + 260);
-    double total = 0;
-    for (const QChar c : m_title)
-        total += p.fontMetrics().horizontalAdvance(c) + gap;
-    double x = width() / 2.0 - (total - gap) / 2;
-    for (int i = 0; i < m_title.size(); ++i) {
-        const double show = Motion::soft(Motion::part(ms, 850 + 45 * i, 1350 + 45 * i));
-        QColor gold("#e9d8a8");
-        gold.setAlphaF(show * out);
-        p.setPen(gold);
-        p.drawText(QPointF(x, center.y() + 196 + 16 * (1 - show)), QString(m_title[i]));
-        x += p.fontMetrics().horizontalAdvance(m_title[i]) + gap;
-    }
+    p.setPen(QColor("#e9d8a8"));
+    p.drawText(QRectF(4, center.y() + 112 + 18 * (1 - words), width(), 58), Qt::AlignCenter, m_title);
     QFont small("Inter");
     small.setPixelSize(14);
     p.setFont(small);
-    QColor grey("#b9b4a8");
-    grey.setAlphaF(Motion::soft(Motion::part(ms, 1250, 1700)) * out);
-    p.setPen(grey);
-    p.drawText(QRectF(0, center.y() + 214, width(), 26), Qt::AlignCenter, m_subtitle);
+    p.setPen(QColor("#b9b4a8"));
+    p.drawText(QRectF(0, center.y() + 172 + 18 * (1 - words), width(), 26), Qt::AlignCenter, m_subtitle);
 }

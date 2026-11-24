@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     arduino/bornepage.cpp \
     Animations/ChartAnimation.cpp \
     Animations/ClosingAnimation.cpp \
-    Animations/LinesAnimation.cpp \
+    Animations/CardAnimation.cpp \
+    Animations/FormAnimation.cpp \
     Animations/LogoAnimation.cpp \
     Animations/QrAnimation.cpp \
     Animations/TableAnimation.cpp \
@@ -46,7 +47,8 @@ HEADERS += Crud/material.h \
     Animations/UiAnimations.h \
     Animations/ChartAnimation.h \
     Animations/ClosingAnimation.h \
-    Animations/LinesAnimation.h \
+    Animations/CardAnimation.h \
+    Animations/FormAnimation.h \
     Animations/LogoAnimation.h \
     Animations/QrAnimation.h \
     Animations/TableAnimation.h \

@@ -11,6 +11,7 @@ class QTableWidget;
 class TableAnimation : public QStyledItemDelegate {
 public:
     explicit TableAnimation(QTableWidget *table);
+    void replay();
     void paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 protected:

@@ -37,7 +37,7 @@ Table : `materials`. Schéma : `oracle/01_schema.sql` ; `oracle/99_drop_all.sql`
 | `Crud/` | Fenêtre, classe `Material`, dépôt `InventoryRepository`, connexion Oracle |
 | `Metier/` | Réapprovisionnement, QR code par lot, statistiques et PDF |
 | `arduino/` | Classe `Arduino`, page de la borne, programme `.ino`, projet Wokwi |
-| `Animations/` | Ouverture, fermeture, fils de soie, logo, QR, tableaux, graphique, liaison |
+| `Animations/` | Ouverture, fermeture, cartes, formulaire, logo, QR, tableaux, graphique, liaison |
 | `Animations/ClosingAnimation` | Module commun de l'équipe, repris du projet AUREA_Employes |
 | `Extras/` | Messages animés, icônes, sons, script de lancement, bibliothèques QR (`libs/`) |
 | `Resources/Assets/` | Thème, polices, logo, icônes des matières, sons |

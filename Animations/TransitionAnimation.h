@@ -1,17 +1,19 @@
 #pragma once
 #include <QElapsedTimer>
 #include <QPixmap>
+#include <QPointer>
 #include <QTimer>
 #include <QWidget>
 
-class QLabel;
+#include <QLabel>
 
-// Ouverture : les fils de soie s'enroulent autour du logo, puis le logo rejoint le menu
-// pendant que l'application apparaît dans un cercle de lumière.
+// Ouverture : le logo surgit en profondeur, l'application avance derrière lui,
+// puis ce même logo va se poser à sa place dans le menu (un seul logo à l'écran).
 class TransitionAnimation : public QWidget {
     Q_OBJECT
 public:
     TransitionAnimation(QWidget *window, QLabel *logo, const QString &title, const QString &subtitle);
+    ~TransitionAnimation() override;
 
 signals:
     void finished();
@@ -23,11 +25,11 @@ protected:
 
 private:
     void finish();
-    QLabel *m_logo;
+    void restoreLogo();
+    QPointer<QLabel> m_logo;
     QString m_title, m_subtitle;
-    QPixmap m_big, m_shot;
+    QPixmap m_menuLogo, m_big, m_shot, m_back;
     QElapsedTimer m_clock;
-    QPixmap m_back;
     QTimer m_timer;
     bool m_done = false;
 };

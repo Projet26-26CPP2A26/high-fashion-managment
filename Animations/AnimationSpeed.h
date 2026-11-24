@@ -4,8 +4,23 @@
 #include <algorithm>
 #include <cmath>
 
+#ifdef Q_OS_WIN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <mmsystem.h>
+#endif
+
 // Durées (ms) et courbes communes à toutes les animations.
 namespace Motion {
+// Windows réveille les minuteries toutes les 15 ms par défaut (64 images/s) : on demande 1 ms.
+struct SmoothTimers {
+#ifdef Q_OS_WIN
+    SmoothTimers() { timeBeginPeriod(1); }
+    ~SmoothTimers() { timeEndPeriod(1); }
+#endif
+};
 constexpr int Fast = 180;
 constexpr int Page = 240;
 constexpr int Normal = 320;
