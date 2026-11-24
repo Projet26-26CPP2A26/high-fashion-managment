@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="/assets">
+    <file alias="theme.qss">Assets/theme.qss</file>
+    <file alias="logo_aurea.png">Assets/logo_aurea.png</file>
+    <file alias="chevron_down.png">Assets/chevron_down.png</file>
+    <file alias="chevron_up.png">Assets/chevron_up.png</file>
+    <file alias="fonts/Inter.ttf">Assets/fonts/Inter.ttf</file>
+    <file alias="fonts/CormorantGaramond.ttf">Assets/fonts/CormorantGaramond.ttf</file>
+    <file alias="fonts/CormorantGaramond-Italic.ttf">Assets/fonts/CormorantGaramond-Italic.ttf</file>
+    <file alias="sounds/alerte.wav">Assets/sounds/alerte.wav</file>
+    <file alias="sounds/fermeture.wav">Assets/sounds/fermeture.wav</file>
+    <file alias="sounds/ouverture.wav">Assets/sounds/ouverture.wav</file>
+    <file alias="sounds/refus.wav">Assets/sounds/refus.wav</file>
+    <file alias="sounds/valide.wav">Assets/sounds/valide.wav</file>
+    <file alias="icons/autre.png">Assets/icons/autre.png</file>
+    <file alias="icons/bouton.png">Assets/icons/bouton.png</file>
+    <file alias="icons/dentelle.png">Assets/icons/dentelle.png</file>
+    <file alias="icons/doublure.png">Assets/icons/doublure.png</file>
+    <file alias="icons/fermeture.png">Assets/icons/fermeture.png</file>
+    <file alias="icons/fil.png">Assets/icons/fil.png</file>
+    <file alias="icons/ruban.png">Assets/icons/ruban.png</file>
+    <file alias="icons/tissu.png">Assets/icons/tissu.png</file>
+  </qresource>
+</RCC>

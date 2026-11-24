@@ -49,13 +49,13 @@ QLineEdit:hover, QComboBox:hover, QDoubleSpinBox:hover, QSpinBox:hover { border-
 QLineEdit:read-only { color: #b9b4a8; background: #232326; }
 QLineEdit:disabled, QComboBox:disabled, QDoubleSpinBox:disabled { color: #66645f; background: #212124; }
 QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: center right; border: none; width: 28px; }
-QComboBox::down-arrow { image: url(:/icons/chevron_down.png); width: 12px; height: 12px; }
+QComboBox::down-arrow { image: url(:/assets/chevron_down.png); width: 12px; height: 12px; }
 QDoubleSpinBox, QSpinBox { padding-right: 26px; }
 QDoubleSpinBox::up-button, QSpinBox::up-button { subcontrol-origin: border; subcontrol-position: top right; width: 24px; border: none; border-top-right-radius: 9px; background: transparent; }
 QDoubleSpinBox::down-button, QSpinBox::down-button { subcontrol-origin: border; subcontrol-position: bottom right; width: 24px; border: none; border-bottom-right-radius: 9px; background: transparent; }
 QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover, QSpinBox::up-button:hover, QSpinBox::down-button:hover { background: #2e2e32; }
-QDoubleSpinBox::up-arrow, QSpinBox::up-arrow { image: url(:/icons/chevron_up.png); width: 10px; height: 10px; }
-QDoubleSpinBox::down-arrow, QSpinBox::down-arrow { image: url(:/icons/chevron_down.png); width: 10px; height: 10px; }
+QDoubleSpinBox::up-arrow, QSpinBox::up-arrow { image: url(:/assets/chevron_up.png); width: 10px; height: 10px; }
+QDoubleSpinBox::down-arrow, QSpinBox::down-arrow { image: url(:/assets/chevron_down.png); width: 10px; height: 10px; }
 QComboBox QAbstractItemView { background: #242427; color: #f3f0ea; border: 1px solid #36363a; selection-background-color: #4a4434; selection-color: #fff6dc; outline: none; }
 QCheckBox { spacing: 8px; }
 
