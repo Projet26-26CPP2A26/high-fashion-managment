@@ -33,6 +33,7 @@
 #include "CardAnimation.h"
 #include "ChartAnimation.h"
 #include "FormAnimation.h"
+#include "OrderAnimation.h"
 #include "ClosingAnimation.h"
 #include "ConnectionAnimation.h"
 #include "dialogskin.h"
@@ -117,10 +118,12 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     connect(ui->alertsTable,&QTableWidget::itemSelectionChanged,this,[this]{
         const Material m=repo.findMaterial(selectedId(ui->alertsTable)); const bool enabled=m.id()!=0;
         ui->purchaseOrderButton->setEnabled(enabled); ui->receiveButton->setEnabled(enabled); ui->reorderQuantity->setEnabled(enabled);
-        ui->reorderQuantity->setValue(m.toOrder());
         ui->reorderQuantity->setDecimals((m.unit()==QStringLiteral("pièce")||m.unit()==QStringLiteral("bobine"))?0:2);
         ui->reorderQuantity->setSuffix(enabled?" "+m.unit():QString());
+        ui->reorderQuantity->setValue(ordered.value(m.id(),m.toOrder()));
+        showOrderStep();
     });
+    connect(ui->reorderQuantity,&QDoubleSpinBox::valueChanged,this,&MaterialWindow::showOrderStep);
     connect(ui->lotCombo,&QComboBox::currentIndexChanged,this,[this]{updateLot();});
     connect(ui->refreshQrButton,&QPushButton::clicked,this,[this]{updateLot();});
     connect(ui->openPhonePageButton,&QPushButton::clicked,this,[this]{if(!currentQrText.isEmpty()) QDesktopServices::openUrl(QUrl(currentQrText));});
@@ -135,7 +138,7 @@ MaterialWindow::MaterialWindow(QWidget *parent)
         DialogSkin::info(this,QStringLiteral("Aide — Gestion des matières"),QStringLiteral(
             "• Matières premières : recherchez, filtrez et sélectionnez une ligne pour modifier, supprimer ou enregistrer une entrée / sortie.\n\n"
             "• Ajouter une matière : chaque référence appartient à un lot unique. L’unité reste fixe une fois le lot enregistré.\n\n"
-            "• Réapprovisionnement : les matières sous le seuil sont repérées automatiquement. Une alerte s’affiche dès qu’une matière passe sous son seuil. « Tout commander » crée un bon par fournisseur. Le PDF prépare une commande ; il ne modifie pas le stock. Enregistrez la réception à l’arrivée des marchandises.\n\n"
+            "• Réapprovisionnement : 1) choisissez une ligne, 2) créez le bon de commande PDF et envoyez-le au fournisseur, 3) à l’arrivée, cliquez sur « Marchandise reçue ». Une alerte s’affiche dès qu’une matière passe sous son seuil. « Tout commander » crée un bon par fournisseur. Le PDF prépare une commande ; il ne modifie pas le stock. Enregistrez la réception à l’arrivée des marchandises.\n\n"
             "• Lots & QR : scannez le QR avec l’appareil photo du téléphone pour afficher la fiche du lot. Recréez le QR après une modification du stock. La consommation est confirmée avant déduction.\n\n"
             "• Statistiques : comparaison de la valeur des stocks par type, sans additionner des unités différentes.\n\n"
             "Ctrl+N : nouvelle matière. Ctrl+F : rechercher. Ctrl+S : enregistrer le formulaire.\n\n"
@@ -157,6 +160,7 @@ MaterialWindow::MaterialWindow(QWidget *parent)
     for(QTableWidget *table:findChildren<QTableWidget*>()) new TableAnimation(table);
     for(QFrame *card:{ui->referencesCard,ui->alertsCard,ui->valueCard,ui->suppliersCard}) new CardGlow(card);
     buildForm();
+    orderGuide=new OrderAnimation; ui->alertIntroLayout->addWidget(orderGuide);
     refresh(); setPage(0);
 }
 void MaterialWindow::buildForm() {
@@ -264,6 +268,7 @@ void MaterialWindow::refresh() {
     materials=repo.loadMaterials(); if(!repo.error().isEmpty()) {failure(repo.error()); return;}
     int low=0; for(const auto &m:materials) low+=m.low();
     showMetrics();
+    borne->setMaterials(materials);
     updateInventory();
     QVector<Material> lowList,newLow; QSet<int> ids;
     for(const auto &m:materials) if(m.low()) {lowList.append(m); ids.insert(m.id()); if(!lowIds.contains(m.id())) newLow.append(m);}
@@ -271,17 +276,18 @@ void MaterialWindow::refresh() {
     ui->navAlerts->setText(low?QStringLiteral("À commander (%1)").arg(low):QStringLiteral("À commander"));
     // Les plus urgentes d'abord : stock restant le plus faible par rapport au seuil.
     std::stable_sort(lowList.begin(),lowList.end(),[](const Material &a,const Material &b){return a.quantity()/a.minimum()<b.quantity()/b.minimum();});
+    const int keptAlert=selectedId(ui->alertsTable);
     ui->alertsTable->setRowCount(0);
     for(const auto &m:lowList) {
         const int row=ui->alertsTable->rowCount(); ui->alertsTable->insertRow(row);
-        const QStringList vals={m.name(),m.supplier(),StockReports::quantity(m.quantity()),StockReports::quantity(m.minimum()),m.unit(),StockReports::quantity(m.minimum()-m.quantity()),m.lot(),state(m)};
+        const QStringList vals={m.name(),m.supplier(),StockReports::quantity(m.quantity()),StockReports::quantity(m.minimum()),m.unit(),StockReports::quantity(m.minimum()-m.quantity()),m.lot(),ordered.contains(m.id())?QStringLiteral("Commandé"):state(m)};
         for(int c=0;c<vals.size();++c) ui->alertsTable->setItem(row,c,cell(vals[c],m.id()));
         ui->alertsTable->item(row,0)->setForeground(QColor(m.quantity()==0?"#e8a9b0":"#e2cf9f"));
     }
     const bool haveAlerts=ui->alertsTable->rowCount()>0;
     ui->purchaseOrderButton->setEnabled(haveAlerts); ui->orderAllButton->setEnabled(haveAlerts); ui->receiveButton->setEnabled(haveAlerts); ui->reorderQuantity->setEnabled(haveAlerts);
-    if(haveAlerts) ui->alertsTable->selectRow(0);
-    ui->alertHeadline->setText(haveAlerts?QStringLiteral("%1 matière(s) à réapprovisionner").arg(low):QStringLiteral("Votre stock est au-dessus des seuils"));
+    if(haveAlerts) {int row=0; for(int i=0;i<ui->alertsTable->rowCount();++i) if(ui->alertsTable->item(i,0)->data(Qt::UserRole).toInt()==keptAlert) row=i; ui->alertsTable->selectRow(row);}
+    showOrderStep();
     const int lotId=ui->lotCombo->currentData().toInt();
     ui->lotCombo->blockSignals(true); ui->lotCombo->clear();
     for(const auto &m:materials) ui->lotCombo->addItem(m.lot()+QStringLiteral(" — ")+m.name(),m.id());

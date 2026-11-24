@@ -1,6 +1,7 @@
 // AUREA - Borne de stock (Arduino Uno + clavier 4x4 + LCD I2C 16x2 + buzzer)
-// Clavier : ID de la matiere, puis C = consulter
-//           ID, A = entree ou B = sortie, quantite, # = valider      * ou D = annuler
+// Clavier : ID, puis C = voir ; ID, A = entree ou B = sortie, quantite, # = valider
+//           apres un resultat, A, B et C reprennent la meme matiere
+//           * = effacer le dernier chiffre, D = annuler
 // Vers Qt : C6   E6:10   S6:2          Depuis Qt : ligne1|ligne2|etat
 // etat : 0 = normal, 1 = sous le seuil (buzzer), 2 = erreur
 #include <Wire.h>
@@ -15,7 +16,7 @@ const byte lignes[4] = {9, 8, 7, 6};
 const byte colonnes[4] = {5, 4, 3, 2};
 
 char derniere = 0;          // derniere touche lue (anti-rebond)
-String id = "", quantite = "", reponse = "";
+String id = "", quantite = "", reponse = "", dernierId = "";
 char operation = 0;         // 'E' entree, 'S' sortie, 0 = saisie de l'ID
 bool attente = false;       // en attente de la reponse de Qt
 unsigned long debut = 0;
@@ -47,6 +48,7 @@ void afficher(String l1, String l2)
 void accueil()
 {
   id = "";
+  dernierId = "";
   quantite = "";
   operation = 0;
   attente = false;
@@ -56,6 +58,7 @@ void accueil()
 void envoyer(String message)
 {
   Serial.println(message);
+  dernierId = id;
   afficher("Recherche...", "");
   attente = true;
   debut = millis();
@@ -72,6 +75,7 @@ void traiterReponse()
     tone(PIN_BUZZER, etat == '2' ? 300 : 1000, 200);
     delay(350);
   }
+  if (reponse.startsWith("ID introuvable")) dernierId = "";
   id = "";
   quantite = "";
   operation = 0;
@@ -80,17 +84,28 @@ void traiterReponse()
 
 void traiterTouche(char t)
 {
-  if (t == '*' || t == 'D') { accueil(); return; }
+  if (t == 'D') { accueil(); return; }
   if (attente) return;
-  if (t >= '0' && t <= '9') {
+  if (t == '*') {                       // effacer le dernier chiffre
+    if (operation != 0 && quantite.length() == 0) operation = 0;
+    else if (operation != 0) quantite.remove(quantite.length() - 1);
+    else if (id.length() > 0) id.remove(id.length() - 1);
+    if (operation == 0 && id.length() == 0) { accueil(); return; }
+  }
+  else if (t >= '0' && t <= '9') {
     if (operation == 0 && id.length() < 6) id += t;
     else if (operation != 0 && quantite.length() < 5) quantite += t;
   }
-  else if (operation == 0 && id.length() > 0 && t == 'C') { envoyer("C" + id); return; }
-  else if (operation == 0 && id.length() > 0 && (t == 'A' || t == 'B')) operation = t == 'A' ? 'E' : 'S';
-  else if (t == '#' && operation != 0 && quantite.length() > 0) {
-    envoyer(String(operation) + id + ":" + quantite);
-    return;
+  else {
+    if (operation == 0 && id.length() == 0) id = dernierId;   // meme matiere
+    if (id.length() == 0) { afficher("Tapez d'abord", "l'ID matiere"); return; }
+    if (t == 'A' || t == 'B') {
+      operation = t == 'A' ? 'E' : 'S';
+      quantite = "";
+    }
+    else if (t == 'C' || operation == 0) { envoyer("C" + id); return; }
+    else if (quantite.length() == 0) { afficher("Quantite ?", "puis #"); return; }
+    else { envoyer(String(operation) + id + ":" + quantite); return; }
   }
   if (operation == 0) afficher("ID : " + id, "A+  B-  C=voir");
   else afficher(String(operation == 'E' ? "Entree ID " : "Sortie ID ") + id, "Qte : " + quantite + "  #=OK");

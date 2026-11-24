@@ -19,7 +19,7 @@ Maquette : boîte en carton recyclé, l'écran et le clavier en façade, l'Ardui
 
 1. Téléverser `borne_stock/borne_stock.ino` avec l'IDE Arduino (bibliothèque *LiquidCrystal I2C*).
 2. **Fermer le moniteur série** de l'IDE, puis lancer AUREA : « Arduino connecté » apparaît en bas à droite.
-3. Consulter : `ID` puis `C`. Entrée : `ID` `A` quantité `#`. Sortie : `ID` `B` quantité `#`. Annuler : `*` ou `D`.
+3. Consulter : `ID` puis `C`. Entrée : `ID` `A` quantité `#`. Sortie : `ID` `B` quantité `#`. Après un résultat, `A`, `B` ou `C` reprennent la même matière. `*` efface un chiffre, `D` annule.
 
 ## Messages
 

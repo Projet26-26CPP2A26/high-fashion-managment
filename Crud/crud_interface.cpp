@@ -102,10 +102,13 @@ void MaterialWindow::changeStock(int id,bool receiptOnly) {
     QDialog dialog(this); dialog.setWindowTitle(receiptOnly?QStringLiteral("Réception de matières"):QStringLiteral("Entrée / sortie de stock")); dialog.setMinimumWidth(480);
     QFormLayout form(&dialog); QLabel info(m.name()+QStringLiteral(" · lot ")+m.lot()+QStringLiteral("\nStock : ")+StockReports::quantity(m.quantity())+" "+m.unit()); info.setWordWrap(true); form.addRow(&info);
     QComboBox kind; kind.addItems({QStringLiteral("Entrée / réception"),QStringLiteral("Sortie / consommation")}); if(!receiptOnly) form.addRow(QStringLiteral("Opération"),&kind);
-    QDoubleSpinBox amount; amount.setRange(0,9999999.99); amount.setDecimals((m.unit()==QStringLiteral("pièce")||m.unit()==QStringLiteral("bobine"))?0:2); amount.setValue(receiptOnly&&m.low()?m.toOrder():1); amount.setSuffix(" "+m.unit()); form.addRow(QStringLiteral("Quantité"),&amount);
+    QDoubleSpinBox amount; amount.setRange(0,9999999.99); amount.setDecimals((m.unit()==QStringLiteral("pièce")||m.unit()==QStringLiteral("bobine"))?0:2); amount.setValue(receiptOnly?ordered.value(m.id(),m.low()?m.toOrder():1):1); amount.setSuffix(" "+m.unit()); form.addRow(QStringLiteral("Quantité"),&amount);
     QDialogButtonBox actions(QDialogButtonBox::Ok|QDialogButtonBox::Cancel); actions.button(QDialogButtonBox::Ok)->setText(QStringLiteral("Enregistrer")); actions.button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Annuler")); form.addRow(&actions);
     connect(&actions,&QDialogButtonBox::accepted,&dialog,&QDialog::accept); connect(&actions,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
     if(dialog.exec()!=QDialog::Accepted) return;
     if(!repo.changeQuantity(id,(kind.currentIndex()==1?-1:1)*amount.value())) {failure(repo.error()); return;}
-    refresh(); notify(QStringLiteral("Stock mis à jour pour le lot %1.").arg(m.lot()));
+    if(receiptOnly) ordered.remove(id);
+    refresh();
+    const Material now=repo.findMaterial(id);
+    notify(QStringLiteral("%1 : nouveau stock %2 %3").arg(now.name(),StockReports::quantity(now.quantity()),now.unit()));
 }

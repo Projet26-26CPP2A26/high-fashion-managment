@@ -2718,7 +2718,7 @@ Un atelier organisé.</string>
                                   <item>
                                     <widget class="QLabel" name="alertDescription">
                                       <property name="text">
-                                        <string>Les matières sous leur seuil minimal apparaissent ici automatiquement. Préparez un bon de commande, puis enregistrez la réception.</string>
+                                        <string>Les matières sous leur seuil apparaissent ici automatiquement.</string>
                                       </property>
                                       <property name="sizePolicy">
                                         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2912,7 +2912,7 @@ Un atelier organisé.</string>
                                   <item>
                                     <widget class="QPushButton" name="purchaseOrderButton">
                                       <property name="text">
-                                        <string>Bon de commande PDF</string>
+                                        <string>Commander cette matière (PDF)</string>
                                       </property>
                                       <property name="primary" stdset="0">
                                         <bool>true</bool>
@@ -2922,14 +2922,14 @@ Un atelier organisé.</string>
                                   <item>
                                     <widget class="QPushButton" name="orderAllButton">
                                       <property name="text">
-                                        <string>Tout commander</string>
+                                        <string>Tout commander (PDF)</string>
                                       </property>
                                     </widget>
                                   </item>
                                   <item>
                                     <widget class="QPushButton" name="receiveButton">
                                       <property name="text">
-                                        <string>Enregistrer une réception</string>
+                                        <string>Marchandise reçue</string>
                                       </property>
                                     </widget>
                                   </item>
@@ -2939,7 +2939,7 @@ Un atelier organisé.</string>
                             <item>
                               <widget class="QLabel" name="reorderHint">
                                 <property name="text">
-                                  <string>Sélectionnez une matière. La quantité proposée remonte le stock au double du seuil minimal.</string>
+                                  <string>La quantité proposée remonte le stock au double du seuil. Le PDF ne change pas le stock : seule la réception le fait.</string>
                                 </property>
                                 <property name="sizePolicy">
                                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

@@ -26,6 +26,7 @@ SOURCES += main.cpp \
     Animations/CardAnimation.cpp \
     Animations/FormAnimation.cpp \
     Animations/LogoAnimation.cpp \
+    Animations/OrderAnimation.cpp \
     Animations/QrAnimation.cpp \
     Animations/TableAnimation.cpp \
     Animations/TransitionAnimation.cpp \
@@ -50,6 +51,7 @@ HEADERS += Crud/material.h \
     Animations/CardAnimation.h \
     Animations/FormAnimation.h \
     Animations/LogoAnimation.h \
+    Animations/OrderAnimation.h \
     Animations/QrAnimation.h \
     Animations/TableAnimation.h \
     Animations/TransitionAnimation.h \

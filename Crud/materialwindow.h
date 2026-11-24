@@ -4,12 +4,14 @@
 #include <QMainWindow>
 #include <QImage>
 #include <QList>
+#include <QHash>
 #include <QSet>
 
 namespace Ui { class MaterialWindow; }
 class BornePage;
 class ChartAnimation;
 class FormAnimation;
+class OrderAnimation;
 class LivingLogo;
 class SpoolAnimation;
 class LinkLight;
@@ -61,6 +63,10 @@ private:
     QrAnimation *qrAnimation;
     ChartAnimation *chart;
     FormAnimation *form;
+    OrderAnimation *orderGuide;
+    QHash<int,double> ordered;   // commandes préparées pendant cette session
+    void showOrderStep();
+    void orderReady(const QString &path,const QString &text);
     void buildForm();
     void enterPage(int index);
     void previewForm();

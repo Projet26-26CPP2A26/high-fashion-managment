@@ -23,6 +23,7 @@ set(APP_SOURCES
     Animations/CardAnimation.cpp Animations/CardAnimation.h
     Animations/FormAnimation.cpp Animations/FormAnimation.h
     Animations/LogoAnimation.cpp Animations/LogoAnimation.h
+    Animations/OrderAnimation.cpp Animations/OrderAnimation.h
     Animations/QrAnimation.cpp Animations/QrAnimation.h
     Animations/TableAnimation.cpp Animations/TableAnimation.h
     Animations/TransitionAnimation.cpp Animations/TransitionAnimation.h

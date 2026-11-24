@@ -125,7 +125,7 @@ void TableAnimation::paint(QPainter *p, const QStyleOptionViewItem &option, cons
     p->translate(0, 26 * (1 - in));
     QRect r = option.rect.adjusted(10, 0, -8, 0);
     if (name == QStringLiteral("État")) {
-        const QColor tone(text == QStringLiteral("Rupture") ? "#e8a9b0" : text == QStringLiteral("Disponible") ? "#b7ccb3" : "#e6ce89");
+        const QColor tone(text == QStringLiteral("Rupture") ? "#e8a9b0" : text == QStringLiteral("Disponible") ? "#b7ccb3" : text == QStringLiteral("Commandé") ? "#9fbfe0" : "#e6ce89");
         const double beat = text == QStringLiteral("Disponible") ? 0 : 0.5 + 0.5 * std::sin(m_life.elapsed() / (text == QStringLiteral("Rupture") ? 260.0 : 520.0));
         QColor back = tone;
         back.setAlpha(int(32 + 22 * beat));

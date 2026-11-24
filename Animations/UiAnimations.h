@@ -115,7 +115,7 @@ inline void count(QLabel *label, double value, const std::function<QString(doubl
     a->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-// Message doré en bas à droite.
+// Message doré en bas, sans cacher les boutons.
 inline void toast(QWidget *window, const QString &message)
 {
     if (QLabel *old = window->findChild<QLabel *>("toast", Qt::FindDirectChildrenOnly))
@@ -124,7 +124,7 @@ inline void toast(QWidget *window, const QString &message)
     t->setObjectName("toast");
     t->setTextFormat(Qt::PlainText);
     t->setAttribute(Qt::WA_TransparentForMouseEvents);
-    t->setStyleSheet("background:#2b2820;border:1px solid #c9b27c;border-radius:10px;color:#f1e1b4;padding:12px 18px;font-weight:600;");
+    t->setStyleSheet("background:#2b2820;border:1px solid #c9b27c;border-radius:10px;color:#f1e1b4;padding:7px 18px;font-weight:600;");
     t->adjustSize();
     auto *opacity = new QGraphicsOpacityEffect(t);
     t->setGraphicsEffect(opacity);
@@ -137,7 +137,7 @@ inline void toast(QWidget *window, const QString &message)
     const auto place = [=](double ms) {
         const double shown = Motion::soft(ms / Motion::Normal) * (1 - Motion::both(Motion::part(ms, 3600 - Motion::Normal, 3600)));
         opacity->setOpacity(shown);
-        t->move(window->width() - t->width() - 28, window->height() - t->height() - 44 + int(18 * (1 - shown)));
+        t->move((window->width() - t->width()) / 2, window->height() - t->height() - 3 + int(18 * (1 - shown)));
     };
     place(0);
     QObject::connect(a, &QVariantAnimation::valueChanged, t, [=](const QVariant &v) { place(v.toDouble()); });

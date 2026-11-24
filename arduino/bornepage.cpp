@@ -2,12 +2,15 @@
 #include "ConnectionAnimation.h"
 #include "sound.h"
 #include "uihelpers.h"
+#include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QSignalBlocker>
 #include <QPainter>
 #include <QTime>
 #include <QVBoxLayout>
+#include <algorithm>
 
 LcdScreen::LcdScreen(QWidget *parent) : QWidget(parent)
 {
@@ -88,24 +91,38 @@ BornePage::BornePage(QWidget *parent) : QWidget(parent)
     auto *left = new QVBoxLayout;
     left->setSpacing(12);
     left->addWidget(text(QStringLiteral("Borne virtuelle"), "section"));
-    left->addWidget(text(QStringLiteral("Même clavier que la borne Arduino. Les opérations modifient réellement le stock dans Oracle."), "muted"));
+    m_pick = new QComboBox;
+    left->addWidget(m_pick);
+    connect(m_pick, &QComboBox::activated, this, [this] {
+        const int id = m_pick->currentData().toInt();
+        if (!id)
+            return;
+        home();
+        for (const QChar c : QString::number(id))
+            key(c);
+    });
     m_lcd = new LcdScreen;
     left->addWidget(m_lcd);
+    m_step = new QLabel;
+    m_step->setWordWrap(true);
+    m_step->setMinimumHeight(42);
+    m_step->setStyleSheet("color:#e9d8a8;font-weight:600;background:transparent;");
+    left->addWidget(m_step);
     auto *grid = new QGridLayout;
     grid->setSpacing(8);
     const QString keys = "123A456B789C*0#D";
     for (int i = 0; i < 16; ++i) {
         const QChar k = keys[i];
-        auto *b = new QPushButton(QString(k));
+        const QString label = k == 'A' ? QStringLiteral("A  Entrée +") : k == 'B' ? QStringLiteral("B  Sortie −") : k == 'C' ? QStringLiteral("C  Voir")
+                            : k == 'D' ? QStringLiteral("D  Annuler") : k == '#' ? QStringLiteral("#  Valider") : k == '*' ? QStringLiteral("*  Effacer") : QString(k);
+        auto *b = new QPushButton(label);
         b->setObjectName(QString("key_%1").arg(k.unicode()));
         b->setMinimumHeight(44);
-        if (!k.isDigit())
-            b->setProperty("primary", k == 'A' || k == 'B' || k == 'C' || k == '#');
+        b->setProperty("primary", k == 'A' || k == 'B' || k == 'C' || k == '#');
         connect(b, &QPushButton::clicked, this, [this, k] { key(k); });
         grid->addWidget(b, i / 4, i % 4);
     }
     left->addLayout(grid);
-    left->addWidget(text(QStringLiteral("ID puis C : consulter     ID, A, quantité, # : entrée     ID, B, quantité, # : sortie     * ou D : annuler"), "muted"));
     left->addStretch();
     root->addWidget(card(left), 2);
 
@@ -139,47 +156,104 @@ void BornePage::setLink(bool on, const QString &value)
     m_link->setText(value);
 }
 
+void BornePage::setMaterials(const QVector<Material> &materials)
+{
+    const QSignalBlocker block(m_pick);
+    const int keep = m_pick->currentData().toInt();
+    m_pick->clear();
+    m_pick->addItem(QStringLiteral("Choisir une matière (ou taper son ID)"), 0);
+    for (const Material &m : materials)
+        m_pick->addItem(QStringLiteral("ID %1  ·  %2").arg(m.id()).arg(m.name()), m.id());
+    m_pick->setCurrentIndex(std::max(0, m_pick->findData(keep)));
+}
+
+void BornePage::step(const QString &text)
+{
+    m_step->setText(text);
+}
+
 void BornePage::home()
 {
     m_id.clear();
     m_quantity.clear();
+    m_last.clear();
     m_operation = QChar();
     m_lcd->display("AUREA  Stock", "ID matiere ?");
+    step(QStringLiteral("1. Tapez l'ID de la matière (ou choisissez-la dans la liste)."));
 }
 
 void BornePage::key(QChar k)
 {
-    if (k == '*' || k == 'D') {
+    if (k == 'D') {
         home();
         return;
     }
-    if (k.isDigit()) {
+    if (k == '*') {                                   // efface le dernier chiffre
+        if (!m_operation.isNull() && m_quantity.isEmpty())
+            m_operation = QChar();
+        else if (!m_operation.isNull())
+            m_quantity.chop(1);
+        else
+            m_id.chop(1);
+        if (m_operation.isNull() && m_id.isEmpty()) {
+            home();
+            return;
+        }
+    } else if (k.isDigit()) {
         if (m_operation.isNull() && m_id.size() < 6)
             m_id += k;
         else if (!m_operation.isNull() && m_quantity.size() < 5)
             m_quantity += k;
-    } else if (m_operation.isNull() && !m_id.isEmpty() && k == 'C') {
-        send("C" + m_id);
-        return;
-    } else if (m_operation.isNull() && !m_id.isEmpty() && (k == 'A' || k == 'B')) {
-        m_operation = k == 'A' ? 'E' : 'S';
-    } else if (k == '#' && !m_operation.isNull() && !m_quantity.isEmpty()) {
-        send(QString(m_operation) + m_id + ":" + m_quantity);
-        return;
+    } else {
+        // A, B ou C juste après un résultat : on garde la même matière.
+        if (m_operation.isNull() && m_id.isEmpty())
+            m_id = m_last;
+        if (m_id.isEmpty()) {
+            m_lcd->display("Tapez d'abord", "l'ID matiere", 2);
+            step(QStringLiteral("Il manque l'ID : tapez par exemple 3, puis A, B ou C."));
+            return;
+        }
+        if (k == 'A' || k == 'B') {
+            m_operation = k == 'A' ? 'E' : 'S';
+            m_quantity.clear();
+        } else if (k == 'C' || m_operation.isNull()) {
+            send("C" + m_id);
+            return;
+        } else if (m_quantity.isEmpty()) {
+            m_lcd->display("Quantite ?", "puis #", 2);
+            step(QStringLiteral("Il manque la quantité : tapez un nombre, puis # Valider."));
+            return;
+        } else {
+            send(QString(m_operation) + m_id + ":" + m_quantity);
+            return;
+        }
     }
-    if (m_operation.isNull())
+    if (m_operation.isNull()) {
         m_lcd->display("ID : " + m_id, "A+  B-  C=voir");
-    else
+        step(QStringLiteral("2. Choisissez : A pour ajouter, B pour retirer, C pour voir le stock."));
+    } else {
         m_lcd->display((m_operation == 'E' ? "Entree ID " : "Sortie ID ") + m_id, "Qte : " + m_quantity + "  #=OK");
+        step(m_quantity.isEmpty() ? QStringLiteral("3. Tapez la quantité à %1.").arg(m_operation == 'E' ? QStringLiteral("ajouter") : QStringLiteral("retirer"))
+                                  : QStringLiteral("4. Appuyez sur # Valider pour enregistrer dans Oracle."));
+    }
 }
 
 void BornePage::send(const QString &message)
 {
+    const QString id = m_id;
     m_id.clear();
     m_quantity.clear();
     m_operation = QChar();
-    if (ask)
-        exchange(QStringLiteral("Virtuelle"), message, ask(message));
+    if (!ask)
+        return;
+    const QByteArray reply = ask(message);
+    exchange(QStringLiteral("Virtuelle"), message, reply);
+    const bool ok = !reply.trimmed().endsWith("|2");
+    const bool missing = reply.startsWith("ID introuvable");
+    m_last = missing ? QString() : id;
+    step(missing ? QStringLiteral("Cet ID n'existe pas. Tapez-en un autre.")
+                 : ok ? QStringLiteral("%1  Continuez avec A, B ou C sur la même matière, ou tapez un autre ID.").arg(message[0] == 'C' ? QStringLiteral("Stock affiché.") : QStringLiteral("Enregistré dans Oracle."))
+                      : QStringLiteral("Opération refusée (voir l'écran). Recommencez avec A ou B."));
 }
 
 void BornePage::exchange(const QString &source, const QString &request, const QByteArray &reply)
