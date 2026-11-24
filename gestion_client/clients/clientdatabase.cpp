@@ -16,7 +16,7 @@ bool openClientDatabase()
 
     db.setDatabaseName("projetCpp");   // nafs esm el DSN (Partie B)
     db.setUserName("meniyar");              // BADDELHA
-    db.setPassword("TON_PASSWORD");          // BADDELHA
+    db.setPassword("1892006");          // BADDELHA
 
     if (!db.open()) {
         qDebug() << "Erreur connexion Oracle:" << db.lastError().text();

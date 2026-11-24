@@ -250,17 +250,17 @@ AUREA / COLLECTION ATELIER</string></property>
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="cardAnniv">
-               <layout class="QVBoxLayout" name="cardAnnivLayout">
+              <widget class="QFrame" name="cardInactifs">
+               <layout class="QVBoxLayout" name="cardInactifsLayout">
  <property name="leftMargin"><number>18</number></property><property name="topMargin"><number>15</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>4</number></property>
                 <item>
-                 <layout class="QHBoxLayout" name="cardAnnivHead">
-                  <item><widget class="QLabel" name="capAnniv"><property name="text"><string>Anniversaires ce mois</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
-                  <item><spacer name="cardAnnivSp"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>10</width><height>10</height></size></property></spacer></item>
-                  <item><widget class="QLabel" name="iconAnniv"><property name="minimumSize"><size><width>30</width><height>30</height></size></property><property name="maximumSize"><size><width>30</width><height>30</height></size></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="role" stdset="0"><string>iconbox</string></property></widget></item>
+                 <layout class="QHBoxLayout" name="cardInactifsHead">
+                  <item><widget class="QLabel" name="capInactifs"><property name="text"><string>Clients inactifs (6 mois)</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+                  <item><spacer name="cardInactifsSp"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>10</width><height>10</height></size></property></spacer></item>
+                  <item><widget class="QLabel" name="iconInactifs"><property name="minimumSize"><size><width>30</width><height>30</height></size></property><property name="maximumSize"><size><width>30</width><height>30</height></size></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="role" stdset="0"><string>iconbox</string></property></widget></item>
                  </layout>
                 </item>
-                <item><widget class="QLabel" name="kpiAnniv"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
+                <item><widget class="QLabel" name="kpiInactifs"><property name="text"><string>0</string></property><property name="role" stdset="0"><string>kpi</string></property></widget></item>
                </layout>
               </widget>
              </item>
@@ -451,6 +451,7 @@ AUREA / COLLECTION ATELIER</string></property>
                  </layout>
                 </item>
                 <item><widget class="QPushButton" name="btnAjouterMesure"><property name="minimumSize"><size><width>0</width><height>40</height></size></property><property name="text"><string>Enregistrer ces mesures</string></property></widget></item>
+                <item><widget class="QPushButton" name="btnTaille"><property name="minimumSize"><size><width>0</width><height>40</height></size></property><property name="text"><string>Taille recommandée</string></property></widget></item>
                 <item>
                  <spacer name="spacerMes">
                   <property name="orientation"><enum>Qt::Vertical</enum></property>
@@ -535,15 +536,15 @@ AUREA / COLLECTION ATELIER</string></property>
               <item><widget class="QLabel" name="lblClassement"><property name="text"><string>Classement fidélité</string></property><property name="role" stdset="0"><string>section</string></property></widget></item>
               <item><widget class="QTableWidget" name="tableFidelite"/></item>
               <item>
-               <layout class="QHBoxLayout" name="annivLayout">
-                <item><widget class="QLabel" name="labelAnniv"><property name="text"><string>Aucun anniversaire aujourd'hui.</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
+               <layout class="QHBoxLayout" name="relanceLayout">
+                <item><widget class="QLabel" name="labelRelance"><property name="text"><string>Clients sans commande depuis 6 mois : relancez-les par mail.</string></property><property name="role" stdset="0"><string>muted</string></property></widget></item>
                 <item>
-                 <spacer name="spacerAnniv">
+                 <spacer name="spacerRelance">
                   <property name="orientation"><enum>Qt::Horizontal</enum></property>
                   <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
                  </spacer>
                 </item>
-                <item><widget class="QPushButton" name="btnAnniv"><property name="minimumSize"><size><width>260</width><height>40</height></size></property><property name="text"><string>Envoyer le mail d'anniversaire</string></property></widget></item>
+                <item><widget class="QPushButton" name="btnRelance"><property name="minimumSize"><size><width>260</width><height>40</height></size></property><property name="text"><string>Relancer les clients inactifs</string></property></widget></item>
                </layout>
               </item>
              </layout>

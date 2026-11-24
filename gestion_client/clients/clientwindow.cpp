@@ -1,9 +1,11 @@
 #include "clientwindow.h"
 #include "ui_clientwindow.h"
+#include "client.h"
 #include "icons.h"
 
-#include <QDebug>
 #include <QDate>
+#include <QDebug>
+#include <QDialog>
 #include <QFile>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -18,14 +20,13 @@
 #include <QPdfWriter>
 #include <QPageSize>
 #include <QPageLayout>
-#include <QRegularExpression>
+#include <QPushButton>
 #include <QSignalBlocker>
-#include <QSqlError>
-#include <QSqlQuery>
+#include <QTableWidget>
 #include <QTextDocument>
-#include <QTimer>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QVBoxLayout>
 
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QBarSeries>
@@ -40,7 +41,7 @@
 QT_CHARTS_USE_NAMESPACE
 #endif
 
-static const int VIP_THRESHOLD = 100;                 // score à partir duquel le client devient VIP
+static const int VIP_THRESHOLD = Client::SEUIL_VIP;   // score à partir duquel le client devient VIP
 static const QColor GOLD("#e8d5a0");
 static const QColor WINE("#55555d");   // catégorie « Standard » : gris neutre à côté de l'or VIP
 static const QColor TEXT("#d9d5cb");
@@ -113,7 +114,6 @@ ClientWindow::ClientWindow(QWidget *parent)
 
     refreshClients();
     showPage(0);
-
 }
 
 ClientWindow::~ClientWindow() { delete ui; }
@@ -121,16 +121,6 @@ ClientWindow::~ClientWindow() { delete ui; }
 void ClientWindow::setSidebarVisible(bool visible)
 {
     ui->sidebar->setVisible(visible);
-}
-
-void ClientWindow::announceBirthdays()
-{
-    const QStringList b = birthdaysToday();
-    if (b.isEmpty())
-        return;
-    QMessageBox::information(this, "Anniversaires du jour",
-        "Aujourd'hui, c'est l'anniversaire de :\n\n  • " + b.join("\n  • ")
-        + "\n\nVous pouvez leur envoyer un mail depuis « Fidélité & VIP ».");
 }
 
 // ============================================================ setup
@@ -153,7 +143,7 @@ void ClientWindow::setupLogo()
     ui->lineSearch->addAction(QIcon(Icons::pixmap(Icons::Search, QColor("#8f8c86"), 16)), QLineEdit::LeadingPosition);
     ui->iconTotal->setPixmap(Icons::pixmap(Icons::People, gold, 18));
     ui->iconVip->setPixmap(Icons::pixmap(Icons::Star, gold, 18));
-    ui->iconAnniv->setPixmap(Icons::pixmap(Icons::Calendar, gold, 18));
+    ui->iconInactifs->setPixmap(Icons::pixmap(Icons::Clock, gold, 18));
     ui->iconScore->setPixmap(Icons::pixmap(Icons::Chart, gold, 18));
 }
 
@@ -173,13 +163,13 @@ void ClientWindow::setupCombos()
 
 void ClientWindow::reloadClientCombos()
 {
+    const QList<QPair<int, QString>> clients = Client::listeClients();
     for (QComboBox *cb : { ui->comboClientMes, ui->comboClientCmd }) {
         QSignalBlocker block(cb);
         const int cur = cb->currentData().toInt();
         cb->clear();
-        QSqlQuery q("SELECT id, nom FROM clients ORDER BY UPPER(nom)");
-        while (q.next())
-            cb->addItem(q.value(1).toString(), q.value(0));
+        for (const auto &c : clients)
+            cb->addItem(c.second, c.first);
         const int idx = cb->findData(cur);
         cb->setCurrentIndex(idx < 0 ? 0 : idx);
     }
@@ -225,47 +215,31 @@ int ClientWindow::currentId(QTableWidget *t) const
 // ============================================================ CRUD : afficher / rechercher / trier
 void ClientWindow::refreshClients()
 {
-    QString sql = "SELECT id, nom, mail, tel, naissance, mensuration, categorie, score FROM clients "
-                  "WHERE (UPPER(nom) LIKE UPPER(:s) OR UPPER(mail) LIKE UPPER(:s) "
-                  "OR tel LIKE :s OR TO_CHAR(id) LIKE :s)";
-    const bool filtered = ui->comboFiltre->currentIndex() > 0;
-    if (filtered) sql += " AND categorie = :c";
-
-    static const QStringList orders = { "UPPER(nom) ASC", "UPPER(nom) DESC",
-                                       "score DESC", "naissance ASC", "id ASC" };
-    sql += " ORDER BY " + orders.value(qMax(0, ui->comboTri->currentIndex()));
-
-    QSqlQuery q;
-    q.prepare(sql);
-    q.bindValue(":s", "%" + ui->lineSearch->text().trimmed() + "%");
-    if (filtered) q.bindValue(":c", ui->comboFiltre->currentText());
-    if (!q.exec())
-        qDebug() << "Erreur refreshClients:" << q.lastError().text();
+    const QString categorie = ui->comboFiltre->currentIndex() > 0 ? ui->comboFiltre->currentText() : QString();
+    const QList<Client> liste = Client::afficher(ui->lineSearch->text().trimmed(),
+                                                 categorie,
+                                                 qMax(0, ui->comboTri->currentIndex()));
 
     QTableWidget *t = ui->tableClients;
     t->setRowCount(0);
-    while (q.next()) {
+    for (const Client &c : liste) {
         const int r = t->rowCount();
         t->insertRow(r);
-        fillRow(t, r, q.value(0).toInt(),
-                { q.value(0).toString(), q.value(1).toString(), q.value(2).toString(), q.value(3).toString(),
-                  fr(q.value(4).toString()), q.value(5).toString(), q.value(6).toString(), q.value(7).toString() });
-        if (q.value(6).toString() == "VIP")
+        fillRow(t, r, c.getID(),
+                { QString::number(c.getID()), c.getNom(), c.getMail(), c.getTel(),
+                  fr(c.getNaissance()), c.getMensuration(), c.getCategorie(), QString::number(c.getScore()) });
+        if (c.getCategorie() == "VIP")
             t->item(r, 6)->setForeground(GOLD);
     }
     ui->lblCount->setText(QString("%1 client(s) affiché(s)").arg(t->rowCount()));
 
     // KPI
-    QSqlQuery k("SELECT COUNT(*), "
-                "NVL(SUM(CASE WHEN categorie='VIP' THEN 1 ELSE 0 END),0), "
-                "NVL(SUM(CASE WHEN SUBSTR(naissance,6,2)=TO_CHAR(SYSDATE,'MM') THEN 1 ELSE 0 END),0), "
-                "NVL(AVG(score),0) FROM clients");
-    if (k.next()) {
-        ui->kpiTotal->setText(k.value(0).toString());
-        ui->kpiVip->setText(k.value(1).toString());
-        ui->kpiAnniv->setText(k.value(2).toString());
-        ui->kpiScore->setText(QString::number(k.value(3).toDouble(), 'f', 0));
-    }
+    const Client::Stats s = Client::statistiques();
+    ui->kpiTotal->setText(QString::number(s.total));
+    ui->kpiVip->setText(QString::number(s.vip));
+    ui->kpiInactifs->setText(QString::number(s.inactifs));
+    ui->kpiScore->setText(QString::number(s.scoreMoyen, 'f', 0));
+
     reloadClientCombos();
 }
 
@@ -285,12 +259,11 @@ void ClientWindow::startAdd()
 
 bool ClientWindow::startEdit(int id)
 {
-    QSqlQuery q;
-    q.prepare("SELECT nom, mail, tel, naissance, mensuration, categorie FROM clients WHERE id = ?");
-    q.addBindValue(id);
-    if (!q.exec() || !q.next()) {
+    Client c;
+    if (!Client::charger(id, c)) {
         QMessageBox::critical(this, "Erreur",
-                              "Impossible de charger le client " + QString::number(id) + "\n" + q.lastError().text());
+                              "Impossible de charger le client " + QString::number(id)
+                              + "\n" + Client::derniereErreur());
         return false;
     }
 
@@ -298,12 +271,12 @@ bool ClientWindow::startEdit(int id)
     qDebug() << "Mode modification, m_editId =" << m_editId;
     ui->lblFormTitle->setText("Modifier le client");
     ui->labelId->setText(QString::number(id));
-    ui->leNom->setText(q.value(0).toString());
-    ui->leMail->setText(q.value(1).toString());
-    ui->leTel->setText(q.value(2).toString());
-    ui->deNaissance->setDate(QDate::fromString(q.value(3).toString(), Qt::ISODate));
-    ui->leMensuration->setText(q.value(4).toString());
-    ui->comboCategorie->setCurrentText(q.value(5).toString());
+    ui->leNom->setText(c.getNom());
+    ui->leMail->setText(c.getMail());
+    ui->leTel->setText(c.getTel());
+    ui->deNaissance->setDate(QDate::fromString(c.getNaissance(), Qt::ISODate));
+    ui->leMensuration->setText(c.getMensuration());
+    ui->comboCategorie->setCurrentText(c.getCategorie());
     return true;
 }
 
@@ -316,12 +289,12 @@ void ClientWindow::on_btnNouveau_clicked()
 void ClientWindow::on_btnModifier_clicked()
 {
     const int id = currentId(ui->tableClients);
-    qDebug() << "Modifier: id lu dans le tableau =" << id;
+    qDebug() << "Modifier : id lu dans le tableau =" << id;
     if (id <= 0) {
         QMessageBox::information(this, "AUREA", "Sélectionnez d'abord un client dans la liste.");
         return;
     }
-    if (startEdit(id))        // only open the form if loading worked
+    if (startEdit(id))          // on n'ouvre le formulaire que si le chargement a réussi
         showPage(1);
 }
 
@@ -329,39 +302,32 @@ void ClientWindow::on_btnAnnuler_clicked() { showPage(0); }
 
 void ClientWindow::on_btnEnregistrer_clicked()
 {
-    const QString nom  = ui->leNom->text().trimmed();
-    const QString mail = ui->leMail->text().trimmed();
-    const QString tel  = ui->leTel->text().trimmed();
+    // 1) la vue lit les champs et remplit l'objet Client
+    Client c(m_editId,
+             ui->leNom->text().trimmed(),
+             ui->leMail->text().trimmed(),
+             ui->leTel->text().trimmed(),
+             ui->deNaissance->date().toString(Qt::ISODate),
+             ui->leMensuration->text().trimmed(),
+             ui->comboCategorie->currentText());
 
-    static const QRegularExpression rxMail(R"(^[\w.+-]+@[\w-]+\.[\w.-]+$)");
-    static const QRegularExpression rxTel(R"(^\+?\d{8,12}$)");
-
-    if (nom.isEmpty())                       { QMessageBox::warning(this, "Contrôle de saisie", "Le nom est obligatoire."); return; }
-    if (!rxMail.match(mail).hasMatch())      { QMessageBox::warning(this, "Contrôle de saisie", "Adresse mail invalide."); return; }
-    if (!rxTel.match(tel).hasMatch())        { QMessageBox::warning(this, "Contrôle de saisie", "Téléphone invalide (8 à 12 chiffres)."); return; }
-    if (ui->deNaissance->date() >= QDate::currentDate()) {
-        QMessageBox::warning(this, "Contrôle de saisie", "La date de naissance doit être dans le passé.");
+    // 2) contrôle de saisie (dans la classe C++)
+    QString erreur;
+    if (!c.valider(erreur)) {
+        QMessageBox::warning(this, "Contrôle de saisie", erreur);
         return;
     }
-    qDebug() << "Enregistrer: m_editId =" << m_editId << (m_editId < 0 ? "-> INSERT" : "-> UPDATE");
-    QSqlQuery q;
-    if (m_editId < 0)
-        q.prepare("INSERT INTO clients(nom, mail, tel, naissance, mensuration, categorie) VALUES(?,?,?,?,?,?)");
-    else
-        q.prepare("UPDATE clients SET nom=?, mail=?, tel=?, naissance=?, mensuration=?, categorie=? WHERE id=?");
-    q.addBindValue(nom);
-    q.addBindValue(mail);
-    q.addBindValue(tel);
-    q.addBindValue(ui->deNaissance->date().toString(Qt::ISODate));
-    q.addBindValue(ui->leMensuration->text().trimmed());
-    q.addBindValue(ui->comboCategorie->currentText());
-    if (m_editId >= 0) q.addBindValue(m_editId);
 
-    if (!q.exec()) {
-        QMessageBox::critical(this, "Erreur base de données", q.lastError().text());
+    // 3) la classe fait le travail SQL
+    qDebug() << "Enregistrer : m_editId =" << m_editId << (m_editId < 0 ? "-> AJOUTER" : "-> MODIFIER");
+    const bool ok = (m_editId < 0) ? c.ajouter() : c.modifier();
+    if (!ok) {
+        QMessageBox::critical(this, "Erreur base de données", Client::derniereErreur());
         return;
     }
+
     QMessageBox::information(this, "AUREA", m_editId < 0 ? "Client ajouté avec succès." : "Client modifié avec succès.");
+    m_editId = -1;
     showPage(0);
 }
 
@@ -369,7 +335,7 @@ void ClientWindow::on_btnEnregistrer_clicked()
 void ClientWindow::on_btnSupprimer_clicked()
 {
     const int id = currentId(ui->tableClients);
-    if (id < 0) {
+    if (id <= 0) {
         QMessageBox::information(this, "AUREA", "Sélectionnez d'abord un client dans la liste.");
         return;
     }
@@ -378,23 +344,17 @@ void ClientWindow::on_btnSupprimer_clicked()
         != QMessageBox::Yes)
         return;
 
-    for (const QString &table : { "mesures", "commandes" }) {
-        QSqlQuery d;
-        d.prepare("DELETE FROM " + table + " WHERE client_id = ?");
-        d.addBindValue(id);
-        d.exec();
+    if (!Client::supprimer(id)) {
+        QMessageBox::critical(this, "Erreur base de données", Client::derniereErreur());
+        return;
     }
-    QSqlQuery q;
-    q.prepare("DELETE FROM clients WHERE id = ?");
-    q.addBindValue(id);
-    q.exec();
     refreshClients();
 }
 
 void ClientWindow::on_btnVoirMesures_clicked()
 {
     const int id = currentId(ui->tableClients);
-    if (id < 0) {
+    if (id <= 0) {
         QMessageBox::information(this, "AUREA", "Sélectionnez d'abord un client dans la liste.");
         return;
     }
@@ -457,27 +417,21 @@ void ClientWindow::refreshMesures()
     QTableWidget *t = ui->tableMesures;
     t->setRowCount(0);
 
-    QSqlQuery q;
-    q.prepare("SELECT date, poitrine, taille, hanches, epaules, manche, hauteur FROM mesures "
-              "WHERE client_id = ? ORDER BY date DESC, id DESC");
-    q.addBindValue(id);
-    q.exec();
-
     bool first = true;
-    while (q.next()) {
+    for (const Client::Mesure &m : Client::mesures(id)) {
         const int r = t->rowCount();
         t->insertRow(r);
-        QStringList v = { fr(q.value(0).toString()) };
-        for (int c = 1; c <= 6; ++c)
-            v << QString::number(q.value(c).toDouble(), 'f', 1) + " cm";
+        QStringList v = { fr(m.date) };
+        for (double val : { m.poitrine, m.taille, m.hanches, m.epaules, m.manche, m.hauteur })
+            v << QString::number(val, 'f', 1) + " cm";
         fillRow(t, r, id, v);
         if (first) {   // pré-remplit les champs avec la dernière prise de mesures
-            ui->sbPoitrine->setValue(q.value(1).toDouble());
-            ui->sbTaille->setValue(q.value(2).toDouble());
-            ui->sbHanches->setValue(q.value(3).toDouble());
-            ui->sbEpaules->setValue(q.value(4).toDouble());
-            ui->sbManche->setValue(q.value(5).toDouble());
-            ui->sbHauteur->setValue(q.value(6).toDouble());
+            ui->sbPoitrine->setValue(m.poitrine);
+            ui->sbTaille->setValue(m.taille);
+            ui->sbHanches->setValue(m.hanches);
+            ui->sbEpaules->setValue(m.epaules);
+            ui->sbManche->setValue(m.manche);
+            ui->sbHauteur->setValue(m.hauteur);
             first = false;
         }
     }
@@ -485,81 +439,55 @@ void ClientWindow::refreshMesures()
 
 void ClientWindow::on_btnAjouterMesure_clicked()
 {
-    const int id = ui->comboClientMes->currentData().toInt();
     if (ui->comboClientMes->count() == 0) return;
+    const int id = ui->comboClientMes->currentData().toInt();
 
-    QSqlQuery q;
-    q.prepare("INSERT INTO mesures(client_id, date_mesure, poitrine, taille, hanches, epaules, manche, hauteur) "
-              "VALUES(?,?,?,?,?,?,?,?)");
-    q.addBindValue(id);
-    q.addBindValue(QDate::currentDate().toString(Qt::ISODate));
-    q.addBindValue(ui->sbPoitrine->value());
-    q.addBindValue(ui->sbTaille->value());
-    q.addBindValue(ui->sbHanches->value());
-    q.addBindValue(ui->sbEpaules->value());
-    q.addBindValue(ui->sbManche->value());
-    q.addBindValue(ui->sbHauteur->value());
-    if (!q.exec()) {
-        QMessageBox::critical(this, "Erreur", q.lastError().text());
+    Client::Mesure m;
+    m.poitrine = ui->sbPoitrine->value();
+    m.taille = ui->sbTaille->value();
+    m.hanches = ui->sbHanches->value();
+    m.epaules = ui->sbEpaules->value();
+    m.manche = ui->sbManche->value();
+    m.hauteur = ui->sbHauteur->value();
+
+    if (!Client::ajouterMesure(id, m)) {
+        QMessageBox::critical(this, "Erreur", Client::derniereErreur());
         return;
     }
-
-    // met à jour le résumé "mensuration" du client
-    QSqlQuery u;
-    u.prepare("UPDATE clients SET mensuration = ? WHERE id = ?");
-    u.addBindValue(QString("P%1 / T%2 / H%3").arg(ui->sbPoitrine->value(), 0, 'f', 0)
-                       .arg(ui->sbTaille->value(), 0, 'f', 0).arg(ui->sbHanches->value(), 0, 'f', 0));
-    u.addBindValue(id);
-    u.exec();
 
     refreshMesures();
     QMessageBox::information(this, "AUREA", "Mesures enregistrées dans l'historique.");
 }
 
+// métier avancé : taille recommandée à partir de la dernière prise de mesures
+void ClientWindow::on_btnTaille_clicked()
+{
+    if (ui->comboClientMes->count() == 0) return;
+    QString detail;
+    const QString t = Client::tailleRecommandee(ui->comboClientMes->currentData().toInt(), &detail);
+    if (t.isEmpty()) {
+        QMessageBox::information(this, "AUREA", detail);
+        return;
+    }
+    QMessageBox::information(this, "Taille recommandée",
+                             ui->comboClientMes->currentText() + " : taille " + t + "\n\n" + detail);
+}
+
 void ClientWindow::on_btnRappel_clicked()
 {
     const int id = ui->comboClientMes->currentData().toInt();
-    QSqlQuery q;
-    q.prepare("SELECT nom, mail FROM clients WHERE id = ?");
-    q.addBindValue(id);
-    if (!q.exec() || !q.next()) return;
+    Client c;
+    if (!Client::charger(id, c)) return;
 
     const QString when = QLocale(QLocale::French).toString(ui->dtEssayage->dateTime(), "dddd d MMMM yyyy 'à' HH:mm");
-    openMail(q.value(1).toString(),
+    openMail(c.getMail(),
              "AUREA — Rappel de votre essayage",
-             "Bonjour " + q.value(0).toString() + ",\n\n"
+             "Bonjour " + c.getNom() + ",\n\n"
              "Nous vous rappelons votre rendez-vous d'essayage à l'atelier AUREA :\n\n  " + when +
              "\n\nN'hésitez pas à nous contacter pour toute modification.\n\nÀ très bientôt,\nL'équipe AUREA");
 }
 
 // ============================================================ Fidélité
-bool ClientWindow::recomputeScore(int clientId)
-{
-    QSqlQuery q;
-    q.prepare("SELECT COALESCE(SUM(montant),0), "
-              "COUNT(CASE WHEN date_commande >= TO_CHAR(ADD_MONTHS(SYSDATE,-12),'YYYY-MM-DD') THEN 1 END) "
-              "FROM commandes WHERE client_id = ?");
-    q.addBindValue(clientId);
-    q.exec();
-    q.next();
-    const int score = int(q.value(0).toDouble() / 100.0) + 10 * q.value(1).toInt();
-
-    QSqlQuery u;
-    u.prepare("UPDATE clients SET score = ? WHERE id = ?");
-    u.addBindValue(score);
-    u.addBindValue(clientId);
-    u.exec();
-
-    if (score >= VIP_THRESHOLD) {
-        QSqlQuery v;
-        v.prepare("UPDATE clients SET categorie='VIP' WHERE id = ? AND categorie <> 'VIP'");
-        v.addBindValue(clientId);
-        v.exec();
-        return v.numRowsAffected() > 0;
-    }
-    return false;
-}
-
 void ClientWindow::on_btnAjouterCommande_clicked()
 {
     if (ui->comboClientCmd->count() == 0) return;
@@ -568,14 +496,13 @@ void ClientWindow::on_btnAjouterCommande_clicked()
         QMessageBox::warning(this, "Contrôle de saisie", "Le montant doit être supérieur à 0.");
         return;
     }
-    QSqlQuery q;
-    q.prepare("INSERT INTO commandes(client_id, montant, date_commande) VALUES(?,?,?)");
-    q.addBindValue(id);
-    q.addBindValue(ui->sbMontant->value());
-    q.addBindValue(QDate::currentDate().toString(Qt::ISODate));
-    q.exec();
 
-    const bool nowVip = recomputeScore(id);
+    bool nowVip = false;
+    if (!Client::ajouterCommande(id, ui->sbMontant->value(), &nowVip)) {
+        QMessageBox::critical(this, "Erreur", Client::derniereErreur());
+        return;
+    }
+
     refreshFidelite();
     refreshClients();
     if (nowVip)
@@ -583,63 +510,57 @@ void ClientWindow::on_btnAjouterCommande_clicked()
                                  ui->comboClientCmd->currentText() + " vient de devenir client VIP !");
 }
 
-QStringList ClientWindow::birthdaysToday() const
-{
-    QStringList names;
-    QSqlQuery q("SELECT nom FROM clients WHERE strftime('%m-%d', naissance) = strftime('%m-%d','now','localtime')");
-    while (q.next()) names << q.value(0).toString();
-    return names;
-}
-
 void ClientWindow::refreshFidelite()
 {
     QTableWidget *t = ui->tableFidelite;
     t->setRowCount(0);
-    QSqlQuery q("SELECT c.id, c.nom, COUNT(o.id), COALESCE(SUM(o.montant),0), c.score, c.categorie "
-                "FROM clients c LEFT JOIN commandes o ON o.client_id = c.id "
-                "GROUP BY c.id, c.nom, c.score, c.categorie ORDER BY c.score DESC");
-    while (q.next()) {
-        const int score = q.value(4).toInt();
-        const QString level = score >= VIP_THRESHOLD ? "Or" : (score >= 50 ? "Argent" : "Bronze");
+    for (const Client::LigneFidelite &l : Client::classementFidelite()) {
+        const QString level = l.score >= VIP_THRESHOLD ? "Or" : (l.score >= 50 ? "Argent" : "Bronze");
         const int r = t->rowCount();
         t->insertRow(r);
-        fillRow(t, r, q.value(0).toInt(),
-                { q.value(1).toString(), q.value(2).toString(),
-                  QString::number(q.value(3).toDouble(), 'f', 2) + " DT",
-                  QString::number(score), level, q.value(5).toString() });
-        if (q.value(5).toString() == "VIP") t->item(r, 5)->setForeground(GOLD);
+        fillRow(t, r, l.id,
+                { l.nom, QString::number(l.nbCommandes),
+                  QString::number(l.montant, 'f', 2) + " DT",
+                  QString::number(l.score), level, l.categorie });
+        if (l.categorie == "VIP") t->item(r, 5)->setForeground(GOLD);
     }
-
-    const QStringList b = birthdaysToday();
-    ui->labelAnniv->setText(b.isEmpty() ? "Aucun anniversaire aujourd'hui."
-                                        : "Anniversaire aujourd'hui : " + b.join(", "));
 }
 
-void ClientWindow::on_btnAnniv_clicked()
+// métier avancé : liste des clients inactifs + mail de relance
+void ClientWindow::on_btnRelance_clicked()
 {
-    const int id = currentId(ui->tableFidelite);
-    if (id < 0) {
-        QMessageBox::information(this, "AUREA", "Sélectionnez un client dans le classement.");
+    const QList<Client::ClientInactif> inactifs = Client::clientsInactifs(6);
+    if (inactifs.isEmpty()) {
+        QMessageBox::information(this, "AUREA", "Aucun client inactif depuis 6 mois.");
         return;
     }
-    QSqlQuery q;
-    q.prepare("SELECT nom, mail, naissance FROM clients WHERE id = ?");
-    q.addBindValue(id);
-    if (!q.exec() || !q.next()) return;
 
-    const QDate bd = QDate::fromString(q.value(2).toString(), Qt::ISODate);
-    const QDate now = QDate::currentDate();
-    if (bd.month() != now.month() || bd.day() != now.day()) {
-        if (QMessageBox::question(this, "Anniversaire", "Ce n'est pas son anniversaire aujourd'hui. Envoyer quand même ?")
-            != QMessageBox::Yes)
-            return;
+    QDialog dlg(this);
+    dlg.setWindowTitle("Clients inactifs (6 mois)");
+    dlg.resize(620, 420);
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *t = new QTableWidget;
+    setupTable(t, { "Client", "Mail", "Dernière commande" });
+    for (const auto &c : inactifs) {
+        const int r = t->rowCount();
+        t->insertRow(r);
+        fillRow(t, r, c.id, { c.nom, c.mail, c.derniereCommande.isEmpty() ? "Jamais" : fr(c.derniereCommande) });
     }
-    openMail(q.value(1).toString(),
-             "Joyeux anniversaire de la part d'AUREA",
-             "Chère " + q.value(0).toString() + ",\n\n"
-             "Toute l'équipe de l'atelier AUREA vous souhaite un merveilleux anniversaire.\n"
-             "Pour l'occasion, nous vous réservons une attention particulière lors de votre prochaine visite.\n\n"
-             "Avec toute notre affection,\nL'équipe AUREA");
+    auto *btn = new QPushButton("Envoyer un mail de relance au client sélectionné");
+    lay->addWidget(t);
+    lay->addWidget(btn);
+
+    connect(btn, &QPushButton::clicked, &dlg, [&] {
+        const int r = t->currentRow();
+        if (r < 0) {
+            QMessageBox::information(&dlg, "AUREA", "Sélectionnez un client dans la liste.");
+            return;
+        }
+        openMail(t->item(r, 1)->text(), "AUREA — Vous nous manquez",
+                 "Bonjour " + t->item(r, 0)->text() + ",\n\nCela fait un moment que nous ne vous avons pas vu "
+                 "à l'atelier AUREA. Une remise vous attend pour votre prochaine commande.\n\nL'équipe AUREA");
+    });
+    dlg.exec();
 }
 
 // ============================================================ Statistiques (graphiques)
@@ -662,12 +583,11 @@ void ClientWindow::buildCharts()
 
     // ---- 1) Camembert : Standard / VIP
     auto *pie = new QPieSeries;
-    QSqlQuery q("SELECT categorie, COUNT(*) FROM clients GROUP BY categorie");
-    while (q.next()) {
-        QPieSlice *s = pie->append(q.value(0).toString() + " (" + q.value(1).toString() + ")", q.value(1).toInt());
+    for (const auto &p : Client::repartitionCategories()) {
+        QPieSlice *s = pie->append(p.first + " (" + QString::number(p.second) + ")", p.second);
         s->setLabelVisible(true);
         s->setLabelColor(TEXT);
-        s->setBrush(q.value(0).toString() == "VIP" ? GOLD : WINE);
+        s->setBrush(p.first == "VIP" ? GOLD : WINE);
     }
     auto *chart1 = new QChart;
     chart1->addSeries(pie);
@@ -677,11 +597,9 @@ void ClientWindow::buildCharts()
     auto *set = new QBarSet("Score");
     set->setColor(GOLD);
     QStringList names;
-    QSqlQuery top("SELECT nom, score FROM (SELECT nom, score FROM clients ORDER BY score DESC) "
-                  "WHERE ROWNUM <= 5");
-    while (top.next()) {
-        names << top.value(0).toString().split(' ').first();
-        *set << top.value(1).toInt();
+    for (const auto &p : Client::topScores(5)) {
+        names << p.first.split(' ').first();
+        *set << p.second;
     }
     auto *bars = new QBarSeries;
     bars->append(set);

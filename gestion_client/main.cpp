@@ -1,7 +1,6 @@
 #include "appsetup.h"
 #include "clientdatabase.h"
 #include "clientwindow.h"
-#include <QTimer>
 #include <QApplication>
 #include <QDir>
 #include <QMessageBox>
@@ -24,12 +23,10 @@ int main(int argc, char *argv[])
     auto *window = new ClientWindow;
     window->setWindowTitle(QStringLiteral("AUREA — Gestion des clients"));
 
-    // Disposition d'origine : colonne de boutons verticale à gauche, barre du haut, page.
     if (QScreen *screen = app.primaryScreen()) {
         const QSize available = screen->availableGeometry().size() - QSize(40, 70);
         window->resize(std::min(1480, available.width()), std::min(940, available.height()));
     }
     window->show();
-    QTimer::singleShot(400, window, [window] { window->announceBirthdays(); });   // rappel des anniversaires du jour
     return app.exec();
 }

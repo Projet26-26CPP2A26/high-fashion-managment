@@ -11,7 +11,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class ClientWindow; }
 QT_END_NAMESPACE
 
-// Module « Gestion des clients » (clients, mensurations, fidélité, statistiques).
+// Module « Gestion des clients » (VUE) : aucune requête SQL ici,
+// tout passe par la classe Client (MODÈLE).
 class ClientWindow : public QMainWindow
 {
     Q_OBJECT
@@ -23,8 +24,6 @@ public:
     // Intégration : la fenêtre principale remplace la barre latérale par une rangée de boutons horizontale.
     void setSidebarVisible(bool visible);
     QList<QPushButton *> navButtons() const { return m_nav; }
-    // Notification des anniversaires du jour (appelée à la première ouverture du module).
-    void announceBirthdays();
 
 private slots:
     // Auto-connected to the buttons of the .ui (on_<objectName>_clicked)
@@ -36,21 +35,22 @@ private slots:
     void on_btnEnregistrer_clicked();
     void on_btnAnnuler_clicked();
     void on_btnAjouterMesure_clicked();
+    void on_btnTaille_clicked();         // métier avancé : taille recommandée
     void on_btnRappel_clicked();
     void on_btnAjouterCommande_clicked();
-    void on_btnAnniv_clicked();
+    void on_btnRelance_clicked();        // métier avancé : clients inactifs
 
     // Data refresh
     void refreshClients();       // CRUD "afficher" + rechercher + trier + KPI
     void refreshMesures();       // historique des mesures
-    void refreshFidelite();      // classement fidélité + anniversaires
+    void refreshFidelite();      // classement fidélité
     void buildCharts();          // statistiques
 
 private:
     // navigation
     void showPage(int index);
     void startAdd();
-    bool startEdit(int id);
+    bool startEdit(int id);      // false si le client n'a pas pu être chargé
 
     // setup
     void setupLogo();
@@ -60,8 +60,6 @@ private:
 
     // helpers
     int  currentId(QTableWidget *t) const;
-    bool recomputeScore(int clientId);          // true si le client vient de devenir VIP
-    QStringList birthdaysToday() const;
     void openMail(const QString &to, const QString &subject, const QString &body);
 
     Ui::ClientWindow *ui;
