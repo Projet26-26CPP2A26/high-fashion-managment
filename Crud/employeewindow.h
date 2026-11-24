@@ -40,4 +40,5 @@ private:
     CompanyLink *link=nullptr;
     QStackedWidget *pages;
     bool logoutRequested=false,leaving=false;
+    int lastEntry=0,refusals=0;
 };

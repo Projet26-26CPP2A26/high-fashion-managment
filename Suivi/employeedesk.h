@@ -15,11 +15,12 @@ class QVBoxLayout;
 class EmployeeDesk : public QMainWindow {
     Q_OBJECT
 public:
-    EmployeeDesk(ActivityStore &store, const Employee &employee, QWidget *parent = nullptr);
+    EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via = QStringLiteral("LIGNE"), QWidget *parent = nullptr);
     bool ready() const { return m_session.id > 0; }
     const WorkSession &session() const { return m_session; }
     void tick(const QDateTime &now, int idleSeconds);
     void finish(const QString &reason);
+    void leaveByBadge();
     void showPage(int index);
     bool submitTask(const QString &note, const QString &file);
     int workToday() const { return m_baseWork + m_session.work; }

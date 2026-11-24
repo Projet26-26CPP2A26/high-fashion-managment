@@ -5,7 +5,7 @@
     { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
     { "type": "wokwi-lcd1602", "id": "lcd", "top": -290, "left": 20, "attrs": { "pins": "i2c" } },
     { "type": "board-mfrc522", "id": "rfid", "top": 60, "left": -360, "attrs": {} },
-    { "type": "wokwi-buzzer", "id": "bz", "top": -140, "left": 340, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "bz", "top": -140, "left": 340, "attrs": { "mode": "smooth", "volume": "0.12" } },
     { "type": "wokwi-servo", "id": "sv", "top": 110, "left": 370, "attrs": {} }
   ],
   "connections": [

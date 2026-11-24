@@ -9,7 +9,7 @@ class QSqlQuery;
 struct WorkSession {
     int id = 0;
     QString name;
-    QString position, task, state, endReason;
+    QString position, task, state, endReason, via;
     QDateTime login, lastSeen, logout;
     int work = 0, pause = 0, idle = 0, off = 0;
     QString nextTask;
@@ -50,6 +50,12 @@ struct ReviewStats {
 struct ActivityEvent {
     QDateTime at;
     QString who, text;
+};
+
+struct AccessEntry {
+    int id = 0;
+    QDateTime at;
+    QString who, label, via, kind, detail;
 };
 
 class ActivityStore {
@@ -93,6 +99,12 @@ public:
     ReviewStats reviewStats(const QString &who);
     bool setTaskState(const QString &who, int id, int state);
     bool saveTaskTime(int id, int spent);
+    int addEntry(const QString &who, const QString &label, const QString &via, const QString &kind, const QString &detail = QString(), const QDateTime &at = QDateTime());
+    QVector<AccessEntry> entries(int limit, const QString &via = QString());
+    QVector<AccessEntry> entriesAfter(int id);
+    bool clearDay(const QString &who, const QDate &day);
+    QString setting(const QString &key);
+    bool saveSetting(const QString &key, const QString &value);
 
 private:
     bool run(QSqlQuery &query);

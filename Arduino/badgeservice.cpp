@@ -40,15 +40,55 @@ QString BadgeService::receive(const QString &line)
     const QString text = line.trimmed();
     if (!text.startsWith("BADGE:")) return QString();
     const QString uid = normalize(text.mid(6));
-    if (uid.isEmpty()) return QStringLiteral("NO;Badge illisible");
+    if (uid.isEmpty()) {
+        emit refused(QString());
+        return QStringLiteral("NO;Badge illisible");
+    }
     m_lastUid = uid;
     const QString reply = scan(uid);
     emit changed();
     return reply;
 }
 
+int BadgeService::employeeOf(const QString &uid)
+{
+    QSqlQuery q;
+    q.prepare("SELECT employee_id FROM employee_badges WHERE uid_badge = ?");
+    q.addBindValue(uid);
+    return q.exec() && q.next() ? q.value(0).toInt() : 0;
+}
+
+bool BadgeService::inside(int employeeId)
+{
+    QSqlQuery q;
+    q.prepare("SELECT sens FROM (SELECT sens FROM badge_scans WHERE employee_id = ? AND date_scan >= TRUNC(SYSDATE) AND sens <> 'REFUSE' ORDER BY date_scan DESC, id DESC) WHERE ROWNUM = 1");
+    q.addBindValue(employeeId);
+    return q.exec() && q.next() && q.value(0).toString() == "ARRIVEE";
+}
+
+QString BadgeService::enter(const QString &text)
+{
+    const QString uid = normalize(text);
+    m_lastUid = uid;
+    const int id = uid.isEmpty() ? 0 : employeeOf(uid);
+    if (!id) {
+        if (!uid.isEmpty()) insert(uid, 0, "REFUSE");
+        return uid.isEmpty() ? QStringLiteral("NO;Badge illisible") : QStringLiteral("NO;Badge inconnu");
+    }
+    if (!inside(id) && !insert(uid, id, "ARRIVEE")) return QStringLiteral("ERR");
+    QSqlQuery q;
+    q.prepare("SELECT name FROM employees WHERE id = ?");
+    q.addBindValue(id);
+    const QString name = q.exec() && q.next() ? plain(q.value(0).toString().section(' ', 0, 0), 10) : QString();
+    return QStringLiteral("IN;%1;%2").arg(name, QTime::currentTime().toString("HH:mm"));
+}
+
 QString BadgeService::scan(const QString &uid)
 {
+    if (!adminUid.isEmpty() && uid == adminUid) {
+        emit adminScanned();
+        return QStringLiteral("IN;Admin;") + QTime::currentTime().toString("HH:mm");
+    }
     QSqlQuery q;
     q.prepare("SELECT e.id, e.name FROM employee_badges b JOIN employees e ON e.id = b.employee_id WHERE b.uid_badge = ?");
     q.addBindValue(uid);
@@ -56,7 +96,11 @@ QString BadgeService::scan(const QString &uid)
         fail(q.lastError().text());
         return QStringLiteral("ERR");
     }
-    if (!q.next()) return insert(uid, 0, "REFUSE") ? QStringLiteral("NO;Badge inconnu") : QStringLiteral("ERR");
+    if (!q.next()) {
+        const bool saved = insert(uid, 0, "REFUSE");
+        emit refused(uid);
+        return saved ? QStringLiteral("NO;Badge inconnu") : QStringLiteral("ERR");
+    }
     const int id = q.value(0).toInt();
     const QString name = plain(q.value(1).toString().section(' ', 0, 0), 10);
 

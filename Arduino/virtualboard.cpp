@@ -82,11 +82,11 @@ void VirtualBoard::present(const QString &uid)
     display(QStringLiteral("Verification..."), uid);
 }
 
-void VirtualBoard::reply(const QString &line)
+void VirtualBoard::reply(const QString &line, bool sound)
 {
     const QString type = line.section(';', 0, 0), name = line.section(';', 1, 1), info = line.section(';', 2, 2);
     m_clock.start();
-    Sound::play(type == "IN" ? QStringLiteral("arrivee") : type == "OUT" ? QStringLiteral("depart") : type == "WAIT" ? QStringLiteral("deja") : QStringLiteral("refus"));
+    if (sound) Sound::play(type == "IN" ? QStringLiteral("arrivee") : type == "OUT" ? QStringLiteral("depart") : type == "WAIT" ? QStringLiteral("deja") : QStringLiteral("refus"));
     m_mode = Refused;
     m_tone.go(1, Motion::Base);
     if (type == "IN" || type == "OUT") {

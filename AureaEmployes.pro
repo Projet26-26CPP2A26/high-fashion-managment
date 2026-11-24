@@ -25,11 +25,14 @@ SOURCES += main.cpp \
     Suivi/employeedesk.cpp \
     Suivi/employeepopup.cpp \
     Suivi/employeetile.cpp \
+    Suivi/passagefeed.cpp \
     Suivi/reviewboard.cpp \
     Suivi/submitdialog.cpp \
+    Arduino/badgelink.cpp \
     Arduino/badgepage.cpp \
     Arduino/badgeservice.cpp \
     Arduino/virtualboard.cpp \
+    Animations/BadgeAnimation.cpp \
     Animations/ClosingAnimation.cpp \
     Animations/LinesAnimation.cpp \
     Animations/LoginAnimation.cpp \
@@ -54,13 +57,16 @@ HEADERS += Crud/employee.h \
     Suivi/employeedesk.h \
     Suivi/employeepopup.h \
     Suivi/employeetile.h \
+    Suivi/passagefeed.h \
     Suivi/reviewboard.h \
     Suivi/submitdialog.h \
     Suivi/taskcatalog.h \
+    Arduino/badgelink.h \
     Arduino/badgepage.h \
     Arduino/badgeservice.h \
     Arduino/virtualboard.h \
     Animations/AnimationSpeed.h \
+    Animations/BadgeAnimation.h \
     Animations/ClosingAnimation.h \
     Animations/ConnectionAnimation.h \
     Animations/LinesAnimation.h \

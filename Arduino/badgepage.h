@@ -1,58 +1,50 @@
 #pragma once
 #include "badgeservice.h"
 #include "employeerepository.h"
-#include <QSerialPort>
-#include <QTcpSocket>
+#include <QHash>
 #include <QWidget>
 
 class QComboBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
-class QTableWidget;
-class QTimer;
+class ActivityStore;
+class PassageFeed;
 class LinkLight;
 class VirtualBoard;
 
 class BadgePage : public QWidget {
     Q_OBJECT
 public:
-    explicit BadgePage(EmployeeRepository &repository, QWidget *parent = nullptr);
+    BadgePage(EmployeeRepository &repository, ActivityStore &store, QWidget *parent = nullptr);
+    ~BadgePage() override;
     void enter();
     BadgeService &service() { return m_service; }
+    QHash<int, bool> holders();
     QString virtualScan(const QString &uid);
 
 signals:
     void attendanceChanged();
+    void passed(int employeeId, bool arrival);
 
 private:
     void refreshPorts();
     void toggleSerial();
-    void connectWokwi();
-    void readSerial();
-    void readNetwork();
-    void process(QIODevice &link);
-    void showLink(int state, const QString &text);
+    void showLink();
     void refresh();
     void report(bool ok, const QString &text);
     QString handle(const QString &line, bool mirror = false);
 
     EmployeeRepository &m_repository;
+    ActivityStore &m_store;
     BadgeService m_service;
-    QSerialPort m_serial;
-    QTcpSocket m_tcp;
-    int m_telnet = 0;
-    QTimer *m_auto = nullptr;
     LinkLight *m_light;
     QVector<QWidget *> m_cards;
-    QString m_newest;
-    bool m_filled = false;
-    QByteArray m_buffer;
     bool m_ready = false;
-    QLabel *m_state, *m_count, *m_hint;
+    QLabel *m_state, *m_hint;
     QComboBox *m_ports, *m_people;
     QLineEdit *m_uid;
     QPushButton *m_connect;
-    QTableWidget *m_table;
+    PassageFeed *m_feed;
     VirtualBoard *m_board;
 };

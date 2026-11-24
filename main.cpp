@@ -1,4 +1,6 @@
 #include "activityboard.h"
+#include "badgelink.h"
+#include "badgeservice.h"
 #include "activitystore.h"
 #include "dialogskin.h"
 #include "employeedesk.h"
@@ -109,13 +111,58 @@ int main(int argc, char *argv[])
     std::unique_ptr<QThread> warm(QThread::create([] { OracleConnection::warmUp(); }));
     warm->start();
     struct WarmEnd { QThread *thread; ~WarmEnd() { thread->wait(); } } warmEnd{warm.get()};
-    std::unique_ptr<LoginDialog> next(new LoginDialog);
+    if (demo && store.setting("admin_badge").isEmpty()) store.saveSetting("admin_badge", "11223344");
+    if (qEnvironmentVariableIsSet("AUREA_WOKWI")) BadgeLink::instance().startAuto();
+    const auto scanLogin = [&store](const QString &text) {
+        LoginDialog::BadgeResult out;
+        const QString uid = BadgeService::normalize(text);
+        if (!uid.isEmpty() && uid == store.setting("admin_badge")) {
+            out.role = LoginDialog::Admin;
+            out.name = QStringLiteral("Responsable RH");
+            out.reply = QStringLiteral("IN;Admin;") + QTime::currentTime().toString("HH:mm");
+            return out;
+        }
+        if (!OracleConnection::instance().open()) {
+            out.reply = QStringLiteral("ERR");
+            return out;
+        }
+        BadgeService service;
+        out.reply = service.enter(uid);
+        if (out.reply.startsWith("IN;")) {
+            out.role = LoginDialog::EmployeeRole;
+            out.employeeId = service.employeeOf(uid);
+            EmployeeRepository people;
+            out.name = people.findEmployee(out.employeeId).name();
+        } else if (out.reply != "ERR") {
+            store.addEntry(QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
+        }
+        return out;
+    };
+    const auto makeLogin = [&store, scanLogin] {
+        auto *login = new LoginDialog;
+        login->badgeHandler = scanLogin;
+        login->refusedHandler = [&store](const QString &user) {
+            store.addEntry(QString(), QStringLiteral("Identifiant refusé"), QStringLiteral("LIGNE"), QStringLiteral("REFUSE"), user.isEmpty() ? QStringLiteral("vide") : user);
+        };
+        login->badgeList = [&store] {
+            QVector<QPair<QString, QString>> list;
+            const QString admin = store.setting("admin_badge");
+            if (admin.size() > 3) list.append(qMakePair(admin, QStringLiteral("Responsable RH")));
+            if (OracleConnection::instance().open()) {
+                BadgeService service;
+                list += service.badges();
+            }
+            return list;
+        };
+        return login;
+    };
+    std::unique_ptr<LoginDialog> next(makeLogin());
     std::unique_ptr<EmployeeDesk> desk;
     std::unique_ptr<EmployeeWindow> window;
 
     for (;;) {
         std::unique_ptr<LoginDialog> login = std::move(next);
-        if (!login) login.reset(new LoginDialog);
+        if (!login) login.reset(makeLogin());
         if (overlay) {
             overlay->waitExpanded();
             overlay->waitMessage();
@@ -162,22 +209,32 @@ int main(int argc, char *argv[])
         }
         MorphOverlay::breathe();
         const QDate today = QDate::currentDate();
+        const QString via = login->usedBadge() ? QStringLiteral("BADGE") : QStringLiteral("LIGNE");
         if (role == LoginDialog::EmployeeRole) {
             EmployeeRepository people;
             Employee employee;
             const QVector<Employee> list = people.loadEmployees();
             for (const Employee &e : list)
-                if (!employee.id() || e.id() < employee.id()) employee = e;
+                if (login->employeeId() ? e.id() == login->employeeId() : !employee.id() || e.id() < employee.id()) employee = e;
             if (!people.error().isEmpty() || !employee.id()) {
                 stop(people.error().isEmpty() ? QStringLiteral("Aucun employé dans la base.") : people.error());
                 continue;
             }
-            if (store.hasLiveSession(employee.reference())) {
+            if (!(demo && login->usedBadge()) && store.hasLiveSession(employee.reference())) {
                 stop(QStringLiteral("Cette session est déjà ouverte (ou vient d'être interrompue).\nRéessayez dans 20 secondes."));
                 continue;
             }
             const int ever = store.countSessions(employee.reference(), QDate()), before = store.countSessions(employee.reference(), today);
-            desk.reset(new EmployeeDesk(store, employee));
+            desk.reset(new EmployeeDesk(store, employee, via));
+            BadgeLink::instance().receiver = [&desk, &store, employee](const QString &line) {
+                BadgeService service;
+                service.adminUid = store.setting("admin_badge");
+                const QString uid = BadgeService::normalize(line.section(':', 1));
+                const QString reply = service.receive(line);
+                if (reply.startsWith("OUT;") && service.employeeOf(uid) == employee.id() && desk) QTimer::singleShot(900, desk.get(), [d = desk.get()] { d->leaveByBadge(); });
+                else if (reply.startsWith("NO;")) store.addEntry(QString(), QStringLiteral("Badge inconnu"), QStringLiteral("BADGE"), QStringLiteral("REFUSE"), uid);
+                return reply;
+            };
             MorphOverlay::breathe();
             if (!desk->ready()) {
                 desk.reset();
@@ -205,6 +262,7 @@ int main(int argc, char *argv[])
                 continue;
             }
             store.logAt(adminName, adminEvent, QDateTime::currentDateTime());
+            store.addEntry(adminName, QStringLiteral("Responsable RH"), via, QStringLiteral("ARRIVEE"));
             space = window.get();
             QObject::connect(window.get(), &EmployeeWindow::closed, &loop, [&](bool again) {
                 leave(again, QStringLiteral("À bientôt"), QStringLiteral("Vos données sont enregistrées."));
@@ -218,7 +276,7 @@ int main(int argc, char *argv[])
         overlay->land([&logoOf, space] { return logoOf(space); }, logoSwitch(space));
         overlay = nullptr;
         login.reset();
-        QTimer::singleShot(4200, &loop, [&] { if (!next) next.reset(new LoginDialog); });
+        QTimer::singleShot(4200, &loop, [&] { if (!next) next.reset(makeLogin()); });
         loop.exec();
         if (logout) continue;
         if (overlay) {

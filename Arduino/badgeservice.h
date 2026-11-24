@@ -17,6 +17,10 @@ public:
     bool ready();
     QString error() const { return m_error; }
     QString receive(const QString &line);
+    QString enter(const QString &uid);
+    int employeeOf(const QString &uid);
+    bool inside(int employeeId);
+    QString adminUid;
     bool assign(const QString &uid, int employeeId);
     bool release(int employeeId);
     QString badgeOf(int employeeId);
@@ -27,6 +31,8 @@ public:
 signals:
     void scanned(int employeeId, bool arrival);
     void changed();
+    void refused(const QString &uid);
+    void adminScanned();
 
 private:
     QString scan(const QString &uid);

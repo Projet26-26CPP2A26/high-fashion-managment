@@ -343,7 +343,7 @@ void ActivityBoard::notify()
 {
     const QVector<ActivityEvent> events = m_store.events(QDate::currentDate());
     for (const ActivityEvent &e : events) {
-        if (!m_people.contains(e.who)) continue;
+        if (!m_people.contains(e.who) || !e.text.startsWith(QStringLiteral("Dépôt"))) continue;
         const QString latest = e.at.toString(Qt::ISODate) + e.who + e.text;
         if (!m_lastEvent.isEmpty() && latest != m_lastEvent && window()->isVisible()) Fx::toast(window(), displayName(e.who) + QStringLiteral(" — ") + e.text);
         m_lastEvent = latest;

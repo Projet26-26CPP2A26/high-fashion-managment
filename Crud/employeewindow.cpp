@@ -25,6 +25,7 @@
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTimer>
+#include <algorithm>
 
 EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
     :QMainWindow(parent),ui(new Ui::EmployeeWindow),employeeModule(nullptr),board(nullptr),pages(nullptr) {
@@ -41,12 +42,13 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
     reviews=new ReviewBoard(*board,this); pages->addWidget(reviews);
     reviewButton=new QPushButton(QStringLiteral("  Revues"),this); reviewButton->setProperty("nav",true); reviewButton->setCheckable(true); reviewButton->setIcon(Icons::nav(Icons::Check)); reviewButton->setIconSize(QSize(20,20)); reviewButton->setMinimumHeight(44); reviewButton->setCursor(Qt::PointingHandCursor);
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navEmployees),reviewButton); connect(reviewButton,&QPushButton::clicked,this,&EmployeeWindow::showReviews);
-    badges=new BadgePage(employeeModule->repository(),this); pages->addWidget(badges);
+    badges=new BadgePage(employeeModule->repository(),store,this); pages->addWidget(badges);
     badgeButton=new QPushButton(QStringLiteral("  Badges"),this); badgeButton->setProperty("nav",true); badgeButton->setCheckable(true); badgeButton->setIcon(Icons::nav(Icons::Badge)); badgeButton->setIconSize(QSize(20,20)); badgeButton->setMinimumHeight(44); badgeButton->setCursor(Qt::PointingHandCursor);
     ui->sidebarLayout->insertWidget(ui->sidebarLayout->indexOf(ui->navAttendance)+1,badgeButton); connect(badgeButton,&QPushButton::clicked,this,&EmployeeWindow::showBadges);
     connect(badges,&BadgePage::attendanceChanged,employeeModule,&EmployeeModule::refresh);
-    if(employeeModule->ready()&&demo) {
-        auto *simulator=new CompanySimulator(store,employeeModule->repository().loadEmployees(),this);
+    if(employeeModule->ready()) {
+        auto *simulator=new CompanySimulator(store,employeeModule->repository().loadEmployees(),this,QString(),demo,badges->holders());
+        connect(badges,&BadgePage::passed,simulator,&CompanySimulator::badge);
         connect(employeeModule,&QObject::destroyed,simulator,&QObject::deleteLater);
         auto *people=new QTimer(this); people->start(15000);
         connect(people,&QTimer::timeout,simulator,[this,simulator]{const auto list=employeeModule->repository().loadEmployees(); if(employeeModule->repository().error().isEmpty()) simulator->setEmployees(list);});
@@ -56,7 +58,16 @@ EmployeeWindow::EmployeeWindow(ActivityStore &store,bool demo,QWidget *parent)
         board->assignHandler=[this](int id,const QString &title,int minutes){return link->assignTask(id,title,minutes);};
         connect(link,&CompanyLink::changed,employeeModule,&EmployeeModule::refresh);
     }
+    for(const AccessEntry &e:store.entries(200)) lastEntry=std::max(lastEntry,e.id);
     auto *badge=new QTimer(this); badge->start(1000);
+    connect(badge,&QTimer::timeout,this,[this,&store]{
+        for(const AccessEntry &e:store.entriesAfter(lastEntry)) {
+            lastEntry=std::max(lastEntry,e.id);
+            if(e.kind!="REFUSE") continue;
+            if(pages->currentIndex()!=3) ++refusals;
+        }
+        badgeButton->setText(refusals?QStringLiteral("  Badges   ·  %1").arg(refusals):QStringLiteral("  Badges"));
+    });
     connect(badge,&QTimer::timeout,this,[this]{const int waiting=int(board->reviews().size()); reviewButton->setText(waiting?QStringLiteral("  Revues   ·  %1").arg(waiting):QStringLiteral("  Revues"));});
     MorphOverlay::breathe();
     ui->contentLayout->addWidget(pages);
@@ -111,7 +122,7 @@ void EmployeeWindow::showReviews() {
     ui->pageTitle->setText(QStringLiteral("Revues")); ui->subtitle->setText(QStringLiteral("Dépôts des employés : validez, notez ou demandez une correction.")); reviewButton->setChecked(true); Fx::switchPage(pages,2); reviews->enter();
 }
 void EmployeeWindow::showBadges() {
-    ui->pageTitle->setText(QStringLiteral("Badges")); ui->subtitle->setText(QStringLiteral("Pointage par badge RFID : carte Arduino et base Oracle.")); badgeButton->setChecked(true); badges->enter(); Fx::switchPage(pages,3);
+    ui->pageTitle->setText(QStringLiteral("Badges")); ui->subtitle->setText(QStringLiteral("Pointage par badge RFID : carte Arduino et base Oracle.")); badgeButton->setChecked(true); refusals=0; badges->enter(); Fx::switchPage(pages,3);
 }
 void EmployeeWindow::setPage(int index) {
     static const QStringList titles={"Tableau de bord","Employés","Affectation intelligente","Pointage","Statistiques"};

@@ -13,7 +13,7 @@ public:
     explicit VirtualBoard(QWidget *parent = nullptr);
     void setBadges(const QVector<QPair<QString, QString>> &badges);
     void present(const QString &uid);
-    void reply(const QString &line);
+    void reply(const QString &line, bool sound = true);
     std::function<void(const QString &)> scan;
 
 protected:

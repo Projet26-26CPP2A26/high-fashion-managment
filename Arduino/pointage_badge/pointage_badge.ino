@@ -20,6 +20,17 @@ const unsigned long DUREE_MESSAGE = 3000;
 const int PORTE_FERMEE = 0;
 const int PORTE_OUVERTE = 90;
 
+struct Note {
+  unsigned int frequence;
+  unsigned int duree;
+  unsigned int suivante;
+};
+
+const Note SON_ARRIVEE[] = {{659, 45, 75}, {988, 70, 0}};
+const Note SON_DEPART[] = {{988, 45, 75}, {659, 70, 0}};
+const Note SON_REFUS[] = {{330, 60, 110}, {330, 80, 0}};
+const Note SON_DEJA[] = {{659, 45, 0}};
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo porte;
 #if !SIMULATION
@@ -35,6 +46,9 @@ bool messageAffiche = false;
 bool porteOuverte = false;
 unsigned long debutAttente = 0;
 unsigned long debutMessage = 0;
+const Note *melodie = NULL;
+byte notesRestantes = 0;
+unsigned long prochaineNote = 0;
 
 void afficher(const char *haut, const char *bas) {
   lcd.clear();
@@ -66,9 +80,23 @@ void message(const char *haut, const char *bas) {
   debutMessage = millis();
 }
 
+void jouer(const Note *notes, byte nombre) {
+  melodie = notes;
+  notesRestantes = nombre;
+  prochaineNote = millis();
+}
+
+void jouerNotes() {
+  if (notesRestantes == 0 || (long)(millis() - prochaineNote) < 0) return;
+  tone(PIN_BUZZER, melodie->frequence, melodie->duree);
+  prochaineNote = millis() + melodie->suivante;
+  melodie++;
+  notesRestantes--;
+}
+
 void refuser(const char *haut, const char *bas) {
   fermer();
-  tone(PIN_BUZZER, 220, 700);
+  jouer(SON_REFUS, 2);
   message(haut, bas);
 }
 
@@ -82,17 +110,18 @@ void traiter(char *texte) {
   if (strcmp(type, "IN") == 0) {
     snprintf(haut, sizeof(haut), "Bonjour %s", nom ? nom : "");
     snprintf(bas, sizeof(bas), "Arrivee %s", info ? info : "");
-    tone(PIN_BUZZER, 1500, 150);
+    jouer(SON_ARRIVEE, 2);
     ouvrir();
     message(haut, bas);
   } else if (strcmp(type, "OUT") == 0) {
     snprintf(haut, sizeof(haut), "A bientot %s", nom ? nom : "");
     snprintf(bas, sizeof(bas), "Travail %s", info ? info : "");
-    tone(PIN_BUZZER, 1000, 150);
+    jouer(SON_DEPART, 2);
     ouvrir();
     message(haut, bas);
   } else if (strcmp(type, "WAIT") == 0) {
     snprintf(haut, sizeof(haut), "%s", nom ? nom : "");
+    jouer(SON_DEJA, 1);
     message(haut, "Deja enregistre");
   } else if (strcmp(type, "NO") == 0) {
     snprintf(bas, sizeof(bas), "%s", nom ? nom : "");
@@ -173,6 +202,7 @@ void setup() {
 }
 
 void loop() {
+  jouerNotes();
   lireOrdinateur();
   if (attente && millis() - debutAttente >= DELAI_REPONSE) {
     attente = false;

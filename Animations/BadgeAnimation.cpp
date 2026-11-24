@@ -15,9 +15,7 @@ BadgeAnimation::BadgeAnimation(QWidget *parent) : QWidget(parent)
         if (m_mode == Denied && m_clock.elapsed() > 2200) {
             m_mode = Idle;
             m_tone.go(0, Motion::Base);
-            m_card.go(0, Motion::Slow);
         }
-        if (m_mode == Denied && m_clock.elapsed() > 900 && m_card.target() > 0) m_card.go(0, Motion::Slow);
         if (isVisible()) update();
     });
     timer->start(Fx::frameInterval(this));
@@ -35,6 +33,7 @@ void BadgeAnimation::answer(bool granted)
 {
     m_mode = granted ? Granted : Denied;
     m_clock.start();
+    if (!granted) m_card.go(0, Motion::Slow);
 }
 
 void BadgeAnimation::paintEvent(QPaintEvent *)

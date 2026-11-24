@@ -1,4 +1,5 @@
 #include "employeetile.h"
+#include "icons.h"
 #include "AnimationSpeed.h"
 #include <QMouseEvent>
 #include <QPainter>
@@ -157,8 +158,11 @@ void EmployeeTile::paintEvent(QPaintEvent *)
     text(QRect(int(center.x()) - 20, int(center.y()) - 14, 40, 28), initials, QColor("#e9d8a8"), 10.5, QFont::Bold, Qt::AlignHCenter);
 
     const int nameX = x + 54;
-    text(QRect(nameX, y + 16, right - nameX, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold, Qt::AlignLeft);
+    text(QRect(nameX, y + 16, right - nameX - 20, 22), m_session.name, QColor("#ffffff"), 11, QFont::DemiBold, Qt::AlignLeft);
     text(QRect(nameX, y + 38, right - nameX, 18), m_session.position, QColor("#8f8c86"), 9, QFont::Normal, Qt::AlignLeft);
+
+    if (m_session.login.isValid() && !m_session.ended() && !m_session.via.isEmpty())
+        p.drawPixmap(QPointF(right - 16, y + 18), Icons::pixmap(m_session.via == "BADGE" ? Icons::Office : Icons::Online, QColor(m_session.via == "BADGE" ? "#e2cf9f" : "#8fb3c9"), 16));
 
     QColor soft = color;
     soft.setAlpha(38);

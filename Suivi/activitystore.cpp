@@ -55,6 +55,8 @@ bool ActivityStore::open(const QString &path)
              " login TEXT, last_seen TEXT, logout TEXT, end_reason TEXT, work INTEGER, pause INTEGER, idle INTEGER, off INTEGER)",
              "CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY AUTOINCREMENT, who TEXT, title TEXT, planned INTEGER, spent INTEGER DEFAULT 0, state INTEGER DEFAULT 0, done_at TEXT DEFAULT '')",
              "CREATE TABLE IF NOT EXISTS attendance(employee INTEGER, day TEXT, arrival TEXT, departure TEXT, pause INTEGER, saved_at TEXT, PRIMARY KEY(employee,day))",
+             "CREATE TABLE IF NOT EXISTS entries(id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, who TEXT, label TEXT, via TEXT, kind TEXT, detail TEXT)",
+             "CREATE TABLE IF NOT EXISTS settings(name TEXT PRIMARY KEY, value TEXT)",
              "CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, who TEXT, text TEXT)"}) {
         QSqlQuery q(db);
         if (!q.exec(sql)) { m_error = q.lastError().text(); return false; }
@@ -62,6 +64,15 @@ bool ActivityStore::open(const QString &path)
     for (const char *sql : {"CREATE INDEX IF NOT EXISTS sessions_name ON sessions(name, login)", "CREATE INDEX IF NOT EXISTS tasks_who ON tasks(who, state)", "CREATE INDEX IF NOT EXISTS events_at ON events(at)"}) {
         QSqlQuery q(db);
         q.exec(sql);
+    }
+
+    QSqlQuery known(db);
+    bool hasVia = false;
+    known.exec("PRAGMA table_info(sessions)");
+    while (known.next()) hasVia |= known.value(1).toString() == "via";
+    if (!hasVia) {
+        QSqlQuery q(db);
+        if (!q.exec("ALTER TABLE sessions ADD COLUMN via TEXT DEFAULT ''")) { m_error = q.lastError().text(); return false; }
     }
 
     QSet<QString> columns;
@@ -104,8 +115,8 @@ bool ActivityStore::closeLostSessions(const QString &name)
 bool ActivityStore::start(WorkSession &s)
 {
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare("INSERT INTO sessions(name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off) VALUES(?,?,?,?,?,?,'','',0,0,0,0)");
-    for (const QString &v : {s.name, s.position, s.task, s.state, iso(s.login), iso(s.lastSeen)}) q.addBindValue(v);
+    q.prepare("INSERT INTO sessions(name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off,via) VALUES(?,?,?,?,?,?,'','',0,0,0,0,?)");
+    for (const QString &v : {s.name, s.position, s.task, s.state, iso(s.login), iso(s.lastSeen), s.via.isNull() ? QString("") : s.via}) q.addBindValue(v);
     if (!run(q)) return false;
     s.id = q.lastInsertId().toInt();
     return log(s, QStringLiteral("Connexion"));
@@ -132,7 +143,7 @@ QVector<WorkSession> ActivityStore::sessions(const QDate &day)
     QVector<WorkSession> list;
     QSqlQuery q(QSqlDatabase::database(m_connection));
 
-    q.prepare("SELECT id,name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off FROM sessions "
+    q.prepare("SELECT id,name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off,via FROM sessions "
               "WHERE substr(login,1,10)<=? AND substr(last_seen,1,10)>=? ORDER BY login DESC");
     q.addBindValue(day.toString(Qt::ISODate));
     q.addBindValue(day.toString(Qt::ISODate));
@@ -152,6 +163,7 @@ QVector<WorkSession> ActivityStore::sessions(const QDate &day)
         s.pause = q.value(10).toInt();
         s.idle = q.value(11).toInt();
         s.off = q.value(12).toInt();
+        s.via = q.value(13).toString();
         list.append(s);
     }
     return list;
@@ -376,8 +388,8 @@ void ActivityStore::commit() { QSqlDatabase::database(m_connection).commit(); }
 int ActivityStore::insertSession(const WorkSession &s)
 {
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare("INSERT INTO sessions(name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
-    for (const QVariant &v : QVariantList{s.name, s.position, s.task, s.state, iso(s.login), iso(s.lastSeen), iso(s.logout), s.endReason, s.work, s.pause, s.idle, s.off}) q.addBindValue(v);
+    q.prepare("INSERT INTO sessions(name,position,task,state,login,last_seen,logout,end_reason,work,pause,idle,off,via) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    for (const QVariant &v : QVariantList{s.name, s.position, s.task, s.state, iso(s.login), iso(s.lastSeen), iso(s.logout), s.endReason, s.work, s.pause, s.idle, s.off, s.via.isNull() ? QString("") : s.via}) q.addBindValue(v);
     return run(q) ? q.lastInsertId().toInt() : 0;
 }
 
@@ -429,4 +441,70 @@ int ActivityStore::countSessions(const QString &who, const QDate &day)
     const QString d = day.isValid() ? day.toString(Qt::ISODate) : QString("");
     for (const QString &v : {who, d, d}) q.addBindValue(v);
     return run(q) && q.next() ? q.value(0).toInt() : 0;
+}
+
+int ActivityStore::addEntry(const QString &who, const QString &label, const QString &via, const QString &kind, const QString &detail, const QDateTime &at)
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare("INSERT INTO entries(at,who,label,via,kind,detail) VALUES(?,?,?,?,?,?)");
+    for (const QString &v : {iso(at.isValid() ? at : QDateTime::currentDateTime()), who, label, via, kind, detail}) q.addBindValue(v.isNull() ? QString("") : v);
+    return run(q) ? q.lastInsertId().toInt() : 0;
+}
+
+namespace {
+AccessEntry readEntry(const QSqlQuery &q)
+{
+    return {q.value(0).toInt(), when(q.value(1)), q.value(2).toString(), q.value(3).toString(), q.value(4).toString(), q.value(5).toString(), q.value(6).toString()};
+}
+}
+
+QVector<AccessEntry> ActivityStore::entries(int limit, const QString &via)
+{
+    QVector<AccessEntry> list;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare("SELECT id,at,who,label,via,kind,detail FROM entries WHERE (?='' OR via=?) ORDER BY at DESC, id DESC LIMIT ?");
+    q.addBindValue(via.isNull() ? QString("") : via);
+    q.addBindValue(via.isNull() ? QString("") : via);
+    q.addBindValue(limit);
+    if (run(q)) while (q.next()) list.append(readEntry(q));
+    return list;
+}
+
+QVector<AccessEntry> ActivityStore::entriesAfter(int id)
+{
+    QVector<AccessEntry> list;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare("SELECT id,at,who,label,via,kind,detail FROM entries WHERE id>? ORDER BY id");
+    q.addBindValue(id);
+    if (run(q)) while (q.next()) list.append(readEntry(q));
+    return list;
+}
+
+bool ActivityStore::clearDay(const QString &who, const QDate &day)
+{
+    for (const char *sql : {"DELETE FROM sessions WHERE name=? AND substr(login,1,10)=?", "DELETE FROM entries WHERE who=? AND substr(at,1,10)=?", "DELETE FROM events WHERE who=? AND substr(at,1,10)=?"}) {
+        QSqlQuery q(QSqlDatabase::database(m_connection));
+        q.prepare(sql);
+        q.addBindValue(who);
+        q.addBindValue(day.toString(Qt::ISODate));
+        if (!run(q)) return false;
+    }
+    return true;
+}
+
+QString ActivityStore::setting(const QString &key)
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare("SELECT value FROM settings WHERE name=?");
+    q.addBindValue(key);
+    return run(q) && q.next() ? q.value(0).toString() : QString();
+}
+
+bool ActivityStore::saveSetting(const QString &key, const QString &value)
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare("INSERT OR REPLACE INTO settings(name,value) VALUES(?,?)");
+    q.addBindValue(key);
+    q.addBindValue(value.isNull() ? QString("") : value);
+    return run(q);
 }

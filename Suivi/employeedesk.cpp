@@ -78,7 +78,7 @@ QLabel *statCard(QHBoxLayout *row, const QString &title, QLabel **info = nullptr
 QString minutesText(int seconds) { return QStringLiteral("%1 min").arg((std::max(0, seconds) + 59) / 60); }
 }
 
-EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, QWidget *parent) : QMainWindow(parent), m_store(store), m_employee(employee)
+EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, const QString &via, QWidget *parent) : QMainWindow(parent), m_store(store), m_employee(employee)
 {
     setWindowTitle(QStringLiteral("AUREA — Espace employé"));
     setMinimumSize(1020, 600);
@@ -93,6 +93,7 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, QWidg
 
     m_session.name = m_employee.reference();
     m_session.position = m_employee.position();
+    m_session.via = via;
     m_session.state = kWork;
     m_session.task = kNoTask;
     m_session.login = m_session.lastSeen = m_last = QDateTime::currentDateTime();
@@ -111,7 +112,7 @@ EmployeeDesk::EmployeeDesk(ActivityStore &store, const Employee &employee, QWidg
             m_store.addTask(t);
         }
     }
-    m_store.start(m_session);
+    if (m_store.start(m_session)) m_store.addEntry(m_session.name, m_employee.name(), via, QStringLiteral("ARRIVEE"));
 
     auto *central = new QWidget;
     central->setObjectName("centralwidget");
@@ -664,6 +665,14 @@ void EmployeeDesk::finish(const QString &reason)
     m_session.endReason = reason;
     m_store.save(m_session);
     m_store.log(m_session, QStringLiteral("Déconnexion : ") + reason);
+    m_store.addEntry(m_session.name, m_employee.name(), m_session.via, QStringLiteral("DEPART"));
+}
+
+void EmployeeDesk::leaveByBadge()
+{
+    m_logout = true;
+    finish(QStringLiteral("Départ par badge"));
+    close();
 }
 
 void EmployeeDesk::closeEvent(QCloseEvent *event)

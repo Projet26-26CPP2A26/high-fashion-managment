@@ -19,7 +19,9 @@ enum Kind {
 
     Badge,
 
-    Document, Scissors
+    Document, Scissors,
+
+    Office, Online
 };
 
 inline QPixmap pixmap(Kind kind, const QColor &color, int size = 20)
@@ -165,6 +167,17 @@ inline QPixmap pixmap(Kind kind, const QColor &color, int size = 20)
         p.drawLine(QPointF(9.5, 16.6), QPointF(15.5, 16.6));
         break;
     }
+    case Office:
+        p.drawRoundedRect(QRectF(5, 3, 14, 18), 1.6, 1.6);
+        for (int y : {7, 11}) for (int x : {9, 15}) p.drawLine(QPointF(x - 0.6, y), QPointF(x + 0.6, y));
+        p.drawLine(QPointF(10, 21), QPointF(10, 16));
+        p.drawLine(QPointF(10, 16), QPointF(14, 16));
+        p.drawLine(QPointF(14, 16), QPointF(14, 21));
+        break;
+    case Online:
+        p.drawRoundedRect(QRectF(4.5, 5, 15, 10.5), 1.8, 1.8);
+        p.drawLine(QPointF(2, 19), QPointF(22, 19));
+        break;
     case Scissors:
         p.drawEllipse(QPointF(6.5, 17.5), 2.8, 2.8);
         p.drawEllipse(QPointF(17.5, 17.5), 2.8, 2.8);
