@@ -5,41 +5,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport Network Svg)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/Crud)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql PrintSupport SerialPort Network)
 
-# --- Connexion Oracle (ODBC / QODBC) : singleton + test de bout en bout (--oracle-test) ---
-add_library(oracle_core STATIC
-    common/oracleconnection.cpp common/oracleconnection.h
-    common/oraclecheck.cpp common/oraclecheck.h)
-target_include_directories(oracle_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common)
-target_link_libraries(oracle_core PUBLIC Qt6::Core Qt6::Sql)
+add_library(quirc STATIC
+    third_party/quirc/quirc.c third_party/quirc/decode.c
+    third_party/quirc/identify.c third_party/quirc/version_db.c)
+target_include_directories(quirc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quirc)
 
-# --- Cœur « Matières » (stock SQLite ou Oracle, QR codes, rapports PDF) ---
-add_library(material_core STATIC
-    materials/inventoryrepository.cpp materials/inventoryrepository.h
-    materials/qrservice.cpp materials/qrservice.h
-    materials/reports.cpp materials/reports.h)
-target_include_directories(material_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/materials)
-target_link_libraries(material_core PUBLIC oracle_core Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::Network Qt6::Svg)
+set(APP_SOURCES
+    Crud/crud_interface.cpp Crud/materialwindow.cpp Crud/materialwindow.h Crud/materialwindow.ui
+    Crud/inventoryrepository.cpp Crud/inventoryrepository.h Crud/oracleconnection.cpp Crud/oracleconnection.h
+    Metier/qr_interface.cpp Metier/qrservice.cpp Metier/qrservice.h Metier/reapprovisionnement.cpp
+    Metier/reports.cpp Metier/reports.h Metier/statistiques_pdf.cpp
+    arduino/arduino.cpp arduino/arduino.h arduino/borne_interface.cpp arduino/bornepage.cpp arduino/bornepage.h
+    Animations/QrAnimation.cpp Animations/QrAnimation.h Animations/StitchAnimation.cpp Animations/StitchAnimation.h
+    Animations/LinkLight.h Animations/Motion.h Animations/UiEffects.h
+    Extras/icons.h Extras/sound.h Extras/uihelpers.h
+    third_party/qrcodegen/qrcodegen.cpp Resources/materials.qrc)
 
-# --- Interface ---
-set(UI_SOURCES
-    common/icons.h common/sqldialect.h
-    materials/materialwindow.cpp materials/materialwindow.h materials/materialwindow.ui materials/materials.qrc)
+set(APP_INCLUDES Crud Metier arduino Animations Extras third_party/qrcodegen)
+set(APP_LIBRARIES quirc Qt6::Widgets Qt6::Sql Qt6::PrintSupport Qt6::SerialPort Qt6::Network winmm)
 
-add_executable(AureaMatieres WIN32 main.cpp ${UI_SOURCES})
-target_include_directories(AureaMatieres PRIVATE common materials)
-target_link_libraries(AureaMatieres PRIVATE material_core oracle_core)
-
-if(MINGW)
-    target_compile_options(AureaMatieres PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+add_executable(AureaMatieres WIN32 main.cpp ${APP_SOURCES})
+target_include_directories(AureaMatieres PRIVATE ${APP_INCLUDES})
+target_link_libraries(AureaMatieres PRIVATE ${APP_LIBRARIES})
 
 include(CTest)
 if(BUILD_TESTING)
     find_package(Qt6 REQUIRED COMPONENTS Test)
-    add_executable(material_tests tests/test_materials.cpp ${UI_SOURCES})
-    target_include_directories(material_tests PRIVATE common materials)
-    target_link_libraries(material_tests PRIVATE material_core Qt6::Test)
+    add_executable(material_tests tests/test_materials.cpp ${APP_SOURCES})
+    target_include_directories(material_tests PRIVATE ${APP_INCLUDES})
+    target_link_libraries(material_tests PRIVATE ${APP_LIBRARIES} Qt6::Test)
     add_test(NAME material_module COMMAND material_tests -platform offscreen)
 endif()

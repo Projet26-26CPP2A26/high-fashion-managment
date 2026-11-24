@@ -107,12 +107,6 @@
                             <height>56</height>
                           </size>
                         </property>
-                        <property name="pixmap">
-                          <pixmap>:/assets/logo.svg</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                          <bool>true</bool>
-                        </property>
                       </widget>
                     </item>
                     <item>
@@ -1863,7 +1857,7 @@ Un atelier organisé.</string>
                                     </widget>
                                   </item>
                                   <item>
-                                    <widget class="QPushButton" name="movementButton">
+                                    <widget class="QPushButton" name="stockButton">
                                       <property name="text">
                                         <string>Entrée / sortie de stock</string>
                                       </property>
@@ -2569,50 +2563,6 @@ Un atelier organisé.</string>
                                             </widget>
                                           </item>
                                           <item>
-                                            <widget class="QWidget" name="editReasonField">
-                                              <layout class="QVBoxLayout" name="editReasonFieldLayout">
-                                                <property name="leftMargin">
-                                                  <number>0</number>
-                                                </property>
-                                                <property name="topMargin">
-                                                  <number>0</number>
-                                                </property>
-                                                <property name="rightMargin">
-                                                  <number>0</number>
-                                                </property>
-                                                <property name="bottomMargin">
-                                                  <number>0</number>
-                                                </property>
-                                                <property name="spacing">
-                                                  <number>7</number>
-                                                </property>
-                                                <item>
-                                                  <widget class="QLabel" name="editReasonLabel">
-                                                    <property name="text">
-                                                      <string>Motif du changement de stock</string>
-                                                    </property>
-                                                    <property name="sizePolicy">
-                                                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                                                        <horstretch>0</horstretch>
-                                                        <verstretch>0</verstretch>
-                                                      </sizepolicy>
-                                                    </property>
-                                                    <property name="muted" stdset="0">
-                                                      <bool>true</bool>
-                                                    </property>
-                                                  </widget>
-                                                </item>
-                                                <item>
-                                                  <widget class="QLineEdit" name="editReason">
-                                                    <property name="text">
-                                                      <string>Correction d’inventaire</string>
-                                                    </property>
-                                                  </widget>
-                                                </item>
-                                              </layout>
-                                            </widget>
-                                          </item>
-                                          <item>
                                             <widget class="QLabel" name="validationLabel">
                                               <property name="text">
                                                 <string />
@@ -2831,7 +2781,7 @@ Un atelier organisé.</string>
                                         <bool>true</bool>
                                       </attribute>
                                       <property name="columnCount">
-                                        <number>7</number>
+                                        <number>8</number>
                                       </property>
                                       <property name="rowCount">
                                         <number>0</number>
@@ -2869,6 +2819,11 @@ Un atelier organisé.</string>
                                       <column>
                                         <property name="text">
                                           <string>Lot</string>
+                                        </property>
+                                      </column>
+                                      <column>
+                                        <property name="text">
+                                          <string>État</string>
                                         </property>
                                       </column>
                                     </widget>
@@ -2958,6 +2913,13 @@ Un atelier organisé.</string>
                                     </widget>
                                   </item>
                                   <item>
+                                    <widget class="QPushButton" name="orderAllButton">
+                                      <property name="text">
+                                        <string>Tout commander</string>
+                                      </property>
+                                    </widget>
+                                  </item>
+                                  <item>
                                     <widget class="QPushButton" name="receiveButton">
                                       <property name="text">
                                         <string>Enregistrer une réception</string>
@@ -2970,7 +2932,7 @@ Un atelier organisé.</string>
                             <item>
                               <widget class="QLabel" name="reorderHint">
                                 <property name="text">
-                                  <string>Sélectionnez une matière. La quantité proposée couvre le manque jusqu’au seuil minimal.</string>
+                                  <string>Sélectionnez une matière. La quantité proposée remonte le stock au double du seuil minimal.</string>
                                 </property>
                                 <property name="sizePolicy">
                                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3034,11 +2996,12 @@ Un atelier organisé.</string>
                                       <widget class="QFrame" name="phoneQrCard">
                                         <property name="card" stdset="0"><bool>true</bool></property>
                                         <layout class="QVBoxLayout" name="phoneQrLayout">
-                                          <item><widget class="QLabel" name="phoneQrTitle"><property name="text"><string>Lire le QR avec un téléphone</string></property><property name="section" stdset="0"><bool>true</bool></property></widget></item>
+                                          <item><widget class="QLabel" name="phoneQrTitle"><property name="text"><string>Ouvrir la fiche matière sur téléphone</string></property><property name="section" stdset="0"><bool>true</bool></property></widget></item>
                                           <item><layout class="QHBoxLayout" name="phoneActionsLayout">
                                             <item><widget class="QPushButton" name="refreshQrButton"><property name="text"><string>Recréer le QR</string></property></widget></item>
+                                            <item><widget class="QPushButton" name="openPhonePageButton"><property name="text"><string>Ouvrir la page</string></property></widget></item>
                                           </layout></item>
-                                          <item><widget class="QLabel" name="phoneHelpLabel"><property name="text"><string>Scannez avec la caméra du téléphone : touchez le lien : la fiche du lot s'ouvre dans le navigateur, sans compte. Le stock est celui du moment où le QR a été créé : recréez le QR après une modification.</string></property><property name="wordWrap"><bool>true</bool></property><property name="muted" stdset="0"><bool>true</bool></property></widget></item>
+                                          <item><widget class="QLabel" name="phoneHelpLabel"><property name="text"><string>Scannez avec l’appareil photo du téléphone : la fiche du lot s’affiche directement en texte, sans internet.</string></property><property name="wordWrap"><bool>true</bool></property><property name="muted" stdset="0"><bool>true</bool></property></widget></item>
                                         </layout>
                                       </widget>
                                     </item>
@@ -3119,8 +3082,8 @@ Un atelier organisé.</string>
                                                     </property>
                                                     <property name="minimumSize">
                                                       <size>
-                                                        <width>260</width>
-                                                        <height>270</height>
+                                                        <width>340</width>
+                                                        <height>340</height>
                                                       </size>
                                                     </property>
                                                   </widget>
@@ -3340,50 +3303,6 @@ Un atelier organisé.</string>
                                                           </property>
                                                           <property name="value">
                                                             <number>1</number>
-                                                          </property>
-                                                        </widget>
-                                                      </item>
-                                                    </layout>
-                                                  </widget>
-                                                </item>
-                                                <item>
-                                                  <widget class="QWidget" name="consumeReasonField">
-                                                    <layout class="QVBoxLayout" name="consumeReasonFieldLayout">
-                                                      <property name="leftMargin">
-                                                        <number>0</number>
-                                                      </property>
-                                                      <property name="topMargin">
-                                                        <number>0</number>
-                                                      </property>
-                                                      <property name="rightMargin">
-                                                        <number>0</number>
-                                                      </property>
-                                                      <property name="bottomMargin">
-                                                        <number>0</number>
-                                                      </property>
-                                                      <property name="spacing">
-                                                        <number>7</number>
-                                                      </property>
-                                                      <item>
-                                                        <widget class="QLabel" name="consumeReasonLabel">
-                                                          <property name="text">
-                                                            <string>Motif / référence de commande</string>
-                                                          </property>
-                                                          <property name="sizePolicy">
-                                                            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                                                              <horstretch>0</horstretch>
-                                                              <verstretch>0</verstretch>
-                                                            </sizepolicy>
-                                                          </property>
-                                                          <property name="muted" stdset="0">
-                                                            <bool>true</bool>
-                                                          </property>
-                                                        </widget>
-                                                      </item>
-                                                      <item>
-                                                        <widget class="QLineEdit" name="consumeReason">
-                                                          <property name="text">
-                                                            <string>Utilisation en atelier</string>
                                                           </property>
                                                         </widget>
                                                       </item>
@@ -3693,7 +3612,7 @@ Un atelier organisé.</string>
     <tabstop>materialsTable</tabstop>
     <tabstop>editButton</tabstop>
     <tabstop>deleteButton</tabstop>
-    <tabstop>movementButton</tabstop>
+    <tabstop>stockButton</tabstop>
     <tabstop>openQrButton</tabstop>
     <tabstop>nameEdit</tabstop>
     <tabstop>lotEdit</tabstop>
@@ -3704,7 +3623,6 @@ Un atelier organisé.</string>
     <tabstop>minimumEdit</tabstop>
     <tabstop>unitEdit</tabstop>
     <tabstop>priceEdit</tabstop>
-    <tabstop>editReason</tabstop>
     <tabstop>saveButton</tabstop>
     <tabstop>cancelButton</tabstop>
   </tabstops>
