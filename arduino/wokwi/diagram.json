@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "author": "AUREA Matieres",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 200, "left": 0, "attrs": {} },
+    { "type": "wokwi-lcd1602", "id": "lcd", "top": -40, "left": 0, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-membrane-keypad", "id": "kp", "top": 0, "left": 400, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "bz", "top": 40, "left": -120, "attrs": { "volume": "0.3" } }
+  ],
+  "connections": [
+    [ "kp:R1", "uno:9", "brown", [] ],
+    [ "kp:R2", "uno:8", "red", [] ],
+    [ "kp:R3", "uno:7", "orange", [] ],
+    [ "kp:R4", "uno:6", "yellow", [] ],
+    [ "kp:C1", "uno:5", "green", [] ],
+    [ "kp:C2", "uno:4", "blue", [] ],
+    [ "kp:C3", "uno:3", "purple", [] ],
+    [ "kp:C4", "uno:2", "gray", [] ],
+    [ "lcd:GND", "uno:GND.2", "black", [] ],
+    [ "lcd:VCC", "uno:5V", "red", [] ],
+    [ "lcd:SDA", "uno:A4", "green", [] ],
+    [ "lcd:SCL", "uno:A5", "yellow", [] ],
+    [ "bz:2", "uno:10", "red", [] ],
+    [ "bz:1", "uno:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}

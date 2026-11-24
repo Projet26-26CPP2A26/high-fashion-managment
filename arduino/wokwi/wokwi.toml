@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = "firmware/borne_stock.ino.hex"
+elf = "firmware/borne_stock.ino.elf"
+rfc2217ServerPort = 47110
